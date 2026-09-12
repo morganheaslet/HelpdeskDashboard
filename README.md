@@ -24,12 +24,17 @@ team can open in a browser, backed by Azure.
 
 Two pieces, both serverless (pay only when they run/serve traffic):
 
-1. **Function App** (`function-app/`) — a timer-triggered function polls ConnectWise
-   (and, once you're ready, Dialpad and NinjaOne) on a schedule and writes a single
-   `latest.json` blob containing everything the report needs — the same shape as the
-   `data.json` currently embedded in the artifact. A second, HTTP-triggered function
-   serves that blob to the frontend. Credentials never touch the browser — they live
-   in the Function App's settings, backed by Key Vault.
+1. **Function App** (`function-app/`) — a timer-triggered function (`PullSnapshot`)
+   polls ConnectWise and Dialpad on a schedule and writes a single `latest.json`
+   blob containing everything the report needs — the same shape as the `data.json`
+   currently embedded in the artifact. A second, HTTP-triggered function
+   (`GetReportData`) serves that blob to the frontend. A third, HTTP-triggered
+   function (`RefreshNow`) does the exact same pull as `PullSnapshot`, on demand —
+   it's what the report's "Refresh Now" button calls, for whenever fifteen minutes
+   is too long to wait. All three share the same pull-and-merge logic
+   (`shared/refresh.py`) so they can't drift out of sync with each other.
+   Credentials never touch the browser — they live in the Function App's settings,
+   backed by Key Vault.
 
 2. **Static Web App** (`static-web-app/`) — the report UI (same HTML/CSS/JS you've
    already seen), modified to fetch its data from `/api/GetReportData` instead of

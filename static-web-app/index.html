@@ -211,9 +211,11 @@
           Include Security Services
         </label>
       </div>
+      <button class="btn" id="refreshBtn" title="Pull the latest data from ConnectWise and Dialpad right now">⟳ Refresh Now</button>
       <button class="btn" id="themeBtn" title="Toggle theme">◐ Theme</button>
       <button class="btn primary" id="printBtn">⤓ Download PDF</button>
     </div>
+    <div id="refreshMsg" class="hint no-print" style="width:100%; text-align:right;"></div>
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Report sections">
@@ -466,8 +468,54 @@
 
 <script>
 function renderReport(){
-  const D = window.__REPORT_DATA__;
+  let D = window.__REPORT_DATA__;
   document.getElementById('genDate').textContent = D.meta.generatedAt;
+
+  /* ---------------- Refresh Now ----------------
+     Calls the hosted backend's RefreshNow endpoint, which re-pulls
+     ConnectWise + Dialpad on demand and returns the fresh data. This has no
+     effect when there is no backend to call — e.g. this same page previewed
+     as a static Artifact — in which case the fetch fails (404 or a network
+     error) and the button just reports that refresh isn't available here,
+     rather than breaking anything. */
+  const refreshBtn = document.getElementById('refreshBtn');
+  const refreshMsg = document.getElementById('refreshMsg');
+  function setRefreshMsg(text, isError){
+    refreshMsg.textContent = text;
+    refreshMsg.style.color = isError ? '#B3261E' : '';
+    if(text){
+      setTimeout(() => { if(refreshMsg.textContent === text) refreshMsg.textContent = ''; }, 8000);
+    }
+  }
+  refreshBtn.addEventListener('click', async () => {
+    refreshBtn.disabled = true;
+    const originalLabel = refreshBtn.textContent;
+    refreshBtn.textContent = '⟳ Refreshing…';
+    setRefreshMsg('');
+    try {
+      const res = await fetch('/api/RefreshNow', {method: 'POST', cache: 'no-store'});
+      if(!res.ok){
+        if(res.status === 404){
+          setRefreshMsg("Live refresh isn't available in this preview — it works once the report is hosted.", true);
+        } else {
+          let detail = '';
+          try { detail = (await res.json()).detail || ''; } catch(e){ /* ignore */ }
+          setRefreshMsg('Refresh failed' + (detail ? ': ' + detail : ' — check the Function App logs.'), true);
+        }
+        return;
+      }
+      D = await res.json();
+      window.__REPORT_DATA__ = D;
+      document.getElementById('genDate').textContent = D.meta.generatedAt;
+      rerenderAll();
+      setRefreshMsg('Refreshed at ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + '.', false);
+    } catch(err){
+      setRefreshMsg("Live refresh isn't available in this preview — it works once the report is hosted.", true);
+    } finally {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = originalLabel;
+    }
+  });
 
   /* ---------------- theme toggle (explicit override) ---------------- */
   const root = document.documentElement;
