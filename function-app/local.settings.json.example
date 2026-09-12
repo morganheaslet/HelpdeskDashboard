@@ -1,0 +1,28 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+
+    "CW_SITE": "na.myconnectwise.net",
+    "CW_COMPANY_ID": "th2tech",
+    "CW_PUBLIC_KEY": "replace-me",
+    "CW_PRIVATE_KEY": "replace-me",
+    "CW_CLIENT_ID": "replace-me-issued-clientid-guid",
+
+    "CW_BOARD_MANAGED_SERVICES": "24",
+    "CW_BOARD_TECHNICAL_SERVICES": "38",
+    "CW_BOARD_ALERTS": "20",
+    "CW_BOARD_SECURITY_SERVICES": "54",
+
+    "STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
+    "DATA_CONTAINER": "helpdesk-report-data",
+
+    "DIALPAD_API_KEY": "not-yet-configured",
+    "NINJAONE_CLIENT_ID": "not-yet-configured",
+    "NINJAONE_CLIENT_SECRET": "not-yet-configured"
+  },
+  "Host": {
+    "CORS": "*"
+  }
+}

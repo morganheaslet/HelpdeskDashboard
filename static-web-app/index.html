@@ -1,0 +1,1097 @@
+<title>Helpdesk Ops Report</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#EAEDF2;
+    --ink:#161B22; --ink-muted:#5A6472; --ink-faint:#8B95A3;
+    --border:#DDE2E9;
+    --accent:#D9541F; --accent-ink:#A83E17; --accent-soft:#FBE7DC;
+    --brand:#D9541F; --brand-ink:#A83E17;
+    --accent2:#8A5FA8; --accent2-soft:#EEE4F4;
+    --good:#1E7A3E; --good-soft:#E3F2E7;
+    --warn:#9C6B08; --warn-soft:#FBF0D9;
+    --crit:#B3261E; --crit-soft:#FBE4E2;
+    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 4px 16px rgba(20,30,45,.06);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10141A; --surface:#171D25; --surface-2:#1F2733;
+      --ink:#E8ECF1; --ink-muted:#A4AEBB; --ink-faint:#78828F;
+      --border:#2A3340;
+      --accent:#FF8F5C; --accent-ink:#FFC29E; --accent-soft:#3A2016;
+      --brand:#FF8F5C; --brand-ink:#FFC29E;
+      --accent2:#C4A3DE; --accent2-soft:#2B2338;
+      --good:#7BD79A; --good-soft:#163224;
+      --warn:#E7C15E; --warn-soft:#332A11;
+      --crit:#F0938C; --crit-soft:#3A1C1A;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10141A; --surface:#171D25; --surface-2:#1F2733;
+    --ink:#E8ECF1; --ink-muted:#A4AEBB; --ink-faint:#78828F;
+    --border:#2A3340;
+    --accent:#5CC1DA; --accent-ink:#BFE9F2; --accent-soft:#173038;
+    --accent2:#C4A3DE; --accent2-soft:#2B2338;
+    --good:#7BD79A; --good-soft:#163224;
+    --warn:#E7C15E; --warn-soft:#332A11;
+    --crit:#F0938C; --crit-soft:#3A1C1A;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans", system-ui, sans-serif;
+    padding-inline:0; margin:0;
+  }
+  h1,h2,h3{ font-family:"Manrope", system-ui, sans-serif; text-wrap:balance; margin:0; }
+  .num, td.num, .tabular{ font-variant-numeric: tabular-nums; font-family:"IBM Plex Mono","IBM Plex Sans",monospace; }
+  a{ color:var(--accent-ink); }
+
+  /* ---------- shell ---------- */
+  .shell{ max-width:1180px; margin:0 auto; padding:20px 20px 64px; }
+  header.top{
+    display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; align-items:flex-start;
+    padding:22px 4px 18px; border-bottom:2px solid var(--border); margin-bottom:18px;
+  }
+  .logo-lockup{ margin-bottom:10px; }
+  .logo-img{ height:34px; width:auto; display:block; }
+  .logo-img-dark{ display:none; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .logo-img-light{ display:none; }
+    :root:not([data-theme="light"]) .logo-img-dark{ display:block; }
+  }
+  :root[data-theme="dark"] .logo-img-light{ display:none; }
+  :root[data-theme="dark"] .logo-img-dark{ display:block; }
+
+  .brand-eyebrow{ font-size:12px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent-ink); font-weight:600; }
+  .brand-title{ font-size:26px; font-weight:800; margin-top:2px; }
+  .brand-sub{ color:var(--ink-muted); font-size:13.5px; margin-top:4px; max-width:56ch; }
+  .top-actions{ display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap; }
+  button, select{ font-family:inherit; font-size:13.5px; }
+  .btn{
+    border:1px solid var(--border); background:var(--surface); color:var(--ink);
+    padding:8px 14px; border-radius:8px; cursor:pointer; font-weight:600; display:inline-flex; gap:6px; align-items:center;
+  }
+  .btn:hover{ border-color:var(--accent); color:var(--accent-ink); }
+  .btn.primary{ background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn.primary:hover{ filter:brightness(1.06); color:#fff; }
+  .btn:focus-visible, select:focus-visible, summary:focus-visible, .tab:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  .board-toggle{
+    display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--ink-muted);
+    border:1px solid var(--border); background:var(--surface); border-radius:100px; padding:7px 12px 7px 8px;
+  }
+  .board-toggle input{ position:absolute; opacity:0; width:1px; height:1px; }
+  .board-toggle .track{
+    position:relative; width:30px; height:17px; border-radius:100px; background:var(--surface-2); border:1px solid var(--border);
+    transition:background .15s ease; flex-shrink:0;
+  }
+  .board-toggle .track::after{
+    content:""; position:absolute; top:1px; left:1px; width:13px; height:13px; border-radius:50%;
+    background:var(--ink-faint); transition:transform .15s ease, background .15s ease;
+  }
+  .board-toggle input:checked + .track{ background:var(--accent); border-color:var(--accent); }
+  .board-toggle input:checked + .track::after{ transform:translateX(13px); background:#fff; }
+  .board-toggle input:focus-visible + .track{ outline:2px solid var(--accent); outline-offset:2px; }
+  .board-toggle:hover{ border-color:var(--accent); color:var(--ink); }
+  .board-toggles{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+  nav.tabs{
+    display:flex; gap:4px; flex-wrap:wrap; margin-bottom:22px; border-bottom:1px solid var(--border);
+  }
+  .tab{
+    appearance:none; border:none; background:none; color:var(--ink-muted); font-weight:600;
+    padding:10px 14px; cursor:pointer; border-bottom:2px solid transparent; font-size:13.5px;
+  }
+  .tab[aria-selected="true"]{ color:var(--accent-ink); border-bottom-color:var(--accent); }
+  .tab:hover{ color:var(--ink); }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .badge{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; padding:3px 9px; border-radius:100px; }
+  .badge.live{ background:var(--good-soft); color:var(--good); }
+  .badge.manual{ background:var(--warn-soft); color:var(--warn); }
+  .badge.dot::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+  .controls-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  .controls-row label{ font-size:12.5px; color:var(--ink-muted); font-weight:600; }
+  select{ background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:7px; padding:6px 10px; }
+
+  .grid{ display:grid; gap:14px; }
+  .grid.kpi{ grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
+  .grid.two{ grid-template-columns:1.3fr 1fr; }
+  .grid.cols3{ grid-template-columns:repeat(3,1fr); }
+  @media (max-width:820px){ .grid.two, .grid.cols3{ grid-template-columns:1fr; } }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow); }
+  .card h3{ font-size:14px; margin-bottom:10px; }
+  .card .hint{ color:var(--ink-faint); font-size:11.5px; margin-top:8px; }
+
+  .kpi-tile{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .kpi-tile .label{ font-size:11.5px; color:var(--ink-muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; }
+  .kpi-tile .value{ font-size:26px; font-weight:700; margin-top:4px; font-family:"IBM Plex Mono",monospace; }
+  .kpi-tile .delta{ font-size:12px; margin-top:4px; font-weight:600; }
+  .delta.up{ color:var(--good); } .delta.down{ color:var(--crit); } .delta.flat{ color:var(--ink-faint); }
+
+  .callout{ display:flex; gap:10px; padding:10px 12px; border-radius:10px; font-size:13px; align-items:flex-start; border:1px solid transparent; }
+  .callout.warn{ background:var(--warn-soft); color:var(--warn); border-color:color-mix(in srgb, var(--warn) 30%, transparent); }
+  .callout.crit{ background:var(--crit-soft); color:var(--crit); border-color:color-mix(in srgb, var(--crit) 30%, transparent); }
+  .callout.good{ background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb, var(--good) 30%, transparent); }
+  .callout b{ font-weight:700; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); font-weight:600; padding:7px 8px; border-bottom:1px solid var(--border); }
+  td{ padding:7px 8px; border-bottom:1px solid var(--border); }
+  tr:last-child td{ border-bottom:none; }
+  td.num, th.num{ text-align:right; }
+  .table-wrap{ overflow-x:auto; }
+  .rank{ color:var(--ink-faint); width:1.6em; display:inline-block; }
+
+  .legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-muted); margin-bottom:6px; }
+  .legend .sw{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+
+  details.section{ background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:12px; }
+  details.section summary{ cursor:pointer; padding:12px 16px; font-weight:600; font-size:13.5px; list-style:none; display:flex; justify-content:space-between; align-items:center; }
+  details.section summary::-webkit-details-marker{ display:none; }
+  details.section summary::after{ content:"+"; color:var(--ink-faint); font-size:16px; }
+  details.section[open] summary::after{ content:"–"; }
+  details.section .body{ padding:0 16px 16px; }
+
+  .footer-note{ color:var(--ink-faint); font-size:11.5px; margin-top:30px; border-top:1px solid var(--border); padding-top:14px; }
+
+  bar-chart svg text{ font-family:"IBM Plex Mono",monospace; }
+
+  @media print{
+    nav.tabs, .top-actions, .controls-row, .no-print{ display:none !important; }
+    .panel{ display:block !important; page-break-after:always; }
+    .panel:last-of-type{ page-break-after:auto; }
+    details.section{ display:block !important; }
+    details.section .body{ display:block !important; }
+    body{ background:#fff; }
+    .card{ box-shadow:none; }
+  }
+</style>
+
+<div class="shell">
+
+  <header class="top">
+    <div>
+      <div class="logo-lockup">
+        <img class="logo-img logo-img-light" alt="TH2 Technologies" src="data:image/png;base64,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">
+        <img class="logo-img logo-img-dark" alt="TH2 Technologies" src="data:image/png;base64,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">
+      </div>
+      <div class="brand-eyebrow">Managed Services</div>
+      <div class="brand-title">Helpdesk Operations Report</div>
+      <div class="brand-sub">ConnectWise ticket data pulled live at generation time, blended with the prior manually-compiled phone &amp; service-desk report for trend continuity. Generated <span class="tabular" id="genDate"></span>.</div>
+    </div>
+    <div class="top-actions no-print">
+      <div class="board-toggles">
+        <label class="board-toggle" for="includeAlertsToggle" title="When off, Alerts-board tickets are excluded from every metric on this page, and the Alerts tab is hidden.">
+          <input type="checkbox" id="includeAlertsToggle" checked>
+          <span class="track" aria-hidden="true"></span>
+          Include Alerts
+        </label>
+        <label class="board-toggle" for="includeSecurityToggle" title="When off, Security Services tickets are excluded from every metric on this page.">
+          <input type="checkbox" id="includeSecurityToggle" checked>
+          <span class="track" aria-hidden="true"></span>
+          Include Security Services
+        </label>
+      </div>
+      <button class="btn" id="themeBtn" title="Toggle theme">◐ Theme</button>
+      <button class="btn primary" id="printBtn">⤓ Download PDF</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Report sections">
+    <button class="tab" role="tab" data-panel="today" aria-selected="true">Today's Snapshot</button>
+    <button class="tab" role="tab" data-panel="exec" aria-selected="false">Executive Summary</button>
+    <button class="tab" role="tab" data-panel="desk" aria-selected="false">Service Desk (Live)</button>
+    <button class="tab" role="tab" data-panel="tech" aria-selected="false">Tech Leaderboard (Live)</button>
+    <button class="tab" role="tab" data-panel="alerts" aria-selected="false">Alerts (Live)</button>
+    <button class="tab" role="tab" data-panel="dispatch" aria-selected="false">Dispatch (Live)</button>
+    <button class="tab" role="tab" data-panel="phones" aria-selected="false">Phones &amp; Historical (Jul–Aug)</button>
+    <button class="tab" role="tab" data-panel="sources" aria-selected="false">Data Sources &amp; Roadmap</button>
+  </nav>
+
+  <!-- ============ TODAY'S SNAPSHOT ============ -->
+  <section class="panel active" id="panel-today">
+    <div class="controls-row">
+      <span class="badge live dot">Live · ConnectWise · as of <span id="todayAsOf" class="tabular"></span></span>
+    </div>
+    <div class="grid kpi" id="todayKpis" style="margin-bottom:16px;"></div>
+    <div id="todayCallouts" style="display:flex; flex-direction:column; gap:8px; margin-bottom:18px;"></div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <h3>Tech workload right now</h3>
+      <div class="table-wrap" id="todayWorkloadTable"></div>
+      <div class="hint" id="todayWorkloadHint"></div>
+    </div>
+
+    <div class="grid two">
+      <div class="card">
+        <details class="section" open style="border:none; margin:0;">
+          <summary style="padding:0 0 10px;">Oldest untouched tickets <span class="badge warn">expand</span></summary>
+          <div class="body" style="padding:0;"><div class="table-wrap" id="todayOldest"></div></div>
+        </details>
+      </div>
+      <div class="card">
+        <h3>Unassigned queue — needs triage</h3>
+        <div id="todayUnassigned"></div>
+        <div class="hint">Not attributed to any tech — a good first stop at shift start.</div>
+      </div>
+    </div>
+
+    <div class="callout warn" style="margin-top:12px;" id="todayPhoneNote"></div>
+  </section>
+
+  <!-- ============ EXECUTIVE SUMMARY ============ -->
+  <section class="panel" id="panel-exec">
+    <div class="controls-row">
+      <span class="badge live dot">Live · ConnectWise</span>
+      <label for="execRange">Period</label>
+      <select id="execRange"></select>
+    </div>
+    <div class="grid kpi" id="execKpis" style="margin-bottom:16px;"></div>
+    <div id="execCallouts" style="display:flex; flex-direction:column; gap:8px; margin-bottom:18px;"></div>
+    <div class="grid two">
+      <div class="card">
+        <h3>Tickets opened per week — all boards</h3>
+        <div id="execTrendChart"></div>
+        <div class="hint" id="execTrendHint"></div>
+      </div>
+      <div class="card">
+        <h3>Top 5 techs — tickets closed (current period)</h3>
+        <div id="execLeaderMini"></div>
+        <div class="hint">See the Tech Leaderboard tab for full source/priority mix.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICE DESK ============ -->
+  <section class="panel" id="panel-desk">
+    <div class="controls-row">
+      <span class="badge live dot">Live · ConnectWise</span>
+      <label for="deskBoard">Board</label>
+      <select id="deskBoard">
+        <option value="managedServices">Managed Services</option>
+        <option value="technicalServices">Technical Services</option>
+        <option value="alerts">Alerts</option>
+        <option value="securityServices">Security Services</option>
+      </select>
+      <label for="deskRange">Weeks</label>
+      <select id="deskRange"></select>
+    </div>
+
+    <div class="grid kpi" id="deskKpis" style="margin-bottom:16px;"></div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <h3>Opened vs. closed tickets, per week</h3>
+      <div id="deskTrendChart"></div>
+    </div>
+
+    <div class="grid two" style="margin-bottom:14px;">
+      <div class="card">
+        <h3>Current open backlog — by status</h3>
+        <div id="deskStatusChart"></div>
+      </div>
+      <div class="card">
+        <h3>Current open backlog — by priority</h3>
+        <div id="deskPriorityChart"></div>
+      </div>
+    </div>
+
+    <details class="section" open>
+      <summary>Oldest open tickets (backlog risk) <span class="badge warn">expand</span></summary>
+      <div class="body"><div class="table-wrap" id="deskOldest"></div></div>
+    </details>
+
+    <details class="section">
+      <summary>Top clients by open ticket volume <span class="badge live">expand</span></summary>
+      <div class="body"><div class="table-wrap" id="deskCompanies"></div></div>
+    </details>
+  </section>
+
+  <!-- ============ TECH LEADERBOARD ============ -->
+  <section class="panel" id="panel-tech">
+    <div class="controls-row">
+      <span class="badge live dot">Live · ConnectWise · last 14 days</span>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <h3>Tickets closed per tech — Managed Services, Technical Services, Alerts &amp; Security Services</h3>
+      <div id="techLeaderChart"></div>
+    </div>
+    <div class="controls-row">
+      <label for="techMixBoard">Source / priority mix for</label>
+      <select id="techMixBoard">
+        <option value="all">All Boards</option>
+        <option value="managedServices">Managed Services</option>
+        <option value="technicalServices">Technical Services</option>
+        <option value="alerts">Alerts</option>
+        <option value="securityServices">Security Services</option>
+      </select>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <h3 id="techSourceTitle">Ticket source mix</h3>
+        <div id="techSourceChart"></div>
+      </div>
+      <div class="card">
+        <h3 id="techPriorityTitle">Priority mix</h3>
+        <div id="techPriorityChart"></div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px;">Owner attribution reflects the ticket's current ConnectWise owner, not a per-time-entry split — a ticket reassigned mid-stream counts once, for its final owner. Most closed Alerts-board and Security Services tickets have no human owner recorded (auto-closed by policy or vendor email connector), which is why "(Unassigned)" leads there.</div>
+  </section>
+
+  <!-- ============ ALERTS ============ -->
+  <section class="panel" id="panel-alerts">
+    <div class="controls-row">
+      <span class="badge live dot">Live · ConnectWise · Alerts board</span>
+    </div>
+    <div class="grid kpi" id="alertsKpis" style="margin-bottom:16px;"></div>
+    <div class="grid two" style="margin-bottom:14px;">
+      <div class="card">
+        <h3>Alerts opened per week</h3>
+        <div id="alertsTrendChart"></div>
+      </div>
+      <div class="card">
+        <h3>Open alert backlog — by type</h3>
+        <div id="alertsTypeChart"></div>
+      </div>
+    </div>
+    <details class="section" open>
+      <summary>Top alerting clients (open, current) <span class="badge live">expand</span></summary>
+      <div class="body"><div class="table-wrap" id="alertsCompanies"></div></div>
+    </details>
+    <div class="callout warn" style="margin-top:12px;">
+      <span>⚠</span>
+      <span><b>Noise check:</b> of the sampled open Alerts-board items, a large share carry <b>Maintenance</b> priority rather than <b>Critical</b> — worth periodically auditing which recurring alert types could be auto-resolved by NinjaOne policy instead of landing on a human queue.</span>
+    </div>
+  </section>
+
+  <!-- ============ DISPATCH ============ -->
+  <section class="panel" id="panel-dispatch">
+    <div class="controls-row">
+      <span class="badge live dot">Live · ConnectWise · Dispatch board · as of <span id="dispatchAsOf" class="tabular"></span></span>
+    </div>
+    <div class="grid kpi" id="dispatchKpis" style="margin-bottom:16px;"></div>
+    <div class="callout warn" style="margin-bottom:14px;">
+      <span>⚠</span>
+      <span>Dispatch is a pre-triage/routing queue — most tickets here have no tech assigned until they're dispatched, so a high unassigned count is expected. It's excluded from the Tech Leaderboard's "All Boards" mix and from every board toggle above.</span>
+    </div>
+    <div class="card">
+      <h3>Every open ticket on the Dispatch board</h3>
+      <div class="table-wrap" id="dispatchTable" style="max-height:560px;overflow-y:auto;"></div>
+      <div class="hint">Sorted by time sitting in queue (oldest first). "Owner" is blank/(Unassigned) until a tech picks the ticket up.</div>
+    </div>
+  </section>
+
+  <!-- ============ PHONES & HISTORICAL ============ -->
+  <section class="panel" id="panel-phones">
+    <div class="controls-row">
+      <span class="badge manual dot">Manual · Dialpad export (no live connector yet)</span>
+      <label for="phoneWeek">Week</label>
+      <select id="phoneWeek"></select>
+    </div>
+    <div class="grid kpi" id="phoneKpis" style="margin-bottom:16px;"></div>
+    <div class="card" style="margin-bottom:14px;">
+      <h3>Calls answered vs. abandoned, 8-week history</h3>
+      <div id="phoneTrendChart"></div>
+    </div>
+    <details class="section" open>
+      <summary>Tech phone activity — talk time &amp; calls answered <span class="badge manual">expand</span></summary>
+      <div class="body"><div class="table-wrap" id="phoneTechTable"></div></div>
+    </details>
+    <details class="section">
+      <summary>Legacy service-desk metrics (as previously reported) <span class="badge manual">expand</span></summary>
+      <div class="body">
+        <div class="table-wrap" id="legacyDeskTable"></div>
+        <div class="grid two" style="margin-top:14px;">
+          <div class="card"><h3>SLA</h3><div id="legacySlaTable"></div></div>
+          <div class="card"><h3>CSAT</h3><div id="legacyCsatTable"></div></div>
+        </div>
+      </div>
+    </details>
+    <details class="section">
+      <summary>Legacy tech scorecards — utilization, FCR, closed tickets/alerts <span class="badge manual">expand</span></summary>
+      <div class="body" id="legacyTechScorecards"></div>
+    </details>
+  </section>
+
+  <!-- ============ DATA SOURCES ============ -->
+  <section class="panel" id="panel-sources">
+    <div class="grid two">
+      <div class="card">
+        <h3>What's live today</h3>
+        <table>
+          <tr><td><b>ConnectWise Manage</b></td><td>Ticket volume, status, priority, owner, source, and backlog age — pulled directly via the ConnectWise API at report generation. Covers the Managed Services, Technical Services, and Alerts boards.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>What's still manual</h3>
+        <table>
+          <tr><td><b>Dialpad</b></td><td>Call volume, answer rate, talk time, per-tech phone stats. No connector available yet — the Phones tab reproduces the last manually-built export.</td></tr>
+          <tr><td><b>NinjaOne</b></td><td>Device counts, patch status, and RMM-driven alert closures aren't pulled yet; alert <i>ticket</i> data comes from ConnectWise, but NinjaOne-side detail (e.g. which policy fired) is not yet joined in.</td></tr>
+          <tr><td><b>CSAT / SLA / utilization legacy figures</b></td><td>These were pulled manually from BrightGauge in the prior workflow. Carried over as-is (see Phones &amp; Historical tab) pending a live source.</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px;">
+      <h3>Suggested next steps to fully automate</h3>
+      <table>
+        <tr><td class="rank">1</td><td>Add a Dialpad connector (or scheduled CSV export) so call metrics refresh alongside ConnectWise data instead of being pasted in by hand each week.</td></tr>
+        <tr><td class="rank">2</td><td>Wire in NinjaOne for device counts and patch/alert origin, joined to ConnectWise tickets by client and asset.</td></tr>
+        <tr><td class="rank">3</td><td>Move the "current period" tech leaderboard and backlog snapshot onto a scheduled pull (e.g. every Monday morning) so this page is regenerated automatically rather than on request.</td></tr>
+        <tr><td class="rank">4</td><td>The legacy report's SLA/CSAT/utilization figures were pulled manually from BrightGauge — once those metrics have a live source (ConnectWise SLA fields, or a BrightGauge connector), they can be folded into the live tabs instead of carried over as-is.</td></tr>
+      </table>
+    </div>
+    <div class="footer-note">Board IDs referenced: Managed Services (24), Technical Services (38), Alerts (20), Security Services (54), Dispatch (1). Ticket ownership, source, and priority come straight from ConnectWise Manage; nothing here is estimated unless labeled "manual." The <b>Include Alerts</b> and <b>Include Security Services</b> toggles in the header control whether those boards' tickets count toward the totals on Today's Snapshot, Executive Summary, and the Tech Leaderboard; turning Alerts off also hides its dedicated tab. Dispatch has no toggle — it's always included on Today's Snapshot and always has its own tab, but is excluded from the Tech Leaderboard's board list.</div>
+  </section>
+
+</div>
+
+<script>
+function renderReport(){
+  const D = window.__REPORT_DATA__;
+  document.getElementById('genDate').textContent = D.meta.generatedAt;
+
+  /* ---------------- theme toggle (explicit override) ---------------- */
+  const root = document.documentElement;
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme');
+    if (cur === 'dark') root.setAttribute('data-theme','light');
+    else if (cur === 'light') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme','dark');
+  });
+  document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+  /* ---------------- tabs ---------------- */
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.setAttribute('aria-selected','false'));
+    t.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-'+t.dataset.panel).classList.add('active');
+  }));
+
+  /* ---------------- Include Alerts / Include Security Services (global) ---------------- */
+  const alertsToggle = document.getElementById('includeAlertsToggle');
+  const securityToggle = document.getElementById('includeSecurityToggle');
+  function includeAlerts(){ return alertsToggle.checked; }
+  function includeSecurity(){ return securityToggle.checked; }
+  function activeBoardKeys(){
+    // Dispatch has no toggle — it's a pre-triage/routing queue, always counted
+    // in Today's Snapshot regardless of the Alerts/Security Services toggles.
+    const keys = ['managedServices','technicalServices','dispatch'];
+    if(includeAlerts()) keys.push('alerts');
+    if(includeSecurity()) keys.push('securityServices');
+    return keys;
+  }
+  // Board <select> elements that offer "Alerts" or "Security Services" as a
+  // drill-down option — hide that option (and fall back to Managed Services)
+  // whenever the corresponding board is excluded.
+  function syncBoardOptionVisibility(){
+    document.querySelectorAll('option[value="alerts"]').forEach(opt => {
+      opt.hidden = !includeAlerts();
+      if(!includeAlerts() && opt.selected){
+        opt.selected = false;
+        opt.parentElement.value = 'managedServices';
+      }
+    });
+    document.querySelectorAll('option[value="securityServices"]').forEach(opt => {
+      opt.hidden = !includeSecurity();
+      if(!includeSecurity() && opt.selected){
+        opt.selected = false;
+        opt.parentElement.value = 'managedServices';
+      }
+    });
+  }
+  // The Alerts tab is a dedicated board view, not a cross-board aggregate — when
+  // Alerts is excluded, hide the tab entirely rather than show an empty/stale one.
+  // If it was the active tab, fall back to Today's Snapshot.
+  function syncAlertsTabVisibility(){
+    const alertsTab = document.querySelector('.tab[data-panel="alerts"]');
+    if(!alertsTab) return;
+    if(includeAlerts()){
+      alertsTab.hidden = false;
+      return;
+    }
+    if(alertsTab.getAttribute('aria-selected') === 'true'){
+      const todayTab = document.querySelector('.tab[data-panel="today"]');
+      tabs.forEach(x => x.setAttribute('aria-selected','false'));
+      todayTab.setAttribute('aria-selected','true');
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-today').classList.add('active');
+    }
+    alertsTab.hidden = true;
+  }
+  alertsToggle.addEventListener('change', () => {
+    syncBoardOptionVisibility();
+    syncAlertsTabVisibility();
+    rerenderAll();
+  });
+  securityToggle.addEventListener('change', () => {
+    syncBoardOptionVisibility();
+    rerenderAll();
+  });
+
+  /* ---------------- helpers ---------------- */
+  const fmt = n => n.toLocaleString();
+  const pct = n => (n*100).toFixed(0)+'%';
+  const COLORS = { a: 'var(--accent)', b: 'var(--accent2)', c: '#C98A3A', d: '#3E63A6' };
+  const SOLID = getComputedStyle(document.documentElement); // not reliably resolved for CSS vars in JS; use hex fallbacks below
+  const HEX = { a:'#1C6E8C', b:'#8A5FA8', c:'#C98A3A', d:'#3E63A6', darkA:'#5CC1DA', darkB:'#C4A3DE', darkC:'#E0A85C', darkD:'#93B5EA' };
+  function isDark(){
+    const explicit = root.getAttribute('data-theme');
+    if (explicit === 'dark') return true;
+    if (explicit === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function seriesColor(key){
+    const d = isDark();
+    if(key==='a') return d?HEX.darkA:HEX.a;
+    if(key==='b') return d?HEX.darkB:HEX.b;
+    if(key==='d') return d?HEX.darkD:HEX.d;
+    return d?HEX.darkC:HEX.c;
+  }
+  function inkColor(){ return isDark() ? '#A4AEBB' : '#5A6472'; }
+  function gridColor(){ return isDark() ? '#2A3340' : '#DDE2E9'; }
+
+  function weekLabel(iso){
+    const d = new Date(iso+'T00:00:00Z');
+    return (d.getUTCMonth()+1)+'/'+d.getUTCDate();
+  }
+
+  /* ---------------- SVG multi-series line chart with hover ---------------- */
+  function lineChart(el, series, labels, opts){
+    opts = opts || {};
+    const W = opts.w || 560, H = opts.h || 220, PAD = {l:38,r:14,t:14,b:26};
+    const allVals = series.flatMap(s=>s.data);
+    const max = Math.max(1, ...allVals) * 1.12;
+    const innerW = W-PAD.l-PAD.r, innerH = H-PAD.t-PAD.b;
+    const n = labels.length;
+    const x = i => PAD.l + (n<=1?0:innerW*i/(n-1));
+    const y = v => PAD.t + innerH - (v/max)*innerH;
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="line chart" style="overflow:visible;">`;
+    // gridlines
+    const ticks = 4;
+    for(let t=0;t<=ticks;t++){
+      const v = max*t/ticks;
+      svg += `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${y(v)}" y2="${y(v)}" stroke="${gridColor()}" stroke-width="1"/>`;
+      svg += `<text x="${PAD.l-6}" y="${y(v)+3}" text-anchor="end" font-size="9.5" fill="${inkColor()}">${Math.round(v)}</text>`;
+    }
+    // x labels (sparse)
+    labels.forEach((lb,i)=>{
+      if(n>8 && i%2!==0 && i!==n-1) return;
+      svg += `<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="9.5" fill="${inkColor()}">${lb}</text>`;
+    });
+    series.forEach(s=>{
+      const col = seriesColor(s.key);
+      const pts = s.data.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+      svg += `<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>`;
+      s.data.forEach((v,i)=>{
+        svg += `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${col}"><title>${s.name}: ${labels[i]} = ${fmt(v)}</title></circle>`;
+      });
+      // endpoint label
+      const last = s.data[s.data.length-1];
+      svg += `<text x="${x(n-1)+6}" y="${y(last)+3}" font-size="10.5" font-weight="600" fill="${col}">${fmt(last)}</text>`;
+    });
+    svg += `</svg>`;
+    el.innerHTML = svg;
+    // Remove any legend this function inserted on a prior render of the same
+    // element before adding a new one — otherwise repeated calls (range change,
+    // toggles, theme switches) stack up duplicate legend rows indefinitely.
+    if(el._lcLegend && el._lcLegend.parentElement){ el._lcLegend.remove(); el._lcLegend = null; }
+    if(series.length>1){
+      const legend = document.createElement('div');
+      legend.className='legend';
+      legend.innerHTML = series.map(s=>`<span><span class="sw" style="background:${seriesColor(s.key)}"></span>${s.name}</span>`).join('');
+      el.parentElement.insertBefore(legend, el);
+      el._lcLegend = legend;
+    }
+  }
+
+  /* ---------------- horizontal bar chart ---------------- */
+  function hbarChart(el, items, opts){
+    opts = opts || {};
+    const max = Math.max(1, ...items.map(i=>i.value));
+    const rows = items.map(it=>{
+      const w = (it.value/max*100).toFixed(1);
+      const col = it.color || seriesColor('a');
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+        <div style="width:${opts.labelWidth||128}px;font-size:12px;color:var(--ink-muted);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${it.label}">${it.label}</div>
+        <div style="flex:1;background:var(--surface-2);border-radius:4px;height:14px;position:relative;">
+          <div style="width:${w}%;background:${col};height:100%;border-radius:4px;"></div>
+        </div>
+        <div class="num" style="width:44px;text-align:right;font-size:12px;font-weight:600;flex-shrink:0;">${fmt(it.value)}</div>
+      </div>`;
+    }).join('');
+    el.innerHTML = rows;
+  }
+
+  /* ---------------- stacked bar (grouped) for opened vs closed ---------------- */
+  function groupedBarChart(el, seriesA, seriesB, labels, nameA, nameB){
+    const W = 560, H = 220, PAD = {l:38,r:14,t:14,b:26};
+    const max = Math.max(1, ...seriesA, ...seriesB) * 1.15;
+    const innerW = W-PAD.l-PAD.r, innerH = H-PAD.t-PAD.b;
+    const n = labels.length;
+    const groupW = innerW/n;
+    const barW = Math.min(14, groupW*0.32);
+    const y = v => PAD.t + innerH - (v/max)*innerH;
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="grouped bar chart">`;
+    const ticks=4;
+    for(let t=0;t<=ticks;t++){
+      const v = max*t/ticks;
+      svg += `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${y(v)}" y2="${y(v)}" stroke="${gridColor()}" stroke-width="1"/>`;
+      svg += `<text x="${PAD.l-6}" y="${y(v)+3}" text-anchor="end" font-size="9.5" fill="${inkColor()}">${Math.round(v)}</text>`;
+    }
+    for(let i=0;i<n;i++){
+      const cx = PAD.l + groupW*i + groupW/2;
+      const va = seriesA[i], vb = seriesB[i];
+      svg += `<rect x="${cx-barW-1}" y="${y(va)}" width="${barW}" height="${innerH-(y(va)-PAD.t)}" fill="${seriesColor('a')}" rx="2"><title>${nameA} ${labels[i]}: ${va}</title></rect>`;
+      svg += `<rect x="${cx+1}" y="${y(vb)}" width="${barW}" height="${innerH-(y(vb)-PAD.t)}" fill="${seriesColor('b')}" rx="2"><title>${nameB} ${labels[i]}: ${vb}</title></rect>`;
+      if(n<=11 || i%2===0 || i===n-1){
+        svg += `<text x="${cx}" y="${H-6}" text-anchor="middle" font-size="9.5" fill="${inkColor()}">${labels[i]}</text>`;
+      }
+    }
+    svg += `</svg>`;
+    el.innerHTML='';
+    const legend = document.createElement('div');
+    legend.className='legend';
+    legend.innerHTML = `<span><span class="sw" style="background:${seriesColor('a')}"></span>${nameA}</span><span><span class="sw" style="background:${seriesColor('b')}"></span>${nameB}</span>`;
+    el.appendChild(legend);
+    const holder = document.createElement('div');
+    holder.innerHTML = svg;
+    el.appendChild(holder);
+  }
+
+  function kpiTile(label, value, delta){
+    const d = delta==null ? '' : `<div class="delta ${delta.dir}">${delta.dir==='up'?'▲':delta.dir==='down'?'▼':'—'} ${delta.text}</div>`;
+    return `<div class="kpi-tile"><div class="label">${label}</div><div class="value">${value}</div>${d}</div>`;
+  }
+
+  function sortObj(obj){ return Object.entries(obj).sort((a,b)=>b[1]-a[1]); }
+
+  /* ---- tech leaderboard total, honoring the Include Security Services toggle ---- */
+  function techClosedTotal(t){
+    return t.closedMS + t.closedTS + (includeAlerts() ? t.closedAlerts : 0) + (includeSecurity() ? t.closedSecurity : 0);
+  }
+  function activeTechLeaderboard(){
+    return D.techLeaderboard.byTech
+      .map(t => ({...t, closedTotal: techClosedTotal(t)}))
+      .filter(t => t.closedTotal > 0)
+      .sort((a,b) => b.closedTotal - a.closedTotal);
+  }
+  // Human-readable list of the boards currently counted toward combined metrics.
+  function activeBoardsLabel(){
+    const labels = ['Managed Services','Technical Services'];
+    if(includeAlerts()) labels.push('Alerts');
+    if(includeSecurity()) labels.push('Security Services');
+    if(labels.length === 1) return labels[0];
+    return labels.slice(0,-1).join(', ') + ' & ' + labels[labels.length-1];
+  }
+
+  /* ================= EXECUTIVE SUMMARY ================= */
+  const wk = D.weeklyTrend.weeks;
+  const execRangeSel = document.getElementById('execRange');
+  wk.forEach((w,i)=>{
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = 'Week of ' + weekLabel(w);
+    execRangeSel.appendChild(opt);
+  });
+  execRangeSel.value = wk.length-1;
+
+  function renderExec(){
+    const idx = parseInt(execRangeSel.value,10);
+    const ms = D.weeklyTrend.managedServices.opened[idx];
+    const ts = D.weeklyTrend.technicalServices.opened[idx];
+    const al = D.weeklyTrend.alerts.opened[idx];
+    const msPrev = D.weeklyTrend.managedServices.opened[idx-1];
+    const totalOpen = D.snapshot.managedServices.openTotal + D.snapshot.technicalServices.openTotal;
+    const leaderboard = activeTechLeaderboard();
+    const weekTotal = ms + ts + (includeAlerts() ? al : 0);
+    const kpis = document.getElementById('execKpis');
+    kpis.innerHTML =
+      kpiTile('Tickets opened this week', fmt(weekTotal)) +
+      kpiTile('Open backlog (MS+TS)', fmt(totalOpen)) +
+      kpiTile('Oldest open ticket', D.snapshot.technicalServices.oldestOpen[0].ageDays+'d') +
+      kpiTile('Techs active (14d)', leaderboard.length) +
+      kpiTile('MS ticket source: phone', pct(D.techLeaderboard.sourceMix.managedServices['Phone'] / D.techLeaderboard.totalClosed.managedServices));
+
+    const callouts = document.getElementById('execCallouts');
+    let c = '';
+    if(msPrev && ms > msPrev*1.15){
+      c += `<div class="callout warn"><span>⚠</span><span><b>Managed Services volume up</b> ${Math.round((ms/msPrev-1)*100)}% week over week (${msPrev} → ${ms}).</span></div>`;
+    }
+    if(leaderboard[0]){
+      c += `<div class="callout good"><span>✓</span><span>Top closer this period: <b>${leaderboard[0].name}</b> with ${leaderboard[0].closedTotal} tickets closed (${activeBoardsLabel()}).</span></div>`;
+    }
+    callouts.innerHTML = c;
+
+    const trendSeries = [
+      {key:'a', name:'Managed Services', data:D.weeklyTrend.managedServices.opened},
+      {key:'b', name:'Technical Services', data:D.weeklyTrend.technicalServices.opened},
+    ];
+    if(includeAlerts()) trendSeries.push({key:'c', name:'Alerts', data:D.weeklyTrend.alerts.opened});
+    lineChart(document.getElementById('execTrendChart'), trendSeries, wk.map(weekLabel));
+    document.getElementById('execTrendHint').textContent =
+      (includeAlerts() ? 'Managed Services + Technical Services + Alerts' : 'Managed Services + Technical Services') +
+      ', by ConnectWise ticket entry date. Use the tab above to drill into any one board.';
+
+    hbarChart(document.getElementById('execLeaderMini'),
+      leaderboard.slice(0,5).map(t=>({label:t.name, value:t.closedTotal})));
+  }
+  execRangeSel.addEventListener('change', renderExec);
+  renderExec();
+
+  /* ================= TODAY'S SNAPSHOT ================= */
+  // Merge the per-board Today's Snapshot data into one combined view, honoring
+  // the Include Security Services toggle — a board left out contributes nothing
+  // to any total, workload row, or oldest-untouched-ticket list below.
+  function mergeTodaySnapshot(){
+    const boards = activeBoardKeys();
+    const perBoard = D.todaySnapshot.perBoard;
+    const merged = {
+      opened: {total:0, byTech:{}, unassignedCount:0},
+      closed: {total:0, byTech:{}, unassignedCount:0},
+      workloadByTech: {},         // id -> {id,name,open,waiting}
+      unassignedBacklog: {open:0, waiting:0},
+      totalActiveOpen: 0, totalWaiting: 0, totalUrgentOpen: 0,
+      oldestWaitingAll: [],
+      unassignedTicketsAll: [],
+    };
+    boards.forEach(key => {
+      const b = perBoard[key];
+      if(!b) return;
+      merged.opened.total += b.opened.total;
+      merged.opened.unassignedCount += b.opened.unassignedCount;
+      merged.closed.total += b.closed.total;
+      merged.closed.unassignedCount += b.closed.unassignedCount;
+      Object.entries(b.opened.byTech).forEach(([n,v]) => merged.opened.byTech[n] = (merged.opened.byTech[n]||0)+v);
+      Object.entries(b.closed.byTech).forEach(([n,v]) => merged.closed.byTech[n] = (merged.closed.byTech[n]||0)+v);
+      b.workload.forEach(w => {
+        const row = merged.workloadByTech[w.id] || {id:w.id, name:w.name, open:0, waiting:0};
+        row.open += w.open; row.waiting += w.waiting;
+        merged.workloadByTech[w.id] = row;
+      });
+      merged.unassignedBacklog.open += b.unassignedBacklog.open;
+      merged.unassignedBacklog.waiting += b.unassignedBacklog.waiting;
+      merged.totalActiveOpen += b.totalActiveOpen;
+      merged.totalWaiting += b.totalWaiting;
+      merged.totalUrgentOpen += b.totalUrgentOpen;
+      merged.oldestWaitingAll.push(...b.waitingCandidates);
+      if(b.unassignedTickets) merged.unassignedTicketsAll.push(...b.unassignedTickets);
+    });
+    merged.workload = Object.values(merged.workloadByTech).sort((a,b) => b.open - a.open);
+    merged.oldestWaitingAll.sort((a,b) => b.hoursSinceTouch - a.hoursSinceTouch);
+    merged.oldestWaiting = merged.oldestWaitingAll.slice(0,10);
+    merged.unassignedTicketsAll.sort((a,b) => (b.hoursInQueue||0) - (a.hoursInQueue||0));
+    merged.unassignedTickets = merged.unassignedTicketsAll;
+    return merged;
+  }
+
+  function renderToday(){
+    const T = mergeTodaySnapshot();
+    const asOfDate = new Date(D.todaySnapshot.asOf);
+    document.getElementById('todayAsOf').textContent = asOfDate.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+
+    document.getElementById('todayKpis').innerHTML =
+      kpiTile('Opened today', fmt(T.opened.total)) +
+      kpiTile('Closed today', fmt(T.closed.total)) +
+      kpiTile((includeAlerts() && includeSecurity()) ? 'Open backlog (all boards)' : 'Open backlog (' + activeBoardsLabel() + ')', fmt(T.totalActiveOpen)) +
+      kpiTile('Waiting on first touch', fmt(T.totalWaiting)) +
+      kpiTile('Open Critical/High priority', fmt(T.totalUrgentOpen)) +
+      kpiTile('Unassigned in queue', fmt(T.unassignedBacklog.open));
+
+    const callouts = document.getElementById('todayCallouts');
+    let c = '';
+    if(T.unassignedBacklog.waiting > 5){
+      c += `<div class="callout warn"><span>⚠</span><span><b>${T.unassignedBacklog.waiting} unassigned tickets</b> are sitting untouched (New/Assigned/Client Responded) — worth triaging first.</span></div>`;
+    }
+    const oldest = T.oldestWaiting[0];
+    if(oldest){
+      c += `<div class="callout crit"><span>⏱</span><span>Oldest untouched ticket: <b>#${oldest.id}</b> (${oldest.company}) — ${oldest.owner}, ${Math.round(oldest.hoursSinceTouch)}h since last update.</span></div>`;
+    }
+    const busiest = T.workload[0];
+    if(busiest){
+      c += `<div class="callout good"><span>✓</span><span><b>${busiest.name}</b> is carrying the heaviest load right now: ${busiest.open} open tickets (${busiest.waiting} waiting).</span></div>`;
+    }
+    callouts.innerHTML = c;
+
+    document.getElementById('todayWorkloadTable').innerHTML = `<table><tr><th>Tech</th><th class="num">Open</th><th class="num">Waiting</th><th class="num">Opened today</th><th class="num">Closed today</th></tr>` +
+      T.workload.map(w => `<tr><td>${w.name}</td><td class="num">${w.open}</td><td class="num">${w.waiting || '—'}</td><td class="num">${T.opened.byTech[w.name] || '—'}</td><td class="num">${T.closed.byTech[w.name] || '—'}</td></tr>`).join('') +
+      `</table>`;
+    document.getElementById('todayWorkloadHint').innerHTML = `Open = currently assigned open tickets across ${activeBoardsLabel()}. Waiting = sitting in New / Assigned / Client Responded — i.e. the client or the queue is waiting on a first touch. Opened/Closed today exclude tickets with no assigned tech.`;
+
+    document.getElementById('todayOldest').innerHTML = `<table><tr><th>Ticket</th><th>Board</th><th>Owner</th><th>Status</th><th>Client</th><th>Description</th><th class="num">Hours untouched</th></tr>` +
+      T.oldestWaiting.map(t=>`<tr><td class="num">#${t.id}</td><td>${t.board}</td><td>${t.owner}</td><td>${t.status}</td><td>${t.company}</td><td>${t.summary||'—'}</td><td class="num">${Math.round(t.hoursSinceTouch)}</td></tr>`).join('') +
+      `</table>`;
+
+    document.getElementById('todayUnassigned').innerHTML =
+      `<div style="display:flex;gap:18px;margin-bottom:10px;">
+        <div><div class="label" style="font-size:11px;color:var(--ink-muted);text-transform:uppercase;font-weight:600;">Open</div><div class="num" style="font-size:22px;font-weight:700;">${T.unassignedBacklog.open}</div></div>
+        <div><div class="label" style="font-size:11px;color:var(--ink-muted);text-transform:uppercase;font-weight:600;">Waiting</div><div class="num" style="font-size:22px;font-weight:700;">${T.unassignedBacklog.waiting}</div></div>
+      </div>
+      <div class="table-wrap" style="max-height:360px;overflow-y:auto;"><table><tr><th>Ticket</th><th>Board</th><th>Client</th><th>Description</th></tr>` +
+      T.unassignedTickets.map(t=>`<tr><td class="num">#${t.id}</td><td>${t.board}</td><td>${t.company}</td><td>${t.summary||'—'}</td></tr>`).join('') +
+      `</table></div>
+      <div class="hint">${T.opened.unassignedCount} tickets opened and ${T.closed.unassignedCount} closed today had no tech attached — these are excluded from the opened/closed totals above and from every tech's numbers.</div>`;
+
+    document.getElementById('todayPhoneNote').innerHTML = `<span>☎</span><span>Phone metrics (calls answered, talk time) aren't live yet — see the Phones &amp; Historical tab for the most recent manually-reported week. Ask for a Dialpad connector to bring that onto this tab.</span>`;
+  }
+  renderToday();
+
+  /* ================= SERVICE DESK ================= */
+  const deskBoardSel = document.getElementById('deskBoard');
+  const deskRangeSel = document.getElementById('deskRange');
+  ['Last 4 weeks','Last 8 weeks','All 11 weeks'].forEach((lab,i)=>{
+    const opt = document.createElement('option'); opt.value=[4,8,11][i]; opt.textContent=lab;
+    deskRangeSel.appendChild(opt);
+  });
+  deskRangeSel.value = 8;
+
+  function renderDesk(){
+    const boardKey = deskBoardSel.value;
+    const n = parseInt(deskRangeSel.value,10);
+    const trend = D.weeklyTrend[boardKey];
+    const labels = wk.slice(-n).map(weekLabel);
+    const opened = trend.opened.slice(-n);
+    const closed = trend.closed.slice(-n);
+    const snap = D.snapshot[boardKey];
+    const boardLabelMap = {managedServices:'Managed Services', technicalServices:'Technical Services', alerts:'Alerts', securityServices:'Security Services'};
+    const boardLabel = boardLabelMap[boardKey];
+
+    const openedSum = opened.reduce((a,b)=>a+b,0);
+    const closedSum = closed.reduce((a,b)=>a+b,0);
+    document.getElementById('deskKpis').innerHTML =
+      kpiTile('Opened, '+labels.length+'wk', fmt(openedSum)) +
+      kpiTile('Closed, '+labels.length+'wk', fmt(closedSum)) +
+      kpiTile('Net change', (openedSum-closedSum>=0?'+':'')+(openedSum-closedSum)) +
+      kpiTile('Currently open ('+boardLabel+')', fmt(snap.openTotal));
+
+    groupedBarChart(document.getElementById('deskTrendChart'), opened, closed, labels, 'Opened', 'Closed');
+
+    hbarChart(document.getElementById('deskStatusChart'), sortObj(snap.byStatus).slice(0,8).map(([k,v])=>({label:k,value:v})));
+    hbarChart(document.getElementById('deskPriorityChart'), sortObj(snap.byPriority).map(([k,v])=>({label:k,value:v,
+      color: k==='Critical'?'var(--crit,#B3261E)': k==='High/Urgent'?'#C98A3A' : seriesColor('a')})));
+
+    const oldest = snap.oldestOpen || [];
+    document.getElementById('deskOldest').innerHTML = oldest.length ? `<table><tr><th>Ticket</th><th>Summary</th><th>Company</th><th>Status</th><th>Priority</th><th class="num">Age (days)</th></tr>` +
+      oldest.map(t=>`<tr><td class="num">#${t.id}</td><td>${t.summary||''}</td><td>${t.company||''}</td><td>${t.status||''}</td><td>${t.priority||''}</td><td class="num">${t.ageDays}</td></tr>`).join('') + `</table>`
+      : `<div class="hint">No aged-backlog sample captured for this board.</div>`;
+
+    document.getElementById('deskCompanies').innerHTML = `<table><tr><th>Client</th><th class="num">Open tickets</th></tr>` +
+      snap.topCompanies.map(([c,v])=>`<tr><td>${c}</td><td class="num">${v}</td></tr>`).join('') + `</table>`;
+  }
+  deskBoardSel.addEventListener('change', renderDesk);
+  deskRangeSel.addEventListener('change', renderDesk);
+  renderDesk();
+
+  /* ================= TECH LEADERBOARD ================= */
+  const techMixBoardSel = document.getElementById('techMixBoard');
+  const techBoardLabels = {all:'All Boards', managedServices:'Managed Services', technicalServices:'Technical Services', alerts:'Alerts', securityServices:'Security Services'};
+  // "All Boards" sums Managed Services, Technical Services, Alerts & Security
+  // Services (never Dispatch — it's a triage queue, not a service board), and
+  // honors the Include Alerts / Include Security Services toggles so the mix
+  // stays consistent with the rest of the report.
+  function techMixBoardsForAll(){
+    const keys = ['managedServices','technicalServices'];
+    if(includeAlerts()) keys.push('alerts');
+    if(includeSecurity()) keys.push('securityServices');
+    return keys;
+  }
+  function techMixFor(kind, boardKey){
+    if(boardKey !== 'all') return D.techLeaderboard[kind][boardKey];
+    const merged = {};
+    techMixBoardsForAll().forEach(k => {
+      Object.entries(D.techLeaderboard[kind][k]).forEach(([label,v]) => { merged[label] = (merged[label]||0)+v; });
+    });
+    return merged;
+  }
+
+  function renderTech(){
+    const byTech = activeTechLeaderboard();
+    const el = document.getElementById('techLeaderChart');
+    el.innerHTML='';
+    const legend = document.createElement('div'); legend.className='legend';
+    legend.innerHTML = `<span><span class="sw" style="background:${seriesColor('a')}"></span>Managed Services</span><span><span class="sw" style="background:${seriesColor('b')}"></span>Technical Services</span>` +
+      (includeAlerts() ? `<span><span class="sw" style="background:${seriesColor('c')}"></span>Alerts</span>` : '') +
+      (includeSecurity() ? `<span><span class="sw" style="background:${seriesColor('d')}"></span>Security Services</span>` : '');
+    el.appendChild(legend);
+    const rows = document.createElement('div');
+    const max = Math.max(1, ...byTech.map(x=>x.closedTotal));
+    rows.innerHTML = byTech.map(t=>{
+      const wMS = (t.closedMS/max*100).toFixed(1), wTS = (t.closedTS/max*100).toFixed(1);
+      const alSegment = includeAlerts()
+        ? `<div style="width:${(t.closedAlerts/max*100).toFixed(1)}%;background:${seriesColor('c')}" title="Alerts: ${t.closedAlerts}"></div>`
+        : '';
+      const secSegment = includeSecurity()
+        ? `<div style="width:${((t.closedSecurity||0)/max*100).toFixed(1)}%;background:${seriesColor('d')}" title="Security Services: ${t.closedSecurity||0}"></div>`
+        : '';
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+        <div style="width:130px;font-size:12.5px;font-weight:600;flex-shrink:0;">${t.name}</div>
+        <div style="flex:1;display:flex;height:16px;border-radius:4px;overflow:hidden;background:var(--surface-2);">
+          <div style="width:${wMS}%;background:${seriesColor('a')}" title="Managed Services: ${t.closedMS}"></div>
+          <div style="width:${wTS}%;background:${seriesColor('b')}" title="Technical Services: ${t.closedTS}"></div>
+          ${alSegment}
+          ${secSegment}
+        </div>
+        <div class="num" style="width:52px;text-align:right;font-weight:700;">${t.closedTotal}</div>
+      </div>`;
+    }).join('');
+    el.appendChild(rows);
+
+    syncBoardOptionVisibility();
+    const boardKey = techMixBoardSel.value;
+    document.getElementById('techSourceTitle').textContent = 'Ticket source mix ('+techBoardLabels[boardKey]+')';
+    document.getElementById('techPriorityTitle').textContent = 'Priority mix ('+techBoardLabels[boardKey]+')';
+    hbarChart(document.getElementById('techSourceChart'), sortObj(techMixFor('sourceMix', boardKey)).map(([k,v])=>({label:k,value:v})));
+    hbarChart(document.getElementById('techPriorityChart'), sortObj(techMixFor('priorityMix', boardKey)).map(([k,v])=>({label:k,value:v,
+      color: k==='Critical'?'#B3261E': k==='High/Urgent'?'#C98A3A' : seriesColor('a')})));
+  }
+  techMixBoardSel.addEventListener('change', renderTech);
+  renderTech();
+
+  /* ================= ALERTS ================= */
+  function renderAlerts(){
+    const snap = D.snapshot.alerts;
+    document.getElementById('alertsKpis').innerHTML =
+      kpiTile('Open alert tickets', fmt(snap.openTotal)) +
+      kpiTile('Opened this week', fmt(D.weeklyTrend.alerts.opened[D.weeklyTrend.alerts.opened.length-1])) +
+      kpiTile('Proactive vs. maintenance', snap.byType['Proactive Alert']+' / '+snap.byType['Maintenance']) +
+      kpiTile('Top alerting client', snap.topCompanies[0][0].split(' ').slice(0,2).join(' '));
+
+    lineChart(document.getElementById('alertsTrendChart'), [
+      {key:'c', name:'Alerts opened', data: D.weeklyTrend.alerts.opened},
+    ], wk.map(weekLabel));
+    hbarChart(document.getElementById('alertsTypeChart'), sortObj(snap.byType).map(([k,v])=>({label:k,value:v})));
+    document.getElementById('alertsCompanies').innerHTML = `<table><tr><th>Client</th><th class="num">Open alerts</th></tr>` +
+      snap.topCompanies.map(([c,v])=>`<tr><td>${c}</td><td class="num">${v}</td></tr>`).join('') + `</table>`;
+  }
+  renderAlerts();
+
+  /* ================= DISPATCH ================= */
+  function renderDispatch(){
+    const q = D.dispatchQueue;
+    const asOfDate = new Date(q.asOf);
+    document.getElementById('dispatchAsOf').textContent = asOfDate.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+    const oldest = q.tickets[0];
+    document.getElementById('dispatchKpis').innerHTML =
+      kpiTile('Open on Dispatch', fmt(q.total)) +
+      kpiTile('Unassigned', fmt(q.unassignedTotal)) +
+      kpiTile('Oldest in queue', oldest ? Math.round(oldest.hoursInQueue/24)+'d' : '—');
+    document.getElementById('dispatchTable').innerHTML = `<table><tr><th>Ticket</th><th>Client</th><th>Contact</th><th>Description</th><th>Owner</th><th>Status</th><th>Priority</th><th class="num">Days in queue</th></tr>` +
+      q.tickets.map(t=>`<tr><td class="num">#${t.id}</td><td>${t.company||'—'}</td><td>${t.contact||'—'}</td><td>${t.summary||'—'}</td><td>${t.owner}</td><td>${t.status}</td><td>${t.priority}</td><td class="num">${t.hoursInQueue!=null?Math.round(t.hoursInQueue/24):'—'}</td></tr>`).join('') +
+      `</table>`;
+  }
+  renderDispatch();
+
+  /* ================= PHONES & HISTORICAL ================= */
+  const L = D.legacy;
+  const phoneWeekSel = document.getElementById('phoneWeek');
+  L.weeks.forEach((w,i)=>{
+    const opt = document.createElement('option'); opt.value=i; opt.textContent='Week of '+w;
+    phoneWeekSel.appendChild(opt);
+  });
+  phoneWeekSel.value = L.weeks.length-1;
+
+  function renderPhones(){
+    const i = parseInt(phoneWeekSel.value,10);
+    const p = L.phones;
+    document.getElementById('phoneKpis').innerHTML =
+      kpiTile('Inbound calls', fmt(p.totalInbound[i])) +
+      kpiTile('Answered', fmt(p.answered[i]), {dir: p.answeredPct[i]>=0.85?'up': p.answeredPct[i]>=0.75?'flat':'down', text: pct(p.answeredPct[i])+' answer rate'}) +
+      kpiTile('Abandoned', fmt(p.abandoned[i])) +
+      kpiTile('Avg wait time', p.avgWaitTime[i]);
+
+    lineChart(document.getElementById('phoneTrendChart'), [
+      {key:'a', name:'Answered', data:p.answered},
+      {key:'b', name:'Abandoned', data:p.abandoned},
+    ], L.weeks);
+
+    const techs = Object.keys(p.techTalkTime);
+    document.getElementById('phoneTechTable').innerHTML = `<table><tr><th>Tech</th><th class="num">Talk time (wk)</th><th class="num">Calls answered (wk)</th><th class="num">Total talk time (8wk)</th><th class="num">Total calls (8wk)</th></tr>` +
+      techs.map(t=>{
+        const totalCalls = p.techCallsAnswered[t].reduce((a,b)=>a+b,0);
+        return `<tr><td>${t}</td><td class="num">${p.techTalkTime[t][i]}</td><td class="num">${p.techCallsAnswered[t][i]}</td><td class="num">—</td><td class="num">${totalCalls}</td></tr>`;
+      }).join('') + `</table>`;
+  }
+  phoneWeekSel.addEventListener('change', renderPhones);
+  renderPhones();
+
+  // legacy service desk table (4 most recent weeks of that report, cols 5-8 i.e. Aug)
+  const sd = L.serviceDesk;
+  const sdWeeks = ['3-Aug','10-Aug','17-Aug','24-Aug'];
+  function row(label, arr, formatter){
+    formatter = formatter || (v=>v==null?'—':fmt(v));
+    return `<tr><td>${label}</td>` + arr.map(v=>`<td class="num">${formatter(v)}</td>`).join('') + `</tr>`;
+  }
+  document.getElementById('legacyDeskTable').innerHTML = `<table><tr><th>Metric</th>${sdWeeks.map(w=>`<th class="num">${w}</th>`).join('')}</tr>` +
+    row('Opened tickets (no alerts, all)', sd.openedTicketsNoAlerts.slice(-4)) +
+    row('Closed tickets (no alerts)', sd.closedTicketsNoAlerts) +
+    row('Cancelled / no-comms', sd.cancelledNoComms.slice(-4)) +
+    row('Escalations', sd.escalations.slice(-4)) +
+    row('Tickets open &gt;7 days', sd.ticketsOver7Days.slice(-4)) +
+    row('Total alerts opened', sd.totalAlertsOpened) +
+    row('Alerts auto-closed by NinjaOne', sd.alertsAutoClosedNinjaOne) +
+  `</table>`;
+
+  document.getElementById('legacySlaTable').innerHTML = `<table><tr><th>Metric</th>${sdWeeks.map(w=>`<th class="num">${w}</th>`).join('')}</tr>` +
+    row('Response met', sd.slaResponseMet, pct) +
+    row('Avg response time', sd.slaAvgResponseTime, v=>v) +
+    row('Resolution met', sd.slaResolutionMet, pct) +
+  `</table>`;
+
+  document.getElementById('legacyCsatTable').innerHTML = `<table><tr><th>Metric</th>${sdWeeks.map(w=>`<th class="num">${w}</th>`).join('')}</tr>` +
+    row('Positive', sd.csatPositive) + row('Neutral', sd.csatNeutral) + row('Negative', sd.csatNegative) +
+  `</table>`;
+
+  const techNames = Object.keys(sd.utilization);
+  document.getElementById('legacyTechScorecards').innerHTML = techNames.map(t=>{
+    const util = sd.utilization[t].slice(-4);
+    const closed = (sd.techClosedSvcDesk[t]||[]).slice(-4);
+    const alertsClosed = (sd.techClosedAlerts[t]||[]).slice(-4);
+    const fcr = (sd.fcr[t]||[]).slice(-4);
+    return `<div class="card" style="margin-bottom:10px;">
+      <h3>${t}</h3>
+      <div class="table-wrap"><table><tr><th>Metric</th>${sdWeeks.map(w=>`<th class="num">${w}</th>`).join('')}</tr>
+      ${row('Utilization', util, v=>v==null?'—':pct(v))}
+      ${row('Svc-desk tickets closed', closed)}
+      ${row('Alert tickets closed', alertsClosed)}
+      ${row('First-contact resolutions', fcr)}
+      </table></div>
+    </div>`;
+  }).join('');
+
+  // re-render charts on theme changes so colors stay correct
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  function rerenderAll(){ renderToday(); renderExec(); renderDesk(); renderTech(); renderAlerts(); renderDispatch(); renderPhones(); }
+  mq.addEventListener('change', rerenderAll);
+  document.getElementById('themeBtn').addEventListener('click', () => setTimeout(rerenderAll, 0));
+}
+</script>
+<script>
+async function loadReportData(){
+  try {
+    const res = await fetch('/api/GetReportData', {cache: 'no-store'});
+    if (!res.ok) throw new Error('API not ready (' + res.status + ')');
+    return await res.json();
+  } catch (err) {
+    console.warn('Live data unavailable, falling back to sample data:', err);
+    const res = await fetch('sample-data.json');
+    return await res.json();
+  }
+}
+loadReportData().then(function(D){
+  window.__REPORT_DATA__ = D;
+  renderReport();
+});
+</script>
+
