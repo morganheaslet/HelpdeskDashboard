@@ -35,21 +35,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          cd function-app
-          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
-
+      # NOTE: deliberately no local `pip install` step here. Installing
+      # dependencies on this runner (ubuntu-latest, a newer glibc) and
+      # shipping those prebuilt wheels straight into the Function App
+      # produces exactly this failure at runtime:
+      #   ImportError: ... GLIBC_2.33' not found (required by .../cryptography/.../_rust.abi3.so)
+      # because the Linux Function App container's glibc is older than the
+      # one these wheels were built against. Instead, ship only the source
+      # (requirements.txt included) and let Azure's own Oryx build system
+      # install dependencies remotely, inside a container that matches the
+      # actual runtime — set once via `SCM_DO_BUILD_DURING_DEPLOYMENT=true`
+      # on the Function App (see README step 6). Do not reintroduce a local
+      # pip install / --target step here.
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
           app-name: "th2-helpdesk-functions"
           package: "function-app"
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          scm-do-build-during-deployment: true
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

@@ -111,7 +111,15 @@ az role assignment create \
   --scope $(az keyvault show -n th2-helpdesk-kv -g rg-helpdesk-report --query id -o tsv)
 
 # 6. App settings (non-secret config; the secret is a Key Vault reference)
+# NOTE: SCM_DO_BUILD_DURING_DEPLOYMENT=true is required — without it, whatever
+# environment ran `pip install` (e.g. a GitHub Actions runner) ships its own
+# prebuilt wheels straight into the Function App, and packages with compiled
+# extensions (cryptography, used by azure-storage-blob) fail at runtime with
+# "ImportError: ... GLIBC_2.33' not found" because that build environment's
+# glibc doesn't match the Function App container's. This setting tells Azure
+# to install dependencies itself, remotely, in a container that matches.
 az functionapp config appsettings set -g rg-helpdesk-report -n th2-helpdesk-functions --settings \
+  SCM_DO_BUILD_DURING_DEPLOYMENT="true" \
   CW_COMPANY_ID="<connectwise company id>" \
   CW_PUBLIC_KEY="<connectwise public api key>" \
   CW_PRIVATE_KEY="@Microsoft.KeyVault(SecretUri=https://th2-helpdesk-kv.vault.azure.net/secrets/CwPrivateKey/)" \
