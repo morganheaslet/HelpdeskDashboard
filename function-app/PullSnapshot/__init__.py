@@ -21,6 +21,7 @@ from azure.storage.blob import BlobServiceClient
 
 from shared.cw_client import ConnectWiseClient
 from shared.aggregate import build_today_snapshot, BOARD_LABELS
+from shared.dialpad_client import DialpadClient
 
 BOARD_KEYS = ["managedServices", "technicalServices", "alerts", "securityServices"]
 BOARD_ENV_VARS = {
@@ -66,6 +67,25 @@ def main(myTimer: func.TimerRequest) -> None:
 
     today_snapshot = build_today_snapshot(tickets_by_board, member_names, now=now)
 
+    # Live phone stats (Today's Snapshot tab) — optional until DIALPAD_API_KEY
+    # is configured. Failures here (not-yet-configured, a transient API error,
+    # a slow/timed-out export) must never take down the ConnectWise half of
+    # this function, so they're caught and logged rather than raised; the
+    # frontend falls back to its "not live yet" note whenever todayPhone is
+    # absent from the blob, exactly like before this was wired in.
+    today_phone = None
+    try:
+        dialpad = DialpadClient()
+        today_phone = dialpad.get_daily_call_stats(date=now.strftime("%Y-%m-%d"))
+        logging.info(
+            "Dialpad: %d answered, %d missed today across %d agents",
+            today_phone["answered"], today_phone["missed"], len(today_phone["byAgent"]),
+        )
+    except NotImplementedError:
+        logging.info("Dialpad not configured yet (DIALPAD_API_KEY unset) — skipping live phone stats")
+    except Exception:
+        logging.exception("Dialpad pull failed — leaving todayPhone out of this run's blob")
+
     # Merge with whatever's already in the blob (weeklyTrend / techLeaderboard /
     # snapshot / legacy sections) rather than recomputing everything here.
     # A future iteration can move that logic into this same function or a
@@ -73,6 +93,8 @@ def main(myTimer: func.TimerRequest) -> None:
     # focused on the part the manager checks every few minutes.
     existing = _read_existing_blob()
     existing["todaySnapshot"] = today_snapshot
+    if today_phone is not None:
+        existing["todayPhone"] = today_phone
     existing["meta"] = existing.get("meta", {})
     existing["meta"]["lastUpdated"] = today_snapshot["asOf"]
 

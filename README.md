@@ -9,8 +9,8 @@ team can open in a browser, backed by Azure.
                     ┌─────────────────────────────┐
    Timer trigger →  │  Azure Function App          │
    (every 15 min)   │  - PullSnapshot               │──► Blob Storage
-                    │    (ConnectWise + stubs for   │    /data/latest.json
-                    │     Dialpad, NinjaOne)         │    /data/history/*.json
+                    │    (ConnectWise + Dialpad;    │    /data/latest.json
+                    │     NinjaOne still a stub)     │    /data/history/*.json
                     │  - GetReportData (HTTP)        │◄── reads latest.json
                     └─────────────────────────────┘
                                    ▲
@@ -48,11 +48,21 @@ password to manage, just "sign in with your work account." That's wired up in
   the ConnectWise Manage API (ticket lists, statuses, members) — it's the same logic
   used to build the current report, ported from the interactive MCP calls to direct
   HTTP calls (which is what has to happen outside this chat session anyway).
-- **Dialpad**: `function-app/shared/dialpad_client.py` is a stub with the shape of
-  what it will return (calls answered/missed, talk time, by-agent breakdown) and a
-  `NotImplementedError` where the real API call goes, plus a comment on what
-  Dialpad API scope/token you'll need. Phone metrics stay manual (BrightGauge) in
-  the report until this is filled in.
+- **Dialpad**: `function-app/shared/dialpad_client.py` is now a real client against
+  Dialpad's Stats Export API — `PullSnapshot` calls it every run and, once
+  `DIALPAD_API_KEY` is set, writes live `answered`/`missed`/`avgTalkTimeSeconds`/
+  per-agent numbers into the blob as `todayPhone`. The frontend's Today's Snapshot
+  tab shows a live "Phones — live (Dialpad)" card when that key is present in the
+  data, and falls back to its old "not live yet" note otherwise — so this is safe
+  to deploy before you've generated a Dialpad API key; it just won't do anything
+  until you have. One caveat: Dialpad doesn't publish an exact CSV column list for
+  the stats export, so the client matches columns by name pattern (see the big
+  comment at the top of `dialpad_client.py`) — **the first time this runs for
+  real, check the Function App's logs and sanity-check the numbers against
+  Dialpad's own analytics dashboard once**, and adjust the column-matching
+  patterns there if anything looks off. This only replaces the *live, today*
+  phone numbers — the "Phones & Historical" tab's weekly trend is still the
+  manually-reported (BrightGauge) data, unchanged.
 - **NinjaOne**: `function-app/shared/ninjaone_client.py` is the same kind of stub,
   for device health / alert counts if you want that folded into the report later.
 
@@ -73,18 +83,32 @@ az group create -n rg-helpdesk-report -l eastus
 az storage account create -n th2helpdeskdata -g rg-helpdesk-report -l eastus --sku Standard_LRS
 
 # 3. Function App (Python 3.11, consumption plan — scales to zero, cheap)
+# NOTE: --os-type linux is required — Azure Functions' Python runtime only runs
+# on Linux, and `az functionapp create` defaults to Windows if you omit this,
+# which fails with "Runtime python not supported for os windows".
 az functionapp create -g rg-helpdesk-report -n th2-helpdesk-functions \
-  --consumption-plan-location eastus --runtime python --runtime-version 3.11 \
+  --consumption-plan-location eastus --os-type linux \
+  --runtime python --runtime-version 3.11 \
   --functions-version 4 --storage-account th2helpdeskdata
 
 # 4. Key Vault for the ConnectWise API keys
+# NOTE: `az keyvault create` defaults to RBAC authorization mode now (not the
+# older "access policy" model), and a vault created that way rejects
+# `az keyvault set-policy` with "Cannot set policies to a vault with
+# '--enable-rbac-authorization' specified". Step 5 below uses an RBAC role
+# assignment instead, which is the correct match for that default.
 az keyvault create -n th2-helpdesk-kv -g rg-helpdesk-report -l eastus
 az keyvault secret set --vault-name th2-helpdesk-kv -n CwPrivateKey --value "<connectwise private key>"
 
-# 5. Grant the Function App's managed identity access to the vault
+# 5. Grant the Function App's managed identity access to the vault (RBAC role
+# assignment — use this instead of `az keyvault set-policy` unless you created
+# the vault with `--enable-rbac-authorization false`)
 az functionapp identity assign -g rg-helpdesk-report -n th2-helpdesk-functions
-az keyvault set-policy -n th2-helpdesk-kv \
-  --object-id <identity principalId from previous command> --secret-permissions get
+# grab the vault's resource id and the identity's principalId, then:
+az role assignment create \
+  --role "Key Vault Secrets User" \
+  --assignee <identity principalId from previous command> \
+  --scope $(az keyvault show -n th2-helpdesk-kv -g rg-helpdesk-report --query id -o tsv)
 
 # 6. App settings (non-secret config; the secret is a Key Vault reference)
 az functionapp config appsettings set -g rg-helpdesk-report -n th2-helpdesk-functions --settings \
@@ -93,17 +117,31 @@ az functionapp config appsettings set -g rg-helpdesk-report -n th2-helpdesk-func
   CW_PRIVATE_KEY="@Microsoft.KeyVault(SecretUri=https://th2-helpdesk-kv.vault.azure.net/secrets/CwPrivateKey/)" \
   CW_CLIENT_ID="<connectwise clientId issued for your API member>" \
   CW_SITE="na.myconnectwise.net" \
-  STORAGE_CONNECTION_STRING="<from the storage account's access keys>"
+  STORAGE_CONNECTION_STRING="<from the storage account's access keys>" \
+  DIALPAD_API_KEY="<generate at Dialpad Admin Settings > Integrations > API>" \
+  DIALPAD_OFFICE_ID="<optional — from GET /api/v2/offices if calls need a target scope>"
 
 # 7. Deploy the function code
 cd function-app
 func azure functionapp publish th2-helpdesk-functions
 
-# 8. Static Web App, linked to the Function App as its managed API
-az staticwebapp create -n th2-helpdesk-report -g rg-helpdesk-report -l eastus2 \
-  --source https://github.com/<your-org>/<this-repo> --branch main \
-  --app-location "/static-web-app" --api-location "" \
-  --login-with-github
+# 8. Static Web App — create it WITHOUT a --source, then push the files
+# straight from your machine with the SWA CLI. (The alternative — --source
+# plus --login-with-github — only works if this scaffold is already pushed to
+# a real GitHub repo, since it has Azure generate a GitHub Actions workflow IN
+# that repo and walks you through a GitHub device login. If you're just
+# working from the unzipped folder locally, as most people are at this step,
+# skip that entirely and use the CLI push below instead.)
+az staticwebapp create -n th2-helpdesk-report -g rg-helpdesk-report -l eastus2 --sku Free
+
+# One-time: install the Static Web Apps CLI (needs Node.js)
+npm install -g @azure/static-web-apps-cli
+
+# Grab this Static Web App's deployment token, then push the static-web-app
+# folder's contents to it directly:
+cd static-web-app
+swa deploy . --env production --deployment-token $(az staticwebapp secrets list -n th2-helpdesk-report --query "properties.apiKey" -o tsv)
+cd ..
 
 # Managed API linking (SWA + separate Function App, "bring your own functions"):
 az staticwebapp backends link -n th2-helpdesk-report \
@@ -111,10 +149,52 @@ az staticwebapp backends link -n th2-helpdesk-report \
   --backend-region eastus
 ```
 
-Steps 1–6 are one-time. Step 7 is how you push code updates to the data-pulling
-side; Static Web Apps redeploys automatically on push to `main` once the GitHub
-Actions workflow in `.github/workflows/azure-static-web-apps.yml` is wired up by
-step 8 (it generates the workflow file and a deployment token secret for you).
+Steps 1–6 are one-time. Step 7 (`func azure functionapp publish`) is how you push
+code updates to the data-pulling side — rerun it any time `function-app/` changes.
+Step 8's `swa deploy` is the equivalent for the frontend — rerun it any time
+`static-web-app/index.html` changes (e.g. after Claude republishes the report).
+
+### Using GitHub Actions instead of `swa deploy` (recommended if the SWA CLI gives you trouble)
+
+This scaffold already ships a working workflow file at
+`.github/workflows/azure-static-web-apps.yml` that deploys *both* the Static Web
+App and the Function App on every push to `main`. If the local `swa deploy`
+step above fails for you (e.g. a broken deployment-binary download), this path
+sidesteps it entirely — GitHub's own runners do the deploy, not a binary on
+your machine. It doesn't require recreating anything you already made above.
+
+1. Create a new repo on github.com (Settings gear → your profile → **New repository**;
+   private is fine), then from the unzipped scaffold folder:
+   ```
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/<your-username>/<repo-name>.git
+   git push -u origin main
+   ```
+2. Add two repo secrets — on GitHub, go to the repo → **Settings → Secrets and
+   variables → Actions → New repository secret**:
+   - `AZURE_STATIC_WEB_APPS_API_TOKEN` — value from:
+     ```
+     az staticwebapp secrets list -n th2-helpdesk-report --query "properties.apiKey" -o tsv
+     ```
+   - `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` — value from:
+     ```
+     az functionapp deployment list-publishing-profiles -g rg-helpdesk-report -n th2-helpdesk-functions --xml
+     ```
+     (paste the entire XML output as the secret's value)
+3. That's it — the push in step 1 already triggered the workflow once (check
+   the repo's **Actions** tab for its run), and every future `git push` to
+   `main` redeploys both the frontend and the function code automatically.
+
+If you'd rather have Azure generate its own separate GitHub Actions workflow
+instead of using the one already in this scaffold, that's what the
+`--source`/`--login-with-github` option on `az staticwebapp create` is for —
+but don't use both approaches on the same repo; pick one. That would mean
+re-creating the Static Web App with `--source https://github.com/<your-org>/<repo>`
+pointed at your new repo, which Azure then wires up itself. It's an optional
+alternative, not something you need once the steps above are working.
 
 ### Turning on team sign-in
 

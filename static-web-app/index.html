@@ -182,6 +182,7 @@
     .card{ box-shadow:none; }
   }
 </style>
+
 </head>
 <body>
 
@@ -254,7 +255,7 @@
       </div>
     </div>
 
-    <div class="callout warn" style="margin-top:12px;" id="todayPhoneNote"></div>
+    <div id="todayPhoneSection" style="margin-top:12px;"></div>
   </section>
 
   <!-- ============ EXECUTIVE SUMMARY ============ -->
@@ -851,7 +852,26 @@ function renderReport(){
       `</table></div>
       <div class="hint">${T.opened.unassignedCount} tickets opened and ${T.closed.unassignedCount} closed today had no tech attached — these are excluded from the opened/closed totals above and from every tech's numbers.</div>`;
 
-    document.getElementById('todayPhoneNote').innerHTML = `<span>☎</span><span>Phone metrics (calls answered, talk time) aren't live yet — see the Phones &amp; Historical tab for the most recent manually-reported week. Ask for a Dialpad connector to bring that onto this tab.</span>`;
+    const phoneSection = document.getElementById('todayPhoneSection');
+    if(D.todayPhone){
+      const P = D.todayPhone;
+      const byAgentRows = Object.entries(P.byAgent || {}).sort((a,b) => (b[1].answered||0) - (a[1].answered||0));
+      const avgTalk = P.avgTalkTimeSeconds ? Math.round(P.avgTalkTimeSeconds/60) + 'm ' + Math.round(P.avgTalkTimeSeconds%60) + 's' : '—';
+      phoneSection.innerHTML = `<div class="card">
+        <h3>Phones — live (Dialpad) <span class="badge live dot" style="margin-left:8px;">as of ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</span></h3>
+        <div class="grid kpi" style="margin-bottom:12px;">
+          ${kpiTile('Answered today', fmt(P.answered))}
+          ${kpiTile('Missed today', fmt(P.missed))}
+          ${kpiTile('Avg talk time', avgTalk)}
+        </div>
+        <div class="table-wrap"><table><tr><th>Agent</th><th class="num">Answered</th><th class="num">Missed</th></tr>` +
+        byAgentRows.map(([name,v])=>`<tr><td>${name}</td><td class="num">${fmt(v.answered||0)}</td><td class="num">${fmt(v.missed||0)}</td></tr>`).join('') +
+        `</table></div>
+        <div class="hint">Pulled live from Dialpad's Stats API. See the Phones &amp; Historical tab for the manually-reported weekly trend (not yet replaced by this feed).</div>
+      </div>`;
+    } else {
+      phoneSection.innerHTML = `<div class="callout warn"><span>☎</span><span>Phone metrics (calls answered, talk time) aren't live yet — see the Phones &amp; Historical tab for the most recent manually-reported week. Ask for a Dialpad connector to bring that onto this tab.</span></div>`;
+    }
   }
   renderToday();
 
@@ -1101,6 +1121,5 @@ loadReportData().then(function(D){
   renderReport();
 });
 </script>
-
 </body>
 </html>
