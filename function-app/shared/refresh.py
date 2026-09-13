@@ -41,7 +41,12 @@ DISPATCH_BOARD_ENV_VAR = "CW_BOARD_DISPATCH"
 
 TICKET_FIELDS = [
     "id", "owner", "status", "priority", "company", "board",
-    "dateEntered", "closedFlag", "closedDate", "_info/lastUpdated",
+    # ConnectWise nests audit-trail fields (dateEntered, lastUpdated) under
+    # the ticket's `_info` sub-object rather than exposing them as top-level
+    # attributes — requesting bare "dateEntered" returns nothing, which
+    # silently zeroed out every opened-today count and every Dispatch
+    # hoursInQueue value until this was caught against a live run.
+    "_info/dateEntered", "closedFlag", "closedDate", "_info/lastUpdated",
 ]
 
 # Dispatch tickets also need `contact` and `summary` for the queue table —
