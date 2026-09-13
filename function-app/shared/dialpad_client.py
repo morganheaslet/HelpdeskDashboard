@@ -172,6 +172,18 @@ class DialpadClient:
         missed_col = self._find_col(fieldnames, "missed") or self._find_col(fieldnames, "no", "answer")
         duration_col = self._find_col(fieldnames, "talk", "time") or self._find_col(fieldnames, "duration") or self._find_col(fieldnames, "avg", "time")
 
+        # Always log the real CSV headers and which column each matched to,
+        # not just as a warning when matching fails — 2026-09-13's first live
+        # run came back all-zeros with a single "Unknown" agent row, but the
+        # Function App log that was checked afterwards didn't actually contain
+        # this diagnostic (either the match silently succeeded on a wrong
+        # column, or the log view filtered an INFO/WARNING line out). Logging
+        # unconditionally at INFO means the *next* run's logs settle this
+        # either way, without guessing at the substrings blind.
+        logging.info(
+            "Dialpad CSV columns: %s | matched name=%r answered=%r missed=%r duration=%r | %d row(s)",
+            fieldnames, name_col, answered_col, missed_col, duration_col, len(rows),
+        )
         if not answered_col:
             logging.warning(
                 "Dialpad CSV columns didn't match expected patterns: %s — "

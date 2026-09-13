@@ -267,31 +267,31 @@ and restricts it to authenticated users. Two things to set after the SWA exists:
    the `allowedRoles` section of the config to check group membership via a custom
    role — happy to wire that in once the group exists.
 
-## Re-seeding the blob (weeklyTrend / snapshot / techLeaderboard / legacy sections)
+## Re-seeding the blob (first run only, before `legacy` has ever been seeded)
 
-`PullSnapshot`/`RefreshNow` (via `shared/refresh.py`) only ever write `todaySnapshot`,
-`dispatchQueue`, and `todayPhone` into the blob — everything else the frontend
-renders (the Executive Summary's weekly trend chart, the Service Desk tab's
-per-board snapshot, the Tech Leaderboard, the Phones & Historical legacy tab)
-comes from whatever was already sitting in the blob when `run_refresh()` ran,
-under the assumption something seeded it first. **Nothing in this scaffold did
-that automatically** until this was caught live on 2026-09-13 — a fresh
-storage account starts genuinely empty, so the very first pull wrote a blob
-with those sections as bare `{}`, and the frontend crashed (`Cannot read
-properties of undefined (reading 'forEach')`) the first time it tried to
-render a tab that needed one of them.
+As of 2026-09-13, `run_refresh()` writes **every** section the frontend
+renders except `legacy` (the old BrightGauge-sourced Phones/Service Desk
+historical tables, which have no live ConnectWise/Dialpad source yet):
+`todaySnapshot`, `dispatchQueue`, `todayPhone`, `weeklyTrend`, `snapshot`
+(the Service Desk tab's current backlog), and `techLeaderboard` are all
+rebuilt from live ConnectWise data on every `PullSnapshot`/`RefreshNow` run —
+see "Weekly trend / backlog snapshot / tech leaderboard" below.
 
-Two things now guard against this:
-1. **Code fix**: `shared/refresh.py`'s `_read_existing_blob()` now falls back
-   to the bundled `shared/seed_data.json` (a copy of the report's original
-   `data.json`, carrying the real historical sections) instead of an empty
-   shell, whenever the blob doesn't exist yet — so a brand-new deployment
-   seeds itself correctly on its very first run.
+`legacy` (and, on the very first run against a brand-new storage account,
+everything else too, until the first successful pull completes) still needs
+to come from somewhere. Two things guard against a frontend crash on an
+empty blob:
+1. **Code fix**: `shared/refresh.py`'s `_read_existing_blob()` falls back to
+   the bundled `shared/seed_data.json` (a copy of the report's original
+   `data.json`) instead of an empty shell, whenever the blob doesn't exist
+   yet — so a brand-new deployment seeds itself correctly on its very first
+   run, and `legacy` in particular stays seeded from that file forever
+   (nothing else in the scaffold writes it, by design — see the Dialpad
+   section above for the plan to eventually replace `legacy.phones`).
 2. **One-time manual fix for an already-broken blob**: if your blob already
-   has the empty-`{}` version baked in (redeploying the code above won't
-   retroactively fix a blob that already downloads successfully — the
-   fallback path only runs when the blob is *missing*), upload the real data
-   directly, once:
+   has an empty-`{}` version baked in from before this fix existed
+   (redeploying the code above won't retroactively fix a blob that already
+   downloads successfully), upload the real data directly, once:
    ```
    az storage blob upload --account-name helpdeskreportdata \
      --container-name helpdesk-report-data --name latest.json \
@@ -299,8 +299,43 @@ Two things now guard against this:
    ```
    (`latest.json` here is the same content as `shared/seed_data.json` /
    the original report's `data.json`.) The next `PullSnapshot` or Refresh Now
-   click will overwrite `todaySnapshot`/`dispatchQueue`/`todayPhone` with
-   fresh live data while leaving the re-seeded historical sections in place.
+   click will overwrite every live section with fresh data while leaving
+   `legacy` in place.
+
+## Weekly trend / backlog snapshot / tech leaderboard (added 2026-09-13)
+
+Executive Summary, Service Desk, and Tech Leaderboard used to be frozen at
+the report's original generation date, since `run_refresh()` never touched
+`weeklyTrend`/`snapshot`/`techLeaderboard`. Each run now does three more
+ConnectWise pulls per throughput board (Managed Services, Technical Services,
+Alerts, Security Services — never Dispatch, which isn't a board techs
+"close tickets on"):
+1. every ticket opened in the last 11 weeks (`_info/dateEntered` in range,
+   any status) — bucketed client-side by the Monday-week it was opened in,
+   feeding the Executive Summary's trend chart (`weeklyTrend`).
+2. every ticket closed in that same 11-week window (`closedDate` in range,
+   `closedFlag=true`) — bucketed the same way, for the same chart.
+3. every ticket closed in the last 14 days (owner/priority/source fields) —
+   feeds the Tech Leaderboard (`techLeaderboard`). Unassigned tickets are
+   excluded from every tech's count, same rule as everywhere else in the
+   report.
+
+The current backlog snapshot (`snapshot`, the Service Desk tab) needs no
+extra API call at all — it's built from the same open+closed-today tickets
+`run_refresh()` already pulls for Today's Snapshot.
+
+This roughly doubles the number of ConnectWise API calls per run (from ~10 to
+~22) and adds real wall-clock time to every `PullSnapshot`/`RefreshNow` call.
+`host.json`'s `functionTimeout` was bumped from 5 to 9 minutes accordingly
+(10 minutes is the max on a Consumption plan) — if your ConnectWise instance
+has a much larger ticket volume than TH2's and a run times out, that's the
+first thing to check.
+
+Like the Dialpad pull, this whole block is wrapped in its own try/except in
+`run_refresh()` — a failure here (a slow ConnectWise response, a transient
+API error) logs and leaves `weeklyTrend`/`snapshot`/`techLeaderboard` as
+whatever they were on the previous successful run, rather than taking down
+the Today's Snapshot half of the same call.
 
 ## Schedule
 

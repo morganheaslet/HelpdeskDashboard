@@ -20,7 +20,8 @@ Two data-quality rules carried over from the manual build of this report:
    Responded}, per the definition the helpdesk manager gave for what counts
    as untouched-since-last-client-contact.
 """
-from datetime import datetime, timezone
+from collections import Counter
+from datetime import datetime, timedelta, timezone
 
 CLOSED_STATUSES = {
     "closed", "resolved*", "resolved", "canceled", "cancelled",
@@ -239,4 +240,196 @@ def build_dispatch_queue(tickets, now=None):
         "total": len(rows),
         "unassignedTotal": unassigned_total,
         "tickets": rows,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Executive Summary / Service Desk / Tech Leaderboard — added 2026-09-13 to
+# make these tabs live instead of frozen at the report's original generation
+# time (2026-09-12). Each of these pulls a materially wider window than the
+# "today" boards above (11 weeks of history, or the current full open
+# backlog, or a 14-day closed window), so refresh.py wraps the calls into
+# these functions in their own try/except — a failure here must never take
+# down the Today's Snapshot half of a run, since that's the tab people watch
+# live minute-to-minute.
+# ---------------------------------------------------------------------------
+
+# The four throughput boards that feed the Tech Leaderboard and Service Desk
+# backlog snapshot. Dispatch is deliberately excluded from both — see the
+# module docstring and BOARD_LABELS above: it's a pre-triage/routing queue,
+# not a board techs "close tickets on."
+LEADERBOARD_BOARD_KEYS = ["managedServices", "technicalServices", "alerts", "securityServices"]
+LEADERBOARD_CLOSED_FIELD = {
+    "managedServices": "closedMS",
+    "technicalServices": "closedTS",
+    "alerts": "closedAlerts",
+    "securityServices": "closedSecurity",
+}
+
+
+def _week_start(dt):
+    """Monday (as a date) of the week containing dt (a date or datetime)."""
+    d = dt.date() if hasattr(dt, "date") else dt
+    return d - timedelta(days=d.weekday())
+
+
+def week_starts(now, count=11):
+    """
+    Returns `count` ISO week-start (Monday) date strings, oldest first,
+    ending with the Monday of the CURRENT (possibly in-progress) week — this
+    matches the shape of the original manually-built weeklyTrend.weeks (see
+    report/data.json), where the last entry is the week containing the
+    report's own generation date, not necessarily a completed week.
+    """
+    now = now or datetime.now(timezone.utc)
+    current = _week_start(now)
+    return [(current - timedelta(weeks=(count - 1 - i))).isoformat() for i in range(count)]
+
+
+def _parse_date(iso_ts):
+    if not iso_ts:
+        return None
+    try:
+        return datetime.fromisoformat(iso_ts.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def build_weekly_trend(opened_by_board, closed_by_board, weeks):
+    """
+    opened_by_board / closed_by_board: dict of board_key -> list of tickets
+    (minimal fields — id, _info/dateEntered, closedDate) covering the full
+    `weeks` window: opened_by_board's tickets were pulled by dateEntered in
+    range regardless of current status, closed_by_board's were pulled by
+    closedDate in range with closedFlag=true. Buckets each ticket into the
+    Monday-week it was opened/closed in and returns the exact
+    {"weeks": [...], boardKey: {"opened": [...], "closed": [...]}} shape the
+    frontend's Executive Summary trend chart already renders (see
+    report/data.json's `weeklyTrend` for the reference shape) — one count
+    per week, in the same order as `weeks`.
+    """
+    week_index = {w: i for i, w in enumerate(weeks)}
+    result = {"weeks": weeks}
+    for board_key in opened_by_board:
+        opened_counts = [0] * len(weeks)
+        closed_counts = [0] * len(weeks)
+        for t in opened_by_board.get(board_key, []):
+            entered = _parse_date(t.get("_info", {}).get("dateEntered") or t.get("dateEntered"))
+            if entered is None:
+                continue
+            wk = _week_start(entered).isoformat()
+            if wk in week_index:
+                opened_counts[week_index[wk]] += 1
+        for t in closed_by_board.get(board_key, []):
+            closed = _parse_date(t.get("closedDate"))
+            if closed is None:
+                continue
+            wk = _week_start(closed).isoformat()
+            if wk in week_index:
+                closed_counts[week_index[wk]] += 1
+        result[board_key] = {"opened": opened_counts, "closed": closed_counts}
+    return result
+
+
+def build_backlog_snapshot(open_tickets_by_board, now=None):
+    """
+    open_tickets_by_board: dict of the four throughput board keys -> tickets
+    for that board (a mix of currently-open and closed-today is fine — this
+    re-filters with is_truly_open itself, so it can reuse the exact same
+    pull run_refresh() already does for Today's Snapshot with no extra API
+    call). Returns the Service Desk tab's {board_key: {...}} shape — see
+    report/data.json's `snapshot` section for the reference shape.
+    """
+    now = now or datetime.now(timezone.utc)
+    result = {}
+    for board_key, tickets in open_tickets_by_board.items():
+        open_tickets = [t for t in tickets if is_truly_open(t)]
+        by_status, by_priority, by_type, by_company = Counter(), Counter(), Counter(), Counter()
+        oldest = []
+
+        for t in open_tickets:
+            status = (t.get("status") or {}).get("name") or "(none)"
+            priority = (t.get("priority") or {}).get("name") or "(none)"
+            ttype = (t.get("type") or {}).get("name") or "(none)"
+            company = (t.get("company") or {}).get("name") or "(none)"
+            by_status[status] += 1
+            by_priority[priority] += 1
+            by_type[ttype] += 1
+            by_company[company] += 1
+
+            entered = t.get("_info", {}).get("dateEntered") or t.get("dateEntered")
+            hrs = _hours_since(entered, now) if entered else None
+            age_days = round(hrs / 24.0, 1) if hrs is not None else 0
+            oldest.append({
+                "id": t.get("id"),
+                "summary": t.get("summary"),
+                "company": company,
+                "status": status,
+                "priority": priority,
+                "ageDays": age_days,
+            })
+
+        oldest.sort(key=lambda r: r["ageDays"], reverse=True)
+
+        result[board_key] = {
+            "openTotal": len(open_tickets),
+            "byStatus": dict(by_status.most_common()),
+            "byPriority": dict(by_priority.most_common()),
+            "byType": dict(by_type.most_common()),
+            "topCompanies": by_company.most_common(7),
+            "oldestOpen": oldest[:10],
+        }
+    return result
+
+
+def build_tech_leaderboard(closed_tickets_by_board, member_display_names, days=14, now=None):
+    """
+    closed_tickets_by_board: dict of the four throughput board keys (never
+    dispatch) -> tickets closed in the last `days` days on that board
+    (fields: id, owner, priority, source). Excludes unassigned tickets from
+    every tech's counts, per the explicit rule carried over from the manual
+    report — an unassigned ticket is never counted as a "closer." Returns the
+    Tech Leaderboard tab's {"boards", "byTech", "sourceMix", "priorityMix",
+    "totalClosed"} shape — see report/data.json's `techLeaderboard` for the
+    reference shape.
+    """
+    now = now or datetime.now(timezone.utc)
+    by_tech = {}
+    source_mix = {k: Counter() for k in LEADERBOARD_BOARD_KEYS}
+    priority_mix = {k: Counter() for k in LEADERBOARD_BOARD_KEYS}
+    total_closed = {k: 0 for k in LEADERBOARD_BOARD_KEYS}
+
+    for board_key in LEADERBOARD_BOARD_KEYS:
+        field = LEADERBOARD_CLOSED_FIELD[board_key]
+        for t in closed_tickets_by_board.get(board_key, []):
+            owner_id = (t.get("owner") or {}).get("identifier")
+            if not owner_id:
+                continue  # unassigned tickets are never counted as a "closer"
+            owner_name = member_display_names.get(owner_id, owner_id)
+            entry = by_tech.setdefault(owner_id, {
+                "id": owner_id, "name": owner_name,
+                "closedMS": 0, "closedTS": 0, "closedAlerts": 0, "closedSecurity": 0, "closedTotal": 0,
+            })
+            entry[field] += 1
+            entry["closedTotal"] += 1
+            total_closed[board_key] += 1
+
+            source = (t.get("source") or {}).get("name") or "(none)"
+            priority = (t.get("priority") or {}).get("name") or "(none)"
+            source_mix[board_key][source] += 1
+            priority_mix[board_key][priority] += 1
+
+    total_closed["all"] = sum(total_closed.values())
+
+    all_source, all_priority = Counter(), Counter()
+    for k in LEADERBOARD_BOARD_KEYS:
+        all_source.update(source_mix[k])
+        all_priority.update(priority_mix[k])
+
+    return {
+        "boards": ["Managed Services", "Technical Services", "Alerts", "Security Services"],
+        "byTech": sorted(by_tech.values(), key=lambda e: e["closedTotal"], reverse=True),
+        "sourceMix": {**{k: dict(v.most_common()) for k, v in source_mix.items()}, "all": dict(all_source.most_common())},
+        "priorityMix": {**{k: dict(v.most_common()) for k, v in priority_mix.items()}, "all": dict(all_priority.most_common())},
+        "totalClosed": total_closed,
     }

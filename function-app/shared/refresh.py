@@ -17,13 +17,16 @@ and doesn't assume this returns instantly.
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
 
 from shared.cw_client import ConnectWiseClient
-from shared.aggregate import build_today_snapshot, build_dispatch_queue, is_truly_open, BOARD_LABELS
+from shared.aggregate import (
+    build_today_snapshot, build_dispatch_queue, is_truly_open, BOARD_LABELS,
+    build_weekly_trend, build_backlog_snapshot, build_tech_leaderboard, week_starts,
+)
 from shared.dialpad_client import DialpadClient
 
 # The four throughput boards that feed the Tech Leaderboard (Dispatch never
@@ -43,7 +46,7 @@ DISPATCH_KEY = "dispatch"
 DISPATCH_BOARD_ENV_VAR = "CW_BOARD_DISPATCH"
 
 TICKET_FIELDS = [
-    "id", "owner", "status", "priority", "company", "board", "summary",
+    "id", "owner", "status", "priority", "type", "company", "board", "summary",
     # ConnectWise nests audit-trail fields (dateEntered, lastUpdated) under
     # the ticket's `_info` sub-object rather than exposing them as top-level
     # attributes — requesting bare "dateEntered" returns nothing, which
@@ -56,6 +59,23 @@ TICKET_FIELDS = [
 # table — the other four boards don't render that column, so it stays off
 # the base TICKET_FIELDS to keep those payloads smaller.
 DISPATCH_TICKET_FIELDS = TICKET_FIELDS + ["contact"]
+
+# --- Executive Summary / Service Desk / Tech Leaderboard (added 2026-09-13) ---
+# These three tabs used to be frozen at the report's original generation date
+# — run_refresh() never touched weeklyTrend/snapshot/techLeaderboard. Making
+# them live means three extra, wider pulls per throughput board (never
+# Dispatch — see LEADERBOARD_BOARD_KEYS in aggregate.py):
+#   1. every ticket opened in the last WEEKLY_TREND_WEEKS weeks (by dateEntered)
+#   2. every ticket closed in that same window (by closedDate)
+#   3. every ticket closed in the last LEADERBOARD_DAYS days, with owner/
+#      priority/source, for the tech leaderboard
+# The current backlog snapshot (Service Desk tab) needs no extra pull at all —
+# it's built from the same open+closed-today tickets already fetched below
+# for Today's Snapshot (see build_backlog_snapshot's docstring).
+WEEKLY_TREND_WEEKS = 11
+LEADERBOARD_DAYS = 14
+MINIMAL_DATE_FIELDS = ["id", "_info/dateEntered", "closedDate"]
+LEADERBOARD_FIELDS = ["id", "owner", "priority", "source"]
 
 
 def run_refresh(now=None):
@@ -140,14 +160,73 @@ def run_refresh(now=None):
     except Exception:
         logging.exception("Dialpad pull failed — leaving todayPhone out of this run's blob")
 
-    # Merge with whatever's already in the blob (weeklyTrend / techLeaderboard /
-    # snapshot / legacy sections) rather than recomputing everything here.
+    # Executive Summary / Service Desk / Tech Leaderboard — see the constants'
+    # comments above for why these are separate, wider pulls. Wrapped the same
+    # defensive way as Dialpad: a failure here (a transient API error, a slow
+    # response) must never take down the Today's Snapshot half of this run,
+    # since that's the tab people watch live minute-to-minute. On failure the
+    # blob simply keeps whatever these three sections were last time.
+    weekly_trend = backlog_snapshot = tech_leaderboard = None
+    try:
+        weeks = week_starts(now, WEEKLY_TREND_WEEKS)
+        window_start = weeks[0] + "T00:00:00Z"
+        leaderboard_window_start = (now - timedelta(days=LEADERBOARD_DAYS)).strftime("%Y-%m-%dT00:00:00Z")
+
+        opened_by_board, closed_by_board, leaderboard_closed_by_board = {}, {}, {}
+        for key in BOARD_KEYS:
+            board_id = os.environ[BOARD_ENV_VARS[key]]
+            # Every ticket opened in the trend window, regardless of current
+            # status — bucketed client-side by the week it was opened in.
+            opened_by_board[key] = cw.list_tickets(
+                board_id, fields=MINIMAL_DATE_FIELDS,
+                conditions=f"_info/dateEntered>=[{window_start}]",
+            )
+            # Every ticket closed in that same window, bucketed by closedDate.
+            closed_by_board[key] = cw.list_tickets(
+                board_id, closed_flag=True, fields=MINIMAL_DATE_FIELDS,
+                conditions=f"closedDate>=[{window_start}]",
+            )
+            # A separate, shorter window for the tech leaderboard, with the
+            # extra owner/priority/source fields it needs.
+            leaderboard_closed_by_board[key] = cw.list_tickets(
+                board_id, closed_flag=True, fields=LEADERBOARD_FIELDS,
+                conditions=f"closedDate>=[{leaderboard_window_start}]",
+            )
+
+        weekly_trend = build_weekly_trend(opened_by_board, closed_by_board, weeks)
+        # Reuses the open+closed-today tickets already pulled above for
+        # Today's Snapshot — no extra API call for the current backlog.
+        backlog_snapshot = build_backlog_snapshot(
+            {key: tickets_by_board[key] for key in BOARD_KEYS}, now=now,
+        )
+        tech_leaderboard = build_tech_leaderboard(
+            leaderboard_closed_by_board, member_names, days=LEADERBOARD_DAYS, now=now,
+        )
+        logging.info(
+            "Weekly trend / backlog snapshot / tech leaderboard rebuilt (%d weeks, %d-day leaderboard window)",
+            WEEKLY_TREND_WEEKS, LEADERBOARD_DAYS,
+        )
+    except Exception:
+        logging.exception(
+            "Weekly trend / backlog snapshot / tech leaderboard pull failed — "
+            "leaving those three blob sections as whatever was there before this run"
+        )
+
+    # Merge with whatever's already in the blob (legacy section, plus
+    # weeklyTrend/snapshot/techLeaderboard on any run where the block above
+    # failed) rather than recomputing everything here.
     existing = _read_existing_blob()
     existing["todaySnapshot"] = today_snapshot
     if dispatch_queue is not None:
         existing["dispatchQueue"] = dispatch_queue
     if today_phone is not None:
         existing["todayPhone"] = today_phone
+    if weekly_trend is not None:
+        existing["weeklyTrend"] = weekly_trend
+    if backlog_snapshot is not None:
+        existing["snapshot"] = backlog_snapshot
+    if tech_leaderboard is not None:
+        existing["techLeaderboard"] = tech_leaderboard
     existing["meta"] = existing.get("meta", {})
     existing["meta"]["lastUpdated"] = today_snapshot["asOf"]
 

@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
 <title>Helpdesk Ops Report</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -183,9 +185,6 @@
   }
 </style>
 
-</head>
-<body>
-
 <div class="shell">
 
   <header class="top">
@@ -212,8 +211,7 @@
         </label>
       </div>
       <button class="btn" id="refreshBtn" title="Pull the latest data from ConnectWise and Dialpad right now">⟳ Refresh Now</button>
-      <button class="btn" id="themeBtn" title="Toggle theme">◐ Theme</button>
-      <button class="btn primary" id="printBtn">⤓ Download PDF</button>
+      <button class="btn primary" id="csvBtn" title="Download the weekly ticket-volume and phone historical data as a CSV">⤓ Download CSV</button>
     </div>
     <div id="refreshMsg" class="hint no-print" style="width:100%; text-align:right;"></div>
   </header>
@@ -225,7 +223,7 @@
     <button class="tab" role="tab" data-panel="tech" aria-selected="false">Tech Leaderboard (Live)</button>
     <button class="tab" role="tab" data-panel="alerts" aria-selected="false">Alerts (Live)</button>
     <button class="tab" role="tab" data-panel="dispatch" aria-selected="false">Dispatch (Live)</button>
-    <button class="tab" role="tab" data-panel="phones" aria-selected="false">Phones &amp; Historical (Jul–Aug)</button>
+    <button class="tab" role="tab" data-panel="phones" aria-selected="false">Phones</button>
     <button class="tab" role="tab" data-panel="sources" aria-selected="false">Data Sources &amp; Roadmap</button>
   </nav>
 
@@ -465,7 +463,6 @@
   </section>
 
 </div>
-
 <script>
 function renderReport(){
   let D = window.__REPORT_DATA__;
@@ -510,22 +507,94 @@ function renderReport(){
       rerenderAll();
       setRefreshMsg('Refreshed at ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + '.', false);
     } catch(err){
-      setRefreshMsg("Live refresh isn't available in this preview — it works once the report is hosted.", true);
+      // A thrown/rejected fetch here (network hiccup, a slow cold start, the
+      // Static Web App's managed-API proxy timing out on a long Dialpad
+      // pull) is NOT the same thing as "there's no backend at all" — that
+      // case is the res.status === 404 branch above, for the static Artifact
+      // preview. Conflating the two used to show "isn't available in this
+      // preview" on the real hosted site for what was actually just a slow
+      // or dropped request, which is misleading once deployed.
+      setRefreshMsg('Refresh failed — network error or timeout. The pull may still finish in the background; try again in a bit, or check back after the next scheduled refresh.', true);
     } finally {
       refreshBtn.disabled = false;
       refreshBtn.textContent = originalLabel;
     }
   });
 
-  /* ---------------- theme toggle (explicit override) ---------------- */
+  /* ---------------- theme ----------------
+     No manual toggle — the page follows the OS/browser's light/dark setting
+     (prefers-color-scheme) only. `root` is still read elsewhere (chart
+     color logic) to check for an explicit override, which nothing sets
+     anymore now that the toggle button is gone, so it always falls through
+     to the media-query-driven styling below. */
   const root = document.documentElement;
-  document.getElementById('themeBtn').addEventListener('click', () => {
-    const cur = root.getAttribute('data-theme');
-    if (cur === 'dark') root.setAttribute('data-theme','light');
-    else if (cur === 'light') root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme','dark');
-  });
-  document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+  /* ---------------- Download CSV (weekly historical data) ----------------
+     Replaces the old "print the dashboard as a PDF" button — this exports
+     the underlying weekly ticket-volume (D.weeklyTrend, 11 weeks, all four
+     throughput boards) and weekly phone (D.legacy.phones, 8 weeks) series as
+     one readable CSV, rather than a screenshot-like copy of the page. Legacy
+     Service Desk figures (CSAT, escalations, etc. in D.legacy.serviceDesk)
+     are deliberately left out: their arrays don't all line up to the same
+     week count as D.legacy.weeks in the source data, so including them here
+     would risk mislabeling a value against the wrong week. */
+  function csvEscape(v){
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  }
+  function downloadHistoricalCSV(){
+    const rows = [];
+    const boardLabels = {
+      managedServices: 'Managed Services', technicalServices: 'Technical Services',
+      alerts: 'Alerts', securityServices: 'Security Services',
+    };
+    const wt = D.weeklyTrend;
+    rows.push(['Weekly Ticket Volume']);
+    rows.push(['Week', 'Board', 'Opened', 'Closed']);
+    if (wt && wt.weeks) {
+      Object.keys(boardLabels).forEach(key => {
+        const series = wt[key];
+        if (!series) return;
+        wt.weeks.forEach((wk, i) => {
+          rows.push([wk, boardLabels[key], series.opened ? series.opened[i] : '', series.closed ? series.closed[i] : '']);
+        });
+      });
+    }
+
+    rows.push([]);
+    rows.push(['Weekly Phone Stats']);
+    rows.push(['Week', 'Total Inbound', 'Answered', 'Answered %', 'Abandoned', 'To Voicemail', 'Unanswered/Hung Up', 'Avg Answer Time', 'Avg Talk Time', 'Avg Wait Time']);
+    const ph = D.legacy && D.legacy.phones;
+    if (ph && D.legacy.weeks) {
+      D.legacy.weeks.forEach((wk, i) => {
+        rows.push([
+          wk,
+          ph.totalInbound ? ph.totalInbound[i] : '',
+          ph.answered ? ph.answered[i] : '',
+          ph.answeredPct && ph.answeredPct[i] != null ? Math.round(ph.answeredPct[i] * 100) + '%' : '',
+          ph.abandoned ? ph.abandoned[i] : '',
+          ph.toVoicemail ? ph.toVoicemail[i] : '',
+          ph.unansweredHungUp ? ph.unansweredHungUp[i] : '',
+          ph.avgAnswerTime ? ph.avgAnswerTime[i] : '',
+          ph.avgTalkTime ? ph.avgTalkTime[i] : '',
+          ph.avgWaitTime ? ph.avgWaitTime[i] : '',
+        ]);
+      });
+    }
+
+    const csv = rows.map(r => r.map(csvEscape).join(',')).join('\r\n');
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'helpdesk-historical-data-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+  document.getElementById('csvBtn').addEventListener('click', downloadHistoricalCSV);
 
   /* ---------------- tabs ---------------- */
   const tabs = document.querySelectorAll('.tab');
@@ -1149,7 +1218,6 @@ function renderReport(){
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   function rerenderAll(){ renderToday(); renderExec(); renderDesk(); renderTech(); renderAlerts(); renderDispatch(); renderPhones(); }
   mq.addEventListener('change', rerenderAll);
-  document.getElementById('themeBtn').addEventListener('click', () => setTimeout(rerenderAll, 0));
 }
 </script>
 <script>
