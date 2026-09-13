@@ -52,7 +52,15 @@ password to manage, just "sign in with your work account." That's wired up in
 - **ConnectWise**: `function-app/shared/cw_client.py` is a real REST client against
   the ConnectWise Manage API (ticket lists, statuses, members) — it's the same logic
   used to build the current report, ported from the interactive MCP calls to direct
-  HTTP calls (which is what has to happen outside this chat session anyway).
+  HTTP calls (which is what has to happen outside this chat session anyway). This
+  now includes the **Dispatch board** (board id 1): `shared/refresh.py` pulls its
+  open tickets separately from the four throughput boards (Dispatch is a
+  pre-triage/routing queue, not one a tech "closes tickets on," so it's excluded
+  from the Tech Leaderboard / today's opened-closed totals on purpose) and
+  `shared/aggregate.py`'s `build_dispatch_queue()` turns them into the "Dispatch
+  (Live)" tab's data. Requires the `CW_BOARD_DISPATCH` app setting (see step 6) —
+  without it, `run_refresh()` logs a line and simply skips writing `dispatchQueue`
+  that run, it doesn't fail the whole pull.
 - **Dialpad**: `function-app/shared/dialpad_client.py` is now a real client against
   Dialpad's Stats Export API — `PullSnapshot` calls it every run and, once
   `DIALPAD_API_KEY` is set, writes live `answered`/`missed`/`avgTalkTimeSeconds`/
@@ -130,9 +138,22 @@ az functionapp config appsettings set -g rg-helpdesk-report -n th2-helpdesk-func
   CW_PRIVATE_KEY="@Microsoft.KeyVault(SecretUri=https://th2-helpdesk-kv.vault.azure.net/secrets/CwPrivateKey/)" \
   CW_CLIENT_ID="<connectwise clientId issued for your API member>" \
   CW_SITE="na.myconnectwise.net" \
+  CW_BOARD_MANAGED_SERVICES="24" \
+  CW_BOARD_TECHNICAL_SERVICES="38" \
+  CW_BOARD_ALERTS="20" \
+  CW_BOARD_SECURITY_SERVICES="54" \
+  CW_BOARD_DISPATCH="1" \
   STORAGE_CONNECTION_STRING="<from the storage account's access keys>" \
   DIALPAD_API_KEY="<generate at Dialpad Admin Settings > Integrations > API>" \
   DIALPAD_OFFICE_ID="<optional — from GET /api/v2/offices if calls need a target scope>"
+
+# NOTE: CW_BOARD_DISPATCH is what powers the report's "Dispatch (Live)" tab
+# (shared/aggregate.py's build_dispatch_queue). It was added after the board
+# id constants above were first wired up — if your Function App was already
+# deployed before this existed, add just this one setting rather than
+# re-running the whole command above:
+#   az functionapp config appsettings set -g rg-helpdesk-report \
+#     -n th2-helpdesk-functions --settings CW_BOARD_DISPATCH="1"
 
 # 7. Deploy the function code
 cd function-app
@@ -200,6 +221,30 @@ your machine. It doesn't require recreating anything you already made above.
 3. That's it — the push in step 1 already triggered the workflow once (check
    the repo's **Actions** tab for its run), and every future `git push` to
    `main` redeploys both the frontend and the function code automatically.
+
+**If "Deploy to Azure Static Web Apps" fails with `A route is covered up by a
+wildcard route... Route: /.auth/login/github, Wildcard(s): /*`:** this means the
+copy of `static-web-app/staticwebapp.config.json` in *your* GitHub repo still has
+the routes in the wrong order (the `/*` wildcard route listed before the specific
+`/.auth/login/github` route, instead of after). Azure's config validator rejects
+that ordering outright and the whole deploy fails — this is not something
+`git push`-ing unrelated changes fixes on its own, since the bad file just gets
+committed again with everything else. Replace the file's contents with the
+corrected version from this scaffold (routes in this exact order: the specific
+`/.auth/login/github` route first, then the two wildcard-ish routes after),
+commit, and push:
+```
+git add static-web-app/staticwebapp.config.json
+git commit -m "Fix staticwebapp.config.json route order"
+git push
+```
+Also, a separate, unrelated, and harmless line you'll see in the same job's
+logs — `Error: Could not detect the language from repo` / `Oryx was unable to
+determine the build steps` — is expected and NOT the cause of a failed deploy.
+This is a plain static HTML/CSS/JS site with no build step (no `package.json`),
+so Oryx can't detect a framework to build; it then falls back to treating
+`static-web-app/` as already-built static assets, which is exactly correct
+here. Only the route-ordering error above actually fails the job.
 
 If you'd rather have Azure generate its own separate GitHub Actions workflow
 instead of using the one already in this scaffold, that's what the

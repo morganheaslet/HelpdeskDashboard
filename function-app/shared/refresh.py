@@ -22,9 +22,14 @@ from datetime import datetime, timezone
 from azure.storage.blob import BlobServiceClient
 
 from shared.cw_client import ConnectWiseClient
-from shared.aggregate import build_today_snapshot, BOARD_LABELS
+from shared.aggregate import build_today_snapshot, build_dispatch_queue, BOARD_LABELS
 from shared.dialpad_client import DialpadClient
 
+# The four throughput boards that feed build_today_snapshot / the Tech
+# Leaderboard. Dispatch (board id 1 on this instance) is handled separately
+# below — it's a pre-triage/routing queue, not a board techs "close tickets
+# on", so it's deliberately excluded from this list (see aggregate.py's
+# build_dispatch_queue docstring).
 BOARD_KEYS = ["managedServices", "technicalServices", "alerts", "securityServices"]
 BOARD_ENV_VARS = {
     "managedServices": "CW_BOARD_MANAGED_SERVICES",
@@ -32,11 +37,17 @@ BOARD_ENV_VARS = {
     "alerts": "CW_BOARD_ALERTS",
     "securityServices": "CW_BOARD_SECURITY_SERVICES",
 }
+DISPATCH_BOARD_ENV_VAR = "CW_BOARD_DISPATCH"
 
 TICKET_FIELDS = [
     "id", "owner", "status", "priority", "company", "board",
     "dateEntered", "closedFlag", "closedDate", "_info/lastUpdated",
 ]
+
+# Dispatch tickets also need `contact` and `summary` for the queue table —
+# the other four boards don't render those columns, so they stay off
+# TICKET_FIELDS to keep those payloads smaller.
+DISPATCH_TICKET_FIELDS = TICKET_FIELDS + ["contact", "summary"]
 
 
 def run_refresh(now=None):
@@ -72,6 +83,24 @@ def run_refresh(now=None):
 
     today_snapshot = build_today_snapshot(tickets_by_board, member_names, now=now)
 
+    # Dispatch (Live) tab — a separate, single-board pull. Only currently-open
+    # tickets matter here (it's a live queue view, not a "today" view), so
+    # this is one list_tickets call rather than the open+closed-today merge
+    # the four throughput boards need above.
+    dispatch_board_id = os.environ.get(DISPATCH_BOARD_ENV_VAR)
+    if dispatch_board_id:
+        dispatch_tickets = cw.list_tickets(
+            dispatch_board_id, closed_flag=False, fields=DISPATCH_TICKET_FIELDS,
+        )
+        dispatch_queue = build_dispatch_queue(dispatch_tickets, now=now)
+        logging.info(
+            "Dispatch: %d open tickets pulled (%d unassigned)",
+            dispatch_queue["total"], dispatch_queue["unassignedTotal"],
+        )
+    else:
+        dispatch_queue = None
+        logging.info("CW_BOARD_DISPATCH not set — skipping Dispatch (Live) pull")
+
     # Live phone stats (Today's Snapshot tab) — optional until DIALPAD_API_KEY
     # is configured. Failures here (not-yet-configured, a transient API error,
     # a slow/timed-out export) must never take down the ConnectWise half of
@@ -94,6 +123,8 @@ def run_refresh(now=None):
     # snapshot / legacy sections) rather than recomputing everything here.
     existing = _read_existing_blob()
     existing["todaySnapshot"] = today_snapshot
+    if dispatch_queue is not None:
+        existing["dispatchQueue"] = dispatch_queue
     if today_phone is not None:
         existing["todayPhone"] = today_phone
     existing["meta"] = existing.get("meta", {})

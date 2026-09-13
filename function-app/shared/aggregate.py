@@ -162,3 +162,56 @@ def build_today_snapshot(tickets_by_board, member_display_names, now=None):
         "totalUrgentOpen": total_urgent_open,
         "oldestWaiting": oldest_waiting[:10],
     }
+
+
+def build_dispatch_queue(tickets, now=None):
+    """
+    Builds the Dispatch (Live) tab's data from the raw list of currently-open
+    tickets on the Dispatch board (board id 1 on this instance).
+
+    Unlike the four boards fed into build_today_snapshot, Dispatch is a
+    pre-triage/routing queue — most tickets sit here with no tech assigned
+    until they're routed elsewhere, so a high unassigned count is normal and
+    expected, not a problem. Per the report's own explanation text, Dispatch
+    is deliberately excluded from build_today_snapshot / the Tech Leaderboard
+    entirely — it isn't a board a tech "closes tickets on" — so this stays a
+    separate, simpler aggregation: every open ticket on the board, with how
+    long it's been sitting there (hoursInQueue, since dateEntered) and how
+    long since anyone touched it (hoursSinceTouch, since lastUpdated).
+    """
+    now = now or datetime.now(timezone.utc)
+    rows = []
+    unassigned_total = 0
+
+    for t in tickets:
+        owner_id = (t.get("owner") or {}).get("identifier")
+        owner_name = (t.get("owner") or {}).get("name") or owner_id
+        if not owner_name:
+            owner_name = "(Unassigned)"
+            unassigned_total += 1
+
+        entered = t.get("_info", {}).get("dateEntered") or t.get("dateEntered")
+        last_touch = t.get("_info", {}).get("lastUpdated") or t.get("lastUpdated")
+        hours_in_queue = _hours_since(entered, now) if entered else None
+        hours_since_touch = _hours_since(last_touch, now) if last_touch else None
+
+        rows.append({
+            "id": t.get("id"),
+            "company": (t.get("company") or {}).get("name"),
+            "contact": (t.get("contact") or {}).get("name"),
+            "summary": t.get("summary"),
+            "status": (t.get("status") or {}).get("name"),
+            "priority": (t.get("priority") or {}).get("name"),
+            "owner": owner_name,
+            "hoursInQueue": round(hours_in_queue, 1) if hours_in_queue is not None else None,
+            "hoursSinceTouch": round(hours_since_touch, 1) if hours_since_touch is not None else None,
+        })
+
+    rows.sort(key=lambda r: (r["hoursInQueue"] if r["hoursInQueue"] is not None else -1), reverse=True)
+
+    return {
+        "asOf": now.strftime("%Y-%m-%dT%H:%M:00Z"),
+        "total": len(rows),
+        "unassignedTotal": unassigned_total,
+        "tickets": rows,
+    }
