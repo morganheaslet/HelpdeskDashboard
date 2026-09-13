@@ -44,6 +44,7 @@ import io
 import logging
 import os
 import time
+from datetime import date, datetime, timedelta, timezone
 
 import requests
 
@@ -114,6 +115,37 @@ class DialpadClient:
                 return field
         return None
 
+    @classmethod
+    def _match_columns(cls, fieldnames):
+        """
+        Shared column-matching logic for both get_daily_call_stats() (today,
+        via is_today=True) and get_call_stats_for_week() (a historical week,
+        via days_ago_start/days_ago_end) — same export shape (group_by=user),
+        so the same substring patterns apply to both.
+
+        Confirmed against a real export on 2026-09-13 (one row per user per
+        hour): columns are exactly 'name', 'answered', 'missed',
+        'talk_duration' (cumulative seconds, NOT an average), 'abandoned',
+        'inbound_calls', and 'ringing_duration' (also cumulative). Two of the
+        original patterns matched the wrong column the first time this ran
+        for real, both fixed here:
+          - name: "user" matched 'user_id' before "name" ever got a chance
+            (there IS a literal 'name' column) — reordered to prefer it.
+          - duration: "talk"+"time" matched nothing (the real column is
+            'talk_duration', no "time" in it), so it fell through to the
+            generic "duration" pattern, which grabbed 'ringing_duration'
+            instead — reordered to try "talk"+"duration" first.
+        """
+        return {
+            "name": cls._find_col(fieldnames, "name") or cls._find_col(fieldnames, "user") or cls._find_col(fieldnames, "operator"),
+            "answered": cls._find_col(fieldnames, "answer"),
+            "missed": cls._find_col(fieldnames, "missed") or cls._find_col(fieldnames, "no", "answer"),
+            "talk_duration": cls._find_col(fieldnames, "talk", "duration") or cls._find_col(fieldnames, "talk", "time") or cls._find_col(fieldnames, "duration") or cls._find_col(fieldnames, "avg", "time"),
+            "abandoned": cls._find_col(fieldnames, "abandoned"),
+            "inbound": cls._find_col(fieldnames, "inbound", "call"),
+            "ring_duration": cls._find_col(fieldnames, "ringing", "duration") or cls._find_col(fieldnames, "avg", "ring"),
+        }
+
     @staticmethod
     def _to_int(val):
         try:
@@ -167,10 +199,7 @@ class DialpadClient:
             return {"date": date, "answered": 0, "missed": 0, "avgTalkTimeSeconds": 0, "byAgent": {}}
 
         fieldnames = list(rows[0].keys())
-        name_col = self._find_col(fieldnames, "user") or self._find_col(fieldnames, "name") or self._find_col(fieldnames, "operator")
-        answered_col = self._find_col(fieldnames, "answer")
-        missed_col = self._find_col(fieldnames, "missed") or self._find_col(fieldnames, "no", "answer")
-        duration_col = self._find_col(fieldnames, "talk", "time") or self._find_col(fieldnames, "duration") or self._find_col(fieldnames, "avg", "time")
+        cols = self._match_columns(fieldnames)
 
         # Always log the real CSV headers and which column each matched to,
         # not just as a warning when matching fails — 2026-09-13's first live
@@ -178,17 +207,17 @@ class DialpadClient:
         # Function App log that was checked afterwards didn't actually contain
         # this diagnostic (either the match silently succeeded on a wrong
         # column, or the log view filtered an INFO/WARNING line out). Logging
-        # unconditionally at INFO means the *next* run's logs settle this
-        # either way, without guessing at the substrings blind.
+        # unconditionally at INFO means every run's logs settle this either
+        # way, without guessing at the substrings blind.
         logging.info(
-            "Dialpad CSV columns: %s | matched name=%r answered=%r missed=%r duration=%r | %d row(s)",
-            fieldnames, name_col, answered_col, missed_col, duration_col, len(rows),
+            "Dialpad CSV columns: %s | matched %s | %d row(s)",
+            fieldnames, cols, len(rows),
         )
-        if not answered_col:
+        if not cols["answered"]:
             logging.warning(
                 "Dialpad CSV columns didn't match expected patterns: %s — "
-                "answered/missed/duration will read as 0 until _extract() column "
-                "patterns in dialpad_client.py are adjusted to match this export.",
+                "answered/missed/duration will read as 0 until the substring "
+                "patterns in _match_columns() are adjusted to match this export.",
                 fieldnames,
             )
 
@@ -196,13 +225,12 @@ class DialpadClient:
         total_answered = 0
         total_missed = 0
         talk_time_total = 0.0
-        talk_time_count = 0
 
         for row in rows:
-            agent = (row.get(name_col) or "Unknown").strip() if name_col else "Unknown"
-            answered = self._to_int(row.get(answered_col)) if answered_col else 0
-            missed = self._to_int(row.get(missed_col)) if missed_col else 0
-            duration = self._to_seconds(row.get(duration_col)) if duration_col else 0.0
+            agent = (row.get(cols["name"]) or "Unknown").strip() if cols["name"] else "Unknown"
+            answered = self._to_int(row.get(cols["answered"])) if cols["answered"] else 0
+            missed = self._to_int(row.get(cols["missed"])) if cols["missed"] else 0
+            duration = self._to_seconds(row.get(cols["talk_duration"])) if cols["talk_duration"] else 0.0
 
             entry = by_agent.setdefault(agent, {"answered": 0, "missed": 0})
             entry["answered"] += answered
@@ -210,14 +238,96 @@ class DialpadClient:
 
             total_answered += answered
             total_missed += missed
-            if duration:
-                talk_time_total += duration
-                talk_time_count += 1
+            # cols["talk_duration"] is a CUMULATIVE seconds total per row (one
+            # row per user per hour), not a per-call average — so summing it
+            # across every row gives total talk seconds for the whole pull,
+            # and dividing by total answered calls (not row count) below
+            # gives a real average seconds-per-call figure.
+            talk_time_total += duration
 
         return {
             "date": date,
             "answered": total_answered,
             "missed": total_missed,
-            "avgTalkTimeSeconds": round(talk_time_total / talk_time_count, 1) if talk_time_count else 0,
+            "avgTalkTimeSeconds": round(talk_time_total / total_answered, 1) if total_answered else 0,
             "byAgent": by_agent,
+        }
+
+    def get_call_stats_for_week(self, week_start_iso, now=None):
+        """
+        Pulls ONE week's aggregated call stats — Monday `week_start_iso`
+        through that week's Sunday, or through today if the week is still in
+        progress — via days_ago_start/days_ago_end instead of is_today.
+        Used to build the Phones tab's rolling multi-week history
+        (shared/refresh.py's phone-history block + aggregate.py's
+        build_phone_history()) without needing to have stored anything in
+        advance: Dialpad's Stats API can retrieve any past window on demand.
+
+        Returns the per-week shape build_phone_history() expects:
+        {"totalInbound","answered","abandoned","answeredPct",
+         "avgWaitTimeSeconds","techTalkTimeSeconds":{name:seconds},
+         "techCallsAnswered":{name:count}}
+        — or None if the week is in the future, or the pull returned no
+        rows at all (e.g. before Dialpad has any data that far back). A
+        caller should keep whatever it already had stored for this week
+        rather than treating None as "zero calls."
+        """
+        if not self._configured():
+            raise NotImplementedError(
+                "Dialpad API key not configured — set DIALPAD_API_KEY in Function App settings "
+                "once you've generated one (Admin Settings > Integrations > API)."
+            )
+        now = now or datetime.now(timezone.utc)
+        today = now.date()
+        week_start = date.fromisoformat(week_start_iso)
+        if week_start > today:
+            return None
+        week_end = min(week_start + timedelta(days=6), today)
+        days_ago_start = (today - week_start).days
+        days_ago_end = max((today - week_end).days, 0)
+
+        rows = self._run_export(
+            stat_type="calls", export_type="stats", group_by="user",
+            days_ago_start=days_ago_start, days_ago_end=days_ago_end, timezone="UTC",
+        )
+        if not rows:
+            return None
+
+        fieldnames = list(rows[0].keys())
+        cols = self._match_columns(fieldnames)
+        logging.info(
+            "Dialpad weekly pull (week of %s, %d-%d days ago): columns matched %s | %d row(s)",
+            week_start_iso, days_ago_start, days_ago_end, cols, len(rows),
+        )
+
+        total_inbound = total_answered = total_abandoned = 0
+        total_ring = 0.0
+        tech_talk, tech_answered = {}, {}
+
+        for row in rows:
+            agent = (row.get(cols["name"]) or "Unknown").strip() if cols["name"] else "Unknown"
+            answered = self._to_int(row.get(cols["answered"])) if cols["answered"] else 0
+            inbound = self._to_int(row.get(cols["inbound"])) if cols["inbound"] else 0
+            abandoned = self._to_int(row.get(cols["abandoned"])) if cols["abandoned"] else 0
+            ring = self._to_seconds(row.get(cols["ring_duration"])) if cols["ring_duration"] else 0.0
+            talk = self._to_seconds(row.get(cols["talk_duration"])) if cols["talk_duration"] else 0.0
+
+            total_inbound += inbound
+            total_answered += answered
+            total_abandoned += abandoned
+            total_ring += ring
+            tech_talk[agent] = tech_talk.get(agent, 0.0) + talk
+            tech_answered[agent] = tech_answered.get(agent, 0) + answered
+
+        return {
+            "totalInbound": total_inbound,
+            "answered": total_answered,
+            "abandoned": total_abandoned,
+            "answeredPct": round(total_answered / total_inbound, 3) if total_inbound else None,
+            # ringing_duration is cumulative across every row (like
+            # talk_duration) — dividing by total inbound calls gives a real
+            # average wait-before-answer-or-abandon per call, not per row.
+            "avgWaitTimeSeconds": round(total_ring / total_inbound, 1) if total_inbound else 0.0,
+            "techTalkTimeSeconds": tech_talk,
+            "techCallsAnswered": tech_answered,
         }

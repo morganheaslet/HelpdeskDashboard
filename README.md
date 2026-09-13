@@ -61,21 +61,31 @@ password to manage, just "sign in with your work account." That's wired up in
   (Live)" tab's data. Requires the `CW_BOARD_DISPATCH` app setting (see step 6) —
   without it, `run_refresh()` logs a line and simply skips writing `dispatchQueue`
   that run, it doesn't fail the whole pull.
-- **Dialpad**: `function-app/shared/dialpad_client.py` is now a real client against
-  Dialpad's Stats Export API — `PullSnapshot` calls it every run and, once
-  `DIALPAD_API_KEY` is set, writes live `answered`/`missed`/`avgTalkTimeSeconds`/
-  per-agent numbers into the blob as `todayPhone`. The frontend's Today's Snapshot
-  tab shows a live "Phones — live (Dialpad)" card when that key is present in the
-  data, and falls back to its old "not live yet" note otherwise — so this is safe
-  to deploy before you've generated a Dialpad API key; it just won't do anything
-  until you have. One caveat: Dialpad doesn't publish an exact CSV column list for
-  the stats export, so the client matches columns by name pattern (see the big
-  comment at the top of `dialpad_client.py`) — **the first time this runs for
-  real, check the Function App's logs and sanity-check the numbers against
-  Dialpad's own analytics dashboard once**, and adjust the column-matching
-  patterns there if anything looks off. This only replaces the *live, today*
-  phone numbers — the "Phones & Historical" tab's weekly trend is still the
-  manually-reported (BrightGauge) data, unchanged.
+- **Dialpad**: `function-app/shared/dialpad_client.py` is a real client against
+  Dialpad's Stats Export API, used two ways:
+  - **Today** (`get_daily_call_stats()`): `PullSnapshot`/`RefreshNow` call it every
+    run and, once `DIALPAD_API_KEY` is set, write live `answered`/`missed`/
+    `avgTalkTimeSeconds`/per-agent numbers into the blob as `todayPhone`. The
+    frontend's Today's Snapshot tab shows a live "Phones — live (Dialpad)" card
+    when that key is present, and falls back to its old "not live yet" note
+    otherwise — safe to deploy before you've generated a Dialpad API key.
+  - **Weekly history** (`get_call_stats_for_week()`, added 2026-09-13): the
+    Phones tab's rolling 8-week trend is now also live, pulled via Dialpad's
+    `days_ago_start`/`days_ago_end` parameters instead of `is_today`. See the
+    "Phones tab — Dialpad weekly history" section below for how the blob
+    caches this so every run doesn't re-pull the whole window.
+
+  One caveat carries over to both: Dialpad doesn't publish an exact CSV column
+  list for the stats export, so the client matches columns by name pattern
+  (`shared/dialpad_client.py`'s `_match_columns()`) rather than a hardcoded
+  list. **Confirmed against a real TH2 export on 2026-09-13** — the columns are
+  `name`, `answered`, `missed`, `talk_duration`, `abandoned`, `inbound_calls`,
+  and `ringing_duration`, and the matching patterns are tuned to exactly those.
+  If Dialpad ever changes its export format, `get_daily_call_stats()` and
+  `get_call_stats_for_week()` both log the real header list and which column
+  each pattern matched to, unconditionally, on every run — check the Function
+  App logs for a `Dialpad CSV columns:` line if the numbers ever look wrong
+  again.
 - **NinjaOne**: `function-app/shared/ninjaone_client.py` is the same kind of stub,
   for device health / alert counts if you want that folded into the report later.
 
@@ -337,6 +347,44 @@ API error) logs and leaves `weeklyTrend`/`snapshot`/`techLeaderboard` as
 whatever they were on the previous successful run, rather than taking down
 the Today's Snapshot half of the same call.
 
+## Phones tab — Dialpad weekly history (added 2026-09-13)
+
+The Phones tab's 8-week trend (inbound calls, answered, abandoned, avg wait
+time, and per-tech talk time/calls answered) is now pulled live from Dialpad
+instead of reproducing the old manually-typed export. Two of the "Legacy
+service-desk metrics" / "Legacy tech scorecards" sections that used to share
+this tab (the SLA/CSAT/utilization figures that still have no live source)
+moved to a new **Work In Progress** tab so the Phones tab is unambiguously
+live now.
+
+A per-week Dialpad export takes the same ~20-30+ second async job/poll
+round-trip as the "today" pull, so re-fetching all 8 weeks on every single
+`PullSnapshot`/`RefreshNow` run would add several minutes to every refresh
+for numbers that mostly don't change run-to-run. Instead:
+- `phoneHistoryByWeek` in the blob (week-start ISO date -> that week's raw
+  Dialpad stats) is the actual source of truth. It is **not** rendered
+  directly — `shared/aggregate.py`'s `build_phone_history()` reshapes it plus
+  the desired rolling window into the frontend's `phoneHistory` structure on
+  every run, which is cheap and makes no API calls.
+- Each run only fetches (via `DialpadClient.get_call_stats_for_week()`) the
+  weeks that are missing from `phoneHistoryByWeek`, plus the current
+  (in-progress) week every time, since that one's numbers keep changing
+  through the day. Weeks that have rolled out of the window are dropped so
+  the blob doesn't grow forever.
+- **A brand-new deployment (or the first run after upgrading to this
+  version) backfills all 8 weeks in one run** — expect that one run to take
+  noticeably longer (up to several minutes) than steady-state runs, which
+  make exactly one Dialpad call here. This is on top of the ConnectWise
+  weekly-trend pulls above, so a first run after deploying both features
+  together could genuinely approach the 9-minute `functionTimeout` — if it
+  ever times out, consider raising `PHONE_HISTORY_WEEKS`/`WEEKLY_TREND_WEEKS`
+  down temporarily for that one deploy, or manually seeding
+  `phoneHistoryByWeek` in the blob first.
+- Wrapped in its own try/except, same defensive pattern as everything else
+  Dialpad-related — a failure fetching one week (or all of them) logs and
+  leaves `phoneHistory` as whatever was there before, it doesn't take down
+  the rest of the run.
+
 ## Schedule
 
 `function-app/PullSnapshot/function.json` runs every 15 minutes
@@ -361,8 +409,11 @@ the UI without the function running.
 
 ## What this doesn't do yet
 
-- Dialpad and NinjaOne pulls are stubbed (see above) — phone metrics and device
-  health stay manually-entered (BrightGauge) until those are filled in.
+- NinjaOne is stubbed (see above) — device health stays out of the report until
+  that's filled in. Dialpad is no longer stubbed — both today's phone stats and
+  the Phones tab's 8-week history are live (see above).
+- The Work In Progress tab's SLA/CSAT/utilization figures are still manually-typed
+  BrightGauge data with no live source — see that tab in the report itself.
 - No alerting/notifications are wired up (e.g. Teams message if the pull fails) —
   worth adding once this is running for a few weeks and you know what "the pull
   failed" looks like in practice.

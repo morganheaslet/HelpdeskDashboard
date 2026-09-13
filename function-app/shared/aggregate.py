@@ -286,6 +286,77 @@ def week_starts(now, count=11):
     return [(current - timedelta(weeks=(count - 1 - i))).isoformat() for i in range(count)]
 
 
+def _format_hms(total_seconds):
+    """Formats a seconds count as H:MM:SS, matching the legacy report's
+    manually-typed duration strings (e.g. "3:23:00") that phoneTechTable /
+    phoneKpis in report.html already expect and render as-is."""
+    total_seconds = int(round(total_seconds or 0))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours}:{minutes:02d}:{seconds:02d}"
+
+
+def build_phone_history(by_week, weeks):
+    """
+    by_week: dict of week-start ISO date -> raw per-week Dialpad stats
+    (DialpadClient.get_call_stats_for_week()'s return shape:
+    {"totalInbound","answered","abandoned","answeredPct","avgWaitTimeSeconds",
+    "techTalkTimeSeconds":{name:seconds},"techCallsAnswered":{name:count}}),
+    or missing/None for a week that's never been fetched or whose fetch
+    failed. `by_week` is the actual source of truth stored in the blob
+    (`phoneHistoryByWeek`) — refresh.py only re-fetches the weeks that are
+    missing from it plus the current in-progress week each run, so this
+    function is a cheap, pure reshape and never itself calls Dialpad.
+
+    weeks: the desired rolling window (oldest first) — see week_starts().
+
+    Returns the exact shape the Phones tab's renderPhones() (report.html)
+    expects — parallel arrays across `weeks`, plus per-tech dicts of the
+    same shape — mirroring the field names the old manually-typed
+    `legacy.phones` used, so the frontend rendering code barely had to
+    change when this went live.
+    """
+    total_inbound, answered, abandoned, answered_pct, avg_wait = [], [], [], [], []
+    tech_names = set()
+    for wk in weeks:
+        wdata = by_week.get(wk)
+        if not wdata:
+            total_inbound.append(0)
+            answered.append(0)
+            abandoned.append(0)
+            answered_pct.append(None)
+            avg_wait.append("0:00:00")
+            continue
+        total_inbound.append(wdata.get("totalInbound", 0))
+        answered.append(wdata.get("answered", 0))
+        abandoned.append(wdata.get("abandoned", 0))
+        answered_pct.append(wdata.get("answeredPct"))
+        avg_wait.append(_format_hms(wdata.get("avgWaitTimeSeconds", 0)))
+        tech_names.update((wdata.get("techTalkTimeSeconds") or {}).keys())
+
+    tech_talk_time, tech_calls_answered = {}, {}
+    for name in sorted(tech_names):
+        tech_talk_time[name] = []
+        tech_calls_answered[name] = []
+        for wk in weeks:
+            wdata = by_week.get(wk) or {}
+            secs = (wdata.get("techTalkTimeSeconds") or {}).get(name, 0.0)
+            calls = (wdata.get("techCallsAnswered") or {}).get(name, 0)
+            tech_talk_time[name].append(_format_hms(secs))
+            tech_calls_answered[name].append(calls)
+
+    return {
+        "weeks": weeks,
+        "totalInbound": total_inbound,
+        "answered": answered,
+        "abandoned": abandoned,
+        "answeredPct": answered_pct,
+        "avgWaitTime": avg_wait,
+        "techTalkTime": tech_talk_time,
+        "techCallsAnswered": tech_calls_answered,
+    }
+
+
 def _parse_date(iso_ts):
     if not iso_ts:
         return None

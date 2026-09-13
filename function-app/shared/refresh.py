@@ -26,6 +26,7 @@ from shared.cw_client import ConnectWiseClient
 from shared.aggregate import (
     build_today_snapshot, build_dispatch_queue, is_truly_open, BOARD_LABELS,
     build_weekly_trend, build_backlog_snapshot, build_tech_leaderboard, week_starts,
+    build_phone_history,
 )
 from shared.dialpad_client import DialpadClient
 
@@ -77,6 +78,20 @@ LEADERBOARD_DAYS = 14
 MINIMAL_DATE_FIELDS = ["id", "_info/dateEntered", "closedDate"]
 LEADERBOARD_FIELDS = ["id", "owner", "priority", "source"]
 
+# --- Phones tab — Dialpad weekly history (added 2026-09-13) ---
+# Same rolling-window idea as the ConnectWise weekly trend above, but a
+# per-week Dialpad export takes ~20-30+ seconds (the same async job/poll
+# pattern as the "today" pull), so re-fetching all PHONE_HISTORY_WEEKS weeks
+# on every single PullSnapshot/RefreshNow run would make every refresh take
+# several extra minutes for no reason — only the current week's numbers
+# actually change between runs. Instead, `phoneHistoryByWeek` in the blob is
+# the real source of truth (week-start ISO date -> that week's raw stats);
+# each run only fetches weeks missing from it, plus the current
+# (in-progress) week every time. A brand-new deployment backfills all
+# PHONE_HISTORY_WEEKS on its first run; after that, steady-state runs make
+# exactly one Dialpad call here.
+PHONE_HISTORY_WEEKS = 8
+
 
 def run_refresh(now=None):
     """Pulls ConnectWise + Dialpad, merges into the existing blob, writes it,
@@ -84,6 +99,11 @@ def run_refresh(now=None):
     back to the frontend without a second round-trip to GetReportData)."""
     now = now or datetime.now(timezone.utc)
     logging.info("run_refresh starting at %s", now.isoformat())
+
+    # Read this up front (not just at the very end, as before) because the
+    # Dialpad weekly-history block below needs to see what's already stored
+    # in phoneHistoryByWeek to know which weeks it can skip re-fetching.
+    existing = _read_existing_blob()
 
     cw = ConnectWiseClient()
     member_names = {
@@ -212,10 +232,55 @@ def run_refresh(now=None):
             "leaving those three blob sections as whatever was there before this run"
         )
 
+    # Phones tab — Dialpad weekly history. See PHONE_HISTORY_WEEKS' comment
+    # above for why this only fetches missing/current weeks instead of the
+    # whole window every run. Wrapped the same defensive way as everything
+    # else Dialpad-related: a failure here must never take down the
+    # ConnectWise half of this run.
+    phone_history = None
+    try:
+        dialpad_weekly = DialpadClient()
+        if not dialpad_weekly._configured():
+            raise NotImplementedError("Dialpad API key not configured")
+
+        phone_weeks = week_starts(now, PHONE_HISTORY_WEEKS)
+        by_week = dict(existing.get("phoneHistoryByWeek") or {})
+        current_week = phone_weeks[-1]
+        weeks_to_fetch = [w for w in phone_weeks if w not in by_week]
+        if current_week not in weeks_to_fetch:
+            weeks_to_fetch.append(current_week)  # always re-pull the in-progress week
+
+        for wk in weeks_to_fetch:
+            try:
+                week_data = dialpad_weekly.get_call_stats_for_week(wk, now=now)
+                if week_data is not None:
+                    by_week[wk] = week_data
+            except Exception:
+                logging.exception(
+                    "Dialpad weekly pull failed for week of %s — keeping whatever "
+                    "was already stored for that week", wk,
+                )
+
+        # Drop weeks that have rolled out of the window so the blob doesn't
+        # grow forever.
+        by_week = {wk: v for wk, v in by_week.items() if wk in phone_weeks}
+        existing["phoneHistoryByWeek"] = by_week
+        phone_history = build_phone_history(by_week, phone_weeks)
+        logging.info(
+            "Dialpad weekly history: fetched %d/%d week(s) fresh this run (%s)",
+            len(weeks_to_fetch), len(phone_weeks), ", ".join(weeks_to_fetch),
+        )
+    except NotImplementedError:
+        logging.info("Dialpad not configured yet — skipping weekly phone history")
+    except Exception:
+        logging.exception(
+            "Dialpad weekly history pull failed — leaving phoneHistory as "
+            "whatever was in the blob before this run"
+        )
+
     # Merge with whatever's already in the blob (legacy section, plus
-    # weeklyTrend/snapshot/techLeaderboard on any run where the block above
-    # failed) rather than recomputing everything here.
-    existing = _read_existing_blob()
+    # weeklyTrend/snapshot/techLeaderboard/phoneHistory on any run where the
+    # corresponding block above failed) rather than recomputing everything here.
     existing["todaySnapshot"] = today_snapshot
     if dispatch_queue is not None:
         existing["dispatchQueue"] = dispatch_queue
@@ -227,6 +292,8 @@ def run_refresh(now=None):
         existing["snapshot"] = backlog_snapshot
     if tech_leaderboard is not None:
         existing["techLeaderboard"] = tech_leaderboard
+    if phone_history is not None:
+        existing["phoneHistory"] = phone_history
     existing["meta"] = existing.get("meta", {})
     existing["meta"]["lastUpdated"] = today_snapshot["asOf"]
 
