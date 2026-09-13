@@ -23,14 +23,15 @@ from pathlib import Path
 from azure.storage.blob import BlobServiceClient
 
 from shared.cw_client import ConnectWiseClient
-from shared.aggregate import build_today_snapshot, build_dispatch_queue, BOARD_LABELS
+from shared.aggregate import build_today_snapshot, build_dispatch_queue, is_truly_open, BOARD_LABELS
 from shared.dialpad_client import DialpadClient
 
-# The four throughput boards that feed build_today_snapshot / the Tech
-# Leaderboard. Dispatch (board id 1 on this instance) is handled separately
-# below — it's a pre-triage/routing queue, not a board techs "close tickets
-# on", so it's deliberately excluded from this list (see aggregate.py's
-# build_dispatch_queue docstring).
+# The four throughput boards that feed the Tech Leaderboard (Dispatch never
+# does — it's a pre-triage/routing queue, not a board techs "close tickets
+# on"). Today's Snapshot is different: the frontend's activeBoardKeys() always
+# includes Dispatch there (it has no on/off toggle), so Dispatch tickets are
+# pulled the same way as these four and folded into tickets_by_board below —
+# see DISPATCH_KEY.
 BOARD_KEYS = ["managedServices", "technicalServices", "alerts", "securityServices"]
 BOARD_ENV_VARS = {
     "managedServices": "CW_BOARD_MANAGED_SERVICES",
@@ -38,10 +39,11 @@ BOARD_ENV_VARS = {
     "alerts": "CW_BOARD_ALERTS",
     "securityServices": "CW_BOARD_SECURITY_SERVICES",
 }
+DISPATCH_KEY = "dispatch"
 DISPATCH_BOARD_ENV_VAR = "CW_BOARD_DISPATCH"
 
 TICKET_FIELDS = [
-    "id", "owner", "status", "priority", "company", "board",
+    "id", "owner", "status", "priority", "company", "board", "summary",
     # ConnectWise nests audit-trail fields (dateEntered, lastUpdated) under
     # the ticket's `_info` sub-object rather than exposing them as top-level
     # attributes — requesting bare "dateEntered" returns nothing, which
@@ -50,10 +52,10 @@ TICKET_FIELDS = [
     "_info/dateEntered", "closedFlag", "closedDate", "_info/lastUpdated",
 ]
 
-# Dispatch tickets also need `contact` and `summary` for the queue table —
-# the other four boards don't render those columns, so they stay off
-# TICKET_FIELDS to keep those payloads smaller.
-DISPATCH_TICKET_FIELDS = TICKET_FIELDS + ["contact", "summary"]
+# Dispatch tickets also need `contact` for the Dispatch (Live) tab's queue
+# table — the other four boards don't render that column, so it stays off
+# the base TICKET_FIELDS to keep those payloads smaller.
+DISPATCH_TICKET_FIELDS = TICKET_FIELDS + ["contact"]
 
 
 def run_refresh(now=None):
@@ -87,25 +89,38 @@ def run_refresh(now=None):
         tickets_by_board[key] = list(by_id.values())
         logging.info("%s: %d tickets pulled", BOARD_LABELS[key], len(tickets_by_board[key]))
 
-    today_snapshot = build_today_snapshot(tickets_by_board, member_names, now=now)
-
-    # Dispatch (Live) tab — a separate, single-board pull. Only currently-open
-    # tickets matter here (it's a live queue view, not a "today" view), so
-    # this is one list_tickets call rather than the open+closed-today merge
-    # the four throughput boards need above.
+    # Dispatch — pulled with the same open+closed-today pattern as the four
+    # throughput boards above (so it can contribute to Today's Snapshot's
+    # totals the way the frontend expects), just with the extra `contact`
+    # field the Dispatch (Live) tab's ticket table also needs.
     dispatch_board_id = os.environ.get(DISPATCH_BOARD_ENV_VAR)
     if dispatch_board_id:
-        dispatch_tickets = cw.list_tickets(
-            dispatch_board_id, closed_flag=False, fields=DISPATCH_TICKET_FIELDS,
+        open_tickets = cw.list_tickets(dispatch_board_id, closed_flag=False, fields=DISPATCH_TICKET_FIELDS)
+        closed_today = cw.list_tickets(
+            dispatch_board_id, closed_flag=True, fields=DISPATCH_TICKET_FIELDS,
+            conditions=f"closedDate>=[{today_iso}]",
         )
-        dispatch_queue = build_dispatch_queue(dispatch_tickets, now=now)
+        by_id = {t["id"]: t for t in open_tickets}
+        for t in closed_today:
+            by_id.setdefault(t["id"], t)
+        tickets_by_board[DISPATCH_KEY] = list(by_id.values())
+        logging.info("Dispatch: %d tickets pulled", len(tickets_by_board[DISPATCH_KEY]))
+    else:
+        logging.info("CW_BOARD_DISPATCH not set — skipping Dispatch entirely (Today's Snapshot and Dispatch (Live) will both be missing it)")
+
+    today_snapshot = build_today_snapshot(tickets_by_board, member_names, now=now)
+
+    # Dispatch (Live) tab's queue view only cares about currently-open
+    # tickets — reuse the pull above instead of a second API call.
+    if dispatch_board_id:
+        open_dispatch = [t for t in tickets_by_board[DISPATCH_KEY] if is_truly_open(t)]
+        dispatch_queue = build_dispatch_queue(open_dispatch, now=now)
         logging.info(
-            "Dispatch: %d open tickets pulled (%d unassigned)",
+            "Dispatch (Live): %d open tickets (%d unassigned)",
             dispatch_queue["total"], dispatch_queue["unassignedTotal"],
         )
     else:
         dispatch_queue = None
-        logging.info("CW_BOARD_DISPATCH not set — skipping Dispatch (Live) pull")
 
     # Live phone stats (Today's Snapshot tab) — optional until DIALPAD_API_KEY
     # is configured. Failures here (not-yet-configured, a transient API error,

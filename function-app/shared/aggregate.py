@@ -33,6 +33,7 @@ BOARD_LABELS = {
     "technicalServices": "Technical Services",
     "alerts": "Alerts",
     "securityServices": "Security Services",
+    "dispatch": "Dispatch",
 }
 
 
@@ -63,104 +64,128 @@ def is_waiting(ticket):
     return status_name in WAITING_STATUSES
 
 
+def _build_board_snapshot(tickets, board_label, member_display_names, now):
+    """
+    Aggregates ONE board's tickets into the exact shape the frontend's
+    mergeTodaySnapshot() expects at D.todaySnapshot.perBoard[boardKey] — see
+    that function in report.html for the merge logic that combines these
+    across whichever boards are currently active (the Alerts/Security
+    Services toggles, plus Dispatch, which is always included).
+    """
+    today_str = now.date().isoformat()
+
+    opened_total = closed_total = 0
+    opened_by_tech, closed_by_tech = {}, {}
+    opened_unassigned = closed_unassigned = 0
+
+    workload = {}  # owner identifier -> {"id":...,"name":...,"open":0,"waiting":0}
+    unassigned_open = unassigned_waiting = 0
+    total_active_open = total_waiting = total_urgent_open = 0
+    waiting_candidates = []
+    unassigned_tickets = []
+
+    for t in tickets:
+        owner_id = (t.get("owner") or {}).get("identifier")
+        owner_display = member_display_names.get(owner_id, owner_id) if owner_id else None
+        entered_date = (t.get("_info", {}).get("dateEntered") or t.get("dateEntered") or "")[:10]
+        closed_date = (t.get("closedDate") or "")[:10]
+
+        if entered_date == today_str:
+            opened_total += 1
+            if owner_display:
+                opened_by_tech[owner_display] = opened_by_tech.get(owner_display, 0) + 1
+            else:
+                opened_unassigned += 1
+
+        if t.get("closedFlag") and closed_date == today_str:
+            closed_total += 1
+            if owner_display:
+                closed_by_tech[owner_display] = closed_by_tech.get(owner_display, 0) + 1
+            else:
+                closed_unassigned += 1
+
+        if is_truly_open(t):
+            total_active_open += 1
+            waiting = is_waiting(t)
+            if waiting:
+                total_waiting += 1
+            priority_name = ((t.get("priority") or {}).get("name") or "").lower()
+            if "critical" in priority_name or "high" in priority_name:
+                total_urgent_open += 1
+
+            entered = t.get("_info", {}).get("dateEntered") or t.get("dateEntered")
+            last_touch = t.get("_info", {}).get("lastUpdated") or t.get("lastUpdated")
+            hrs_touch = _hours_since(last_touch, now) if last_touch else None
+            hrs_queue = _hours_since(entered, now) if entered else None
+
+            if owner_id:
+                w = workload.setdefault(owner_id, {"id": owner_id, "name": owner_display, "open": 0, "waiting": 0})
+                w["open"] += 1
+                if waiting:
+                    w["waiting"] += 1
+            else:
+                unassigned_open += 1
+                if waiting:
+                    unassigned_waiting += 1
+                unassigned_tickets.append({
+                    "id": t.get("id"),
+                    "board": board_label,
+                    "company": (t.get("company") or {}).get("name"),
+                    "summary": t.get("summary"),
+                    "hoursInQueue": round(hrs_queue, 1) if hrs_queue is not None else None,
+                })
+
+            if waiting and hrs_touch is not None:
+                waiting_candidates.append({
+                    "id": t.get("id"),
+                    "board": board_label,
+                    "owner": owner_display or "(Unassigned)",
+                    "status": (t.get("status") or {}).get("name"),
+                    "company": (t.get("company") or {}).get("name"),
+                    "summary": t.get("summary"),
+                    "priority": (t.get("priority") or {}).get("name"),
+                    "hoursSinceTouch": round(hrs_touch, 1),
+                })
+
+    return {
+        "opened": {"total": opened_total, "byTech": opened_by_tech, "unassignedCount": opened_unassigned},
+        "closed": {"total": closed_total, "byTech": closed_by_tech, "unassignedCount": closed_unassigned},
+        "workload": list(workload.values()),
+        "unassignedBacklog": {"open": unassigned_open, "waiting": unassigned_waiting},
+        "totalActiveOpen": total_active_open,
+        "totalWaiting": total_waiting,
+        "totalUrgentOpen": total_urgent_open,
+        "waitingCandidates": waiting_candidates,
+        "unassignedTickets": unassigned_tickets,
+    }
+
+
 def build_today_snapshot(tickets_by_board, member_display_names, now=None):
     """
     tickets_by_board: dict of board_key -> list of ticket dicts (as returned by
     ConnectWiseClient.list_tickets), containing ALL tickets touched today
-    (opened today OR closed today OR currently open) for that board.
+    (opened today OR closed today OR currently open) for that board. Include
+    a "dispatch" key here too — the frontend's activeBoardKeys() always
+    includes Dispatch in Today's Snapshot (it has no on/off toggle), so
+    without a "dispatch" entry here the frontend crashes trying to read
+    D.todaySnapshot.perBoard.dispatch.
     member_display_names: dict mapping CW member identifier -> "First Last",
     used so the report shows human names instead of login IDs.
+
+    Returns {"asOf": ..., "perBoard": {board_key: {...}, ...}} — the frontend's
+    mergeTodaySnapshot() does the cross-board combining itself (respecting the
+    Include Alerts / Include Security Services toggles), so this function
+    deliberately does NOT pre-merge across boards the way it used to.
     """
     now = now or datetime.now(timezone.utc)
-    today_str = now.date().isoformat()
-
-    opened_total = closed_total = 0
-    opened_by_board, closed_by_board = {}, {}
-    opened_by_tech, closed_by_tech = {}, {}
-    opened_unassigned = closed_unassigned = 0
-
-    workload = {}  # owner identifier -> {"name":..., "open":0, "waiting":0}
-    unassigned_open = unassigned_waiting = 0
-    total_active_open = total_waiting = total_urgent_open = 0
-    oldest_waiting = []
-
+    per_board = {}
     for board_key, tickets in tickets_by_board.items():
         board_label = BOARD_LABELS.get(board_key, board_key)
-        for t in tickets:
-            owner_id = (t.get("owner") or {}).get("identifier")
-            owner_display = member_display_names.get(owner_id, owner_id) if owner_id else None
-            entered_date = (t.get("_info", {}).get("dateEntered") or t.get("dateEntered") or "")[:10]
-            closed_date = (t.get("closedDate") or "")[:10]
-
-            if entered_date == today_str:
-                opened_total += 1
-                opened_by_board[board_label] = opened_by_board.get(board_label, 0) + 1
-                if owner_display:
-                    opened_by_tech[owner_display] = opened_by_tech.get(owner_display, 0) + 1
-                else:
-                    opened_unassigned += 1
-
-            if t.get("closedFlag") and closed_date == today_str:
-                closed_total += 1
-                closed_by_board[board_label] = closed_by_board.get(board_label, 0) + 1
-                if owner_display:
-                    closed_by_tech[owner_display] = closed_by_tech.get(owner_display, 0) + 1
-                else:
-                    closed_unassigned += 1
-
-            if is_truly_open(t):
-                total_active_open += 1
-                waiting = is_waiting(t)
-                if waiting:
-                    total_waiting += 1
-                priority_name = ((t.get("priority") or {}).get("name") or "").lower()
-                if "critical" in priority_name or "high" in priority_name:
-                    total_urgent_open += 1
-
-                if owner_id:
-                    w = workload.setdefault(owner_id, {"id": owner_id, "name": owner_display, "open": 0, "waiting": 0})
-                    w["open"] += 1
-                    if waiting:
-                        w["waiting"] += 1
-                else:
-                    unassigned_open += 1
-                    if waiting:
-                        unassigned_waiting += 1
-
-                last_touch = t.get("_info", {}).get("lastUpdated") or t.get("lastUpdated")
-                hrs = _hours_since(last_touch, now) if last_touch else None
-                if waiting and hrs is not None:
-                    oldest_waiting.append({
-                        "id": t.get("id"),
-                        "board": board_label,
-                        "owner": owner_display or "(Unassigned)",
-                        "status": (t.get("status") or {}).get("name"),
-                        "company": (t.get("company") or {}).get("name"),
-                        "priority": (t.get("priority") or {}).get("name"),
-                        "hoursSinceTouch": round(hrs, 1),
-                    })
-
-    oldest_waiting.sort(key=lambda x: x["hoursSinceTouch"], reverse=True)
+        per_board[board_key] = _build_board_snapshot(tickets, board_label, member_display_names, now)
 
     return {
         "asOf": now.strftime("%Y-%m-%dT%H:%M:00Z"),
-        "opened": {
-            "total": opened_total, "byBoard": opened_by_board,
-            "byTech": opened_by_tech, "unassignedCount": opened_unassigned,
-        },
-        "closed": {
-            "total": closed_total, "byBoard": closed_by_board,
-            "byTech": closed_by_tech, "unassignedCount": closed_unassigned,
-        },
-        "workload": sorted(workload.values(), key=lambda w: w["open"], reverse=True),
-        "unassignedBacklog": {
-            "id": "(unassigned)", "name": "(Unassigned)",
-            "open": unassigned_open, "waiting": unassigned_waiting,
-        },
-        "totalActiveOpen": total_active_open,
-        "totalWaiting": total_waiting,
-        "totalUrgentOpen": total_urgent_open,
-        "oldestWaiting": oldest_waiting[:10],
+        "perBoard": per_board,
     }
 
 

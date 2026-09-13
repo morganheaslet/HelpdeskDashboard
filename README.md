@@ -93,7 +93,7 @@ rights to create resources. Rough one-time setup:
 az group create -n rg-helpdesk-report -l eastus
 
 # 2. Storage account (holds the ConnectWise credentials-free data blob)
-az storage account create -n th2helpdeskdata -g rg-helpdesk-report -l eastus --sku Standard_LRS
+az storage account create -n helpdeskreportdata -g rg-helpdesk-report -l eastus --sku Standard_LRS
 
 # 3. Function App (Python 3.11, consumption plan — scales to zero, cheap)
 # NOTE: --os-type linux is required — Azure Functions' Python runtime only runs
@@ -102,7 +102,7 @@ az storage account create -n th2helpdeskdata -g rg-helpdesk-report -l eastus --s
 az functionapp create -g rg-helpdesk-report -n th2-helpdesk-functions \
   --consumption-plan-location eastus --os-type linux \
   --runtime python --runtime-version 3.11 \
-  --functions-version 4 --storage-account th2helpdeskdata
+  --functions-version 4 --storage-account helpdeskreportdata
 
 # 4. Key Vault for the ConnectWise API keys
 # NOTE: `az keyvault create` defaults to RBAC authorization mode now (not the
@@ -293,7 +293,7 @@ Two things now guard against this:
    fallback path only runs when the blob is *missing*), upload the real data
    directly, once:
    ```
-   az storage blob upload --account-name th2helpdeskdata \
+   az storage blob upload --account-name helpdeskreportdata \
      --container-name helpdesk-report-data --name latest.json \
      --file latest.json --auth-mode login --overwrite
    ```
