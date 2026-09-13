@@ -90,7 +90,21 @@ LEADERBOARD_FIELDS = ["id", "owner", "priority", "source"]
 # (in-progress) week every time. A brand-new deployment backfills all
 # PHONE_HISTORY_WEEKS on its first run; after that, steady-state runs make
 # exactly one Dialpad call here.
+#
+# Confirmed live 2026-09-13: a single Dialpad export can itself take longer
+# than expected (one daily pull timed out at the poller's old 120s cap,
+# since bumped to 150s in dialpad_client.py). With up to PHONE_HISTORY_WEEKS
+# calls queued back-to-back on a backfill run, several slow ones in a row
+# could otherwise blow well past host.json's functionTimeout before this
+# function ever gets to write the blob — losing the ConnectWise work that
+# same run already did, since _write_blob() only happens once at the very
+# end. DIALPAD_HISTORY_BUDGET_S bounds how much wall-clock time this block
+# will spend fetching weeks: it stops starting new week pulls once the
+# budget is used up, leaving any remaining weeks for the next run (they're
+# just "still missing from phoneHistoryByWeek," which the logic above
+# already retries every run) instead of risking the whole function.
 PHONE_HISTORY_WEEKS = 8
+DIALPAD_HISTORY_BUDGET_S = 300
 
 
 def run_refresh(now=None):
@@ -98,6 +112,11 @@ def run_refresh(now=None):
     and returns the full updated dict (so an HTTP caller can hand it straight
     back to the frontend without a second round-trip to GetReportData)."""
     now = now or datetime.now(timezone.utc)
+    # Real wall-clock start, independent of `now` (which is the logical "as
+    # of" timestamp this run represents — normally the same instant, but
+    # callers such as tests can pass a fixed value). Used only to bound the
+    # Dialpad weekly-history backfill's time budget below.
+    run_started_at = datetime.now(timezone.utc)
     logging.info("run_refresh starting at %s", now.isoformat())
 
     # Read this up front (not just at the very end, as before) because the
@@ -246,30 +265,61 @@ def run_refresh(now=None):
         phone_weeks = week_starts(now, PHONE_HISTORY_WEEKS)
         by_week = dict(existing.get("phoneHistoryByWeek") or {})
         current_week = phone_weeks[-1]
-        weeks_to_fetch = [w for w in phone_weeks if w not in by_week]
-        if current_week not in weeks_to_fetch:
-            weeks_to_fetch.append(current_week)  # always re-pull the in-progress week
+        today_str = now.date().isoformat()
 
+        # Completed (non-current) weeks are backfilled once and never
+        # change again, so they're only fetched if missing entirely. The
+        # CURRENT week is the one exception — it's still in progress, so its
+        # numbers do change during the day — but re-pulling it on every
+        # 15-minute PullSnapshot/RefreshNow call is unnecessary Dialpad load
+        # for data that's a rolling multi-week trend, not a live-second-by-
+        # second view (that's what Today's Snapshot's separate live phone
+        # card is for). So it only refreshes once per calendar day: each
+        # stored week carries a "_fetchedAt" timestamp, and the current week
+        # is re-fetched only if it's missing or wasn't already fetched today.
+        current_week_entry = by_week.get(current_week)
+        current_week_fresh_today = bool(
+            current_week_entry and current_week_entry.get("_fetchedAt", "")[:10] == today_str
+        )
+        weeks_to_fetch = [w for w in phone_weeks if w != current_week and w not in by_week]
+        if not current_week_fresh_today:
+            weeks_to_fetch.insert(0, current_week)  # do it first when it IS due
+
+        deadline = run_started_at + timedelta(seconds=DIALPAD_HISTORY_BUDGET_S)
+        fetched, skipped_out_of_budget = [], []
         for wk in weeks_to_fetch:
+            if datetime.now(timezone.utc) >= deadline:
+                skipped_out_of_budget.append(wk)
+                continue
             try:
                 week_data = dialpad_weekly.get_call_stats_for_week(wk, now=now)
                 if week_data is not None:
+                    week_data["_fetchedAt"] = now.isoformat()
                     by_week[wk] = week_data
+                fetched.append(wk)
             except Exception:
                 logging.exception(
                     "Dialpad weekly pull failed for week of %s — keeping whatever "
                     "was already stored for that week", wk,
                 )
+                fetched.append(wk)  # attempted, not skipped — counts against the budget either way
 
         # Drop weeks that have rolled out of the window so the blob doesn't
         # grow forever.
         by_week = {wk: v for wk, v in by_week.items() if wk in phone_weeks}
         existing["phoneHistoryByWeek"] = by_week
         phone_history = build_phone_history(by_week, phone_weeks)
-        logging.info(
-            "Dialpad weekly history: fetched %d/%d week(s) fresh this run (%s)",
-            len(weeks_to_fetch), len(phone_weeks), ", ".join(weeks_to_fetch),
-        )
+        if fetched:
+            logging.info(
+                "Dialpad weekly history: attempted %d/%d week(s) this run (%s)%s",
+                len(fetched), len(phone_weeks), ", ".join(fetched),
+                f" — {len(skipped_out_of_budget)} week(s) deferred to a later run (out of the {DIALPAD_HISTORY_BUDGET_S}s budget): {', '.join(skipped_out_of_budget)}" if skipped_out_of_budget else "",
+            )
+        else:
+            logging.info(
+                "Dialpad weekly history: nothing to fetch this run — current week already "
+                "refreshed today (%s) and no backfill weeks missing", today_str,
+            )
     except NotImplementedError:
         logging.info("Dialpad not configured yet — skipping weekly phone history")
     except Exception:

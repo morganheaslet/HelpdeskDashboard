@@ -76,7 +76,13 @@ class DialpadClient:
         resp.raise_for_status()
         return resp.json()["request_id"]
 
-    def _poll_stats_export(self, request_id, initial_wait_s=18, poll_interval_s=8, max_wait_s=120):
+    def _poll_stats_export(self, request_id, initial_wait_s=18, poll_interval_s=8, max_wait_s=150):
+        # Confirmed live 2026-09-13: a real export timed out at the previous
+        # 120s cap under normal load — bumped to 150s. Callers that make
+        # several of these calls in one run (the weekly-history backfill,
+        # see refresh.py) bound their OWN total wall-clock budget separately,
+        # since a slower individual poll here is expected occasionally and
+        # shouldn't by itself blow the whole Function's timeout.
         time.sleep(initial_wait_s)
         waited = initial_wait_s
         while waited <= max_wait_s:

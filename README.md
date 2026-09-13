@@ -362,24 +362,36 @@ round-trip as the "today" pull, so re-fetching all 8 weeks on every single
 `PullSnapshot`/`RefreshNow` run would add several minutes to every refresh
 for numbers that mostly don't change run-to-run. Instead:
 - `phoneHistoryByWeek` in the blob (week-start ISO date -> that week's raw
-  Dialpad stats) is the actual source of truth. It is **not** rendered
-  directly — `shared/aggregate.py`'s `build_phone_history()` reshapes it plus
-  the desired rolling window into the frontend's `phoneHistory` structure on
-  every run, which is cheap and makes no API calls.
-- Each run only fetches (via `DialpadClient.get_call_stats_for_week()`) the
-  weeks that are missing from `phoneHistoryByWeek`, plus the current
-  (in-progress) week every time, since that one's numbers keep changing
-  through the day. Weeks that have rolled out of the window are dropped so
-  the blob doesn't grow forever.
+  Dialpad stats, each carrying a `_fetchedAt` timestamp) is the actual source
+  of truth. It is **not** rendered directly — `shared/aggregate.py`'s
+  `build_phone_history()` reshapes it plus the desired rolling window into
+  the frontend's `phoneHistory` structure on every run, which is cheap and
+  makes no API calls.
+- A **completed week is fetched exactly once, ever** — each run only pulls
+  (via `DialpadClient.get_call_stats_for_week()`) whichever weeks are still
+  missing from `phoneHistoryByWeek` entirely. Weeks that have rolled out of
+  the window are dropped so the blob doesn't grow forever.
+- The **current (in-progress) week is the only one that changes**, but it
+  still only re-pulls **once per calendar day** (checked via its stored
+  `_fetchedAt` date), not on every 15-minute `PullSnapshot`/`RefreshNow` —
+  a multi-week trend chart doesn't need minute-by-minute freshness, and
+  Today's Snapshot's separate live phone card already covers "right now."
+  Confirmed 2026-09-13 per Morgan's explicit ask: steady-state runs make
+  **zero** Dialpad calls here on any day the current week has already been
+  refreshed.
 - **A brand-new deployment (or the first run after upgrading to this
-  version) backfills all 8 weeks in one run** — expect that one run to take
-  noticeably longer (up to several minutes) than steady-state runs, which
-  make exactly one Dialpad call here. This is on top of the ConnectWise
-  weekly-trend pulls above, so a first run after deploying both features
-  together could genuinely approach the 9-minute `functionTimeout` — if it
-  ever times out, consider raising `PHONE_HISTORY_WEEKS`/`WEEKLY_TREND_WEEKS`
-  down temporarily for that one deploy, or manually seeding
-  `phoneHistoryByWeek` in the blob first.
+  version) still backfills all 8 missing weeks in one run** — expect that
+  one run to take noticeably longer than steady-state runs. This is on top
+  of the ConnectWise weekly-trend pulls above, so it could genuinely
+  approach the `functionTimeout`. To guard against that: `refresh.py`'s
+  `DIALPAD_HISTORY_BUDGET_S` (default 300s) caps how long this whole block
+  will spend fetching weeks — once the budget is used up, any remaining
+  weeks are simply left missing and picked up on a later run (retried the
+  same way every run, since "still missing" is all the logic checks), rather
+  than risking the entire function timing out before `_write_blob()` ever
+  runs and losing that run's ConnectWise work too. This was hit for real on
+  2026-09-13: a single Dialpad export timed out at the poller's old 120s
+  cap under normal load, since bumped to 150s in `dialpad_client.py`.
 - Wrapped in its own try/except, same defensive pattern as everything else
   Dialpad-related — a failure fetching one week (or all of them) logs and
   leaves `phoneHistory` as whatever was there before, it doesn't take down
