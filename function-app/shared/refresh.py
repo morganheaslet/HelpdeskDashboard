@@ -18,6 +18,7 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
 
@@ -151,13 +152,37 @@ def _blob_client():
     return service.get_blob_client(container=container, blob="latest.json")
 
 
+def _seed_data():
+    """
+    Fallback content for the very first run against a brand-new (empty) blob
+    container. `shared/seed_data.json` is a copy of the report's original
+    data.json — it carries the real weeklyTrend/snapshot/techLeaderboard/legacy
+    sections (the manually-compiled historical data the frontend's Executive
+    Summary, Service Desk, and Tech Leaderboard tabs render), which nothing
+    else in this scaffold ever populates. Without this, a fresh deployment's
+    first PullSnapshot/RefreshNow run would write a blob containing only
+    empty {} placeholders for those sections — which run_refresh() then
+    happily preserves forever afterwards (it only ever touches todaySnapshot/
+    dispatchQueue/todayPhone) — and the frontend crashes trying to `.forEach`
+    over data that was never actually there. This surfaced for real on
+    2026-09-13: the live deployment's blob had exactly this problem, and had
+    to be manually re-seeded (see README's "Re-seeding the blob" note).
+    """
+    seed_path = Path(__file__).parent / "seed_data.json"
+    try:
+        return json.loads(seed_path.read_text())
+    except Exception:
+        logging.exception("Bundled shared/seed_data.json missing or unreadable — falling back to an empty shell")
+        return {"meta": {}, "weeklyTrend": {}, "snapshot": {}, "techLeaderboard": {}, "legacy": {}}
+
+
 def _read_existing_blob():
     client = _blob_client()
     try:
         return json.loads(client.download_blob().readall())
     except Exception:
-        logging.warning("No existing latest.json blob yet — starting from empty shell")
-        return {"meta": {}, "weeklyTrend": {}, "snapshot": {}, "techLeaderboard": {}, "legacy": {}}
+        logging.warning("No existing latest.json blob yet — seeding from shared/seed_data.json")
+        return _seed_data()
 
 
 def _write_blob(data):

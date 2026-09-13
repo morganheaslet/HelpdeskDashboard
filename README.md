@@ -267,6 +267,41 @@ and restricts it to authenticated users. Two things to set after the SWA exists:
    the `allowedRoles` section of the config to check group membership via a custom
    role — happy to wire that in once the group exists.
 
+## Re-seeding the blob (weeklyTrend / snapshot / techLeaderboard / legacy sections)
+
+`PullSnapshot`/`RefreshNow` (via `shared/refresh.py`) only ever write `todaySnapshot`,
+`dispatchQueue`, and `todayPhone` into the blob — everything else the frontend
+renders (the Executive Summary's weekly trend chart, the Service Desk tab's
+per-board snapshot, the Tech Leaderboard, the Phones & Historical legacy tab)
+comes from whatever was already sitting in the blob when `run_refresh()` ran,
+under the assumption something seeded it first. **Nothing in this scaffold did
+that automatically** until this was caught live on 2026-09-13 — a fresh
+storage account starts genuinely empty, so the very first pull wrote a blob
+with those sections as bare `{}`, and the frontend crashed (`Cannot read
+properties of undefined (reading 'forEach')`) the first time it tried to
+render a tab that needed one of them.
+
+Two things now guard against this:
+1. **Code fix**: `shared/refresh.py`'s `_read_existing_blob()` now falls back
+   to the bundled `shared/seed_data.json` (a copy of the report's original
+   `data.json`, carrying the real historical sections) instead of an empty
+   shell, whenever the blob doesn't exist yet — so a brand-new deployment
+   seeds itself correctly on its very first run.
+2. **One-time manual fix for an already-broken blob**: if your blob already
+   has the empty-`{}` version baked in (redeploying the code above won't
+   retroactively fix a blob that already downloads successfully — the
+   fallback path only runs when the blob is *missing*), upload the real data
+   directly, once:
+   ```
+   az storage blob upload --account-name th2helpdeskdata \
+     --container-name helpdesk-report-data --name latest.json \
+     --file latest.json --auth-mode login --overwrite
+   ```
+   (`latest.json` here is the same content as `shared/seed_data.json` /
+   the original report's `data.json`.) The next `PullSnapshot` or Refresh Now
+   click will overwrite `todaySnapshot`/`dispatchQueue`/`todayPhone` with
+   fresh live data while leaving the re-seeded historical sections in place.
+
 ## Schedule
 
 `function-app/PullSnapshot/function.json` runs every 15 minutes
