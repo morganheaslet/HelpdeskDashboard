@@ -128,13 +128,24 @@ def slicer(page, key, pos, ref, mode, title=None, single=False, filters=None):
     return visual(page, key, "slicer", pos, {"Values": [ref]}, title=title, objects=objects, filters=filters)
 
 
+# Project boards never have tickets here (project tickets aren't synced), so
+# they'd only ever show as empty options in the Board dropdown.
+PROJECT_BOARDS = [
+    "Backup Services Project", "Demo Project", "Managed Services Project",
+    "Professional Services Project", "Technical Services Project",
+]
+# Retired board whose leftover open tickets management doesn't want counted.
+EXCLUDED_BOARDS = ["z(inactive)Quartus - Managed Services"]
+
+
 def board_slicer(page, pos):
-    """Board dropdown listing only active boards. Inactive boards — the
-    "z(Inactive)…", "z(DO NOT USE)…" and "zzzz… (DO NOT USE)" ones, all
-    marked inactive in ConnectWise — are hidden from the options only; their
-    tickets still count in totals when no board is selected."""
+    """Board dropdown listing only active, non-project boards. Inactive
+    boards — the "z(Inactive)…", "z(DO NOT USE)…" and "zzzz… (DO NOT USE)"
+    ones, all marked inactive in ConnectWise — are hidden from the options."""
     active = categorical(f"activeBoards_{page}", "Board", "Is Active", ["true"])
-    return slicer(page, "board", pos, "Board[Board]", "Dropdown", "Board", filters=[active])
+    no_projects = categorical(f"noProjectBoards_{page}", "Board", "Board",
+                              [s(b) for b in PROJECT_BOARDS], exclude=True)
+    return slicer(page, "board", pos, "Board[Board]", "Dropdown", "Board", filters=[active, no_projects])
 
 
 def card(page, key, pos, measure):
@@ -163,6 +174,7 @@ def categorical(name, table, column, values, exclude=False):
 
 NO_AUTOMATION = categorical("noAutomation", "Tech", "Is Automation", ["false"])
 NO_ALERTS = categorical("noAlertsBoard", "Board", "Is Alerts", ["false"])
+NO_EXCLUDED_BOARDS = categorical("excludedBoards", "Board", "Board", [s(b) for b in EXCLUDED_BOARDS], exclude=True)
 
 # --------------------------------------------------------------- pages
 # Canvas 1280 x 720. Positions are (x, y, width, height).
@@ -290,8 +302,8 @@ def contract_profitability(p):
 
 # (folder name Desktop created, display name, builder, page filters)
 PAGES = [
-    ("ReportSection0", "Tickets by Tech", tickets_by_tech, [NO_AUTOMATION, NO_ALERTS]),
-    ("ReportSection1", "SLA", sla, [NO_AUTOMATION, NO_ALERTS]),
+    ("ReportSection0", "Tickets by Tech", tickets_by_tech, [NO_AUTOMATION, NO_ALERTS, NO_EXCLUDED_BOARDS]),
+    ("ReportSection1", "SLA", sla, [NO_AUTOMATION, NO_ALERTS, NO_EXCLUDED_BOARDS]),
     ("ReportSection2", "Utilization", utilization, [NO_AUTOMATION]),
     ("ReportSection3", "Client Profitability", client_profitability, []),
     ("ReportSection4", "Contract Profitability", contract_profitability, []),
