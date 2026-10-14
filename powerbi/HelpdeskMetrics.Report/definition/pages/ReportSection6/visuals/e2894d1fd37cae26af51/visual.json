@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "e2894d1fd37cae26af51",
   "position": {
     "x": 220,
     "y": 8,
     "z": 0,
-    "width": 260,
     "height": 104,
+    "width": 260,
     "tabOrder": 0
   },
   "visual": {
@@ -27,13 +27,13 @@
                 }
               },
               "queryRef": "Tech.Tech",
-              "nativeQueryRef": "Tech"
+              "nativeQueryRef": "Tech",
+              "active": true
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -70,7 +70,8 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   },
   "filterConfig": {
     "filters": [

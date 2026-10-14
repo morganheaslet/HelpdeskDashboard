@@ -10,8 +10,18 @@
                         (T&M, products, projects). Smooth month to month.
     labor_cost          time entry hours x hourly cost (entry's, else member's)
     addition_cost       recurring cost of agreement additions, per month
-    product_cost        one-off procurement product cost, by invoice month
+    product_cost        one-off procurement product cost, by invoice month —
+                        product_class 'Agreement' lines are EXCLUDED: those are
+                        the recurring additions re-appearing on each month's
+                        agreement invoice, already in addition_cost (counting
+                        both double-counted every recurring line item).
     margin              normalized_revenue - all costs  (and an invoiced variant)
+
+  Cost typos: a line whose unit cost is more than COST_SANITY_RATIO (100x)
+  its unit price is left out of cost and listed in rpt.v_cost_data_issues
+  for correction in ConnectWise (e.g. 2026-10: "Offsite Storage" entered at
+  $30,127 cost per $0.10 unit made one addition $72M/month). Lines priced
+  at $0 (bundled items with a real cost) are never excluded.
 */
 GO
 
@@ -35,7 +45,8 @@ adds AS (
            SUM(CASE WHEN x.bill_customer = 'Billable'
                     THEN ISNULL(x.ext_price, (ISNULL(x.quantity, 0) - ISNULL(x.less_included, 0)) * ISNULL(x.unit_price, 0))
                     ELSE 0 END) AS addition_price,
-           SUM(ISNULL(x.ext_cost, ISNULL(x.quantity, 0) * ISNULL(x.unit_cost, 0))) AS addition_cost
+           SUM(CASE WHEN x.unit_price > 0 AND x.unit_cost > 100 * x.unit_price THEN 0   -- cost typo, see header
+                    ELSE ISNULL(x.ext_cost, ISNULL(x.quantity, 0) * ISNULL(x.unit_cost, 0)) END) AS addition_cost
     FROM active ac
     JOIN cw.agreement_additions x
       ON x.agreement_id = ac.agreement_id AND x.deleted = 0
@@ -114,6 +125,8 @@ prod AS (
     SELECT i.company_id, i.month_start, SUM(ISNULL(p.cost, 0) * ISNULL(p.quantity, 0)) AS product_cost
     FROM cw.products p JOIN rpt.v_invoices i ON i.invoice_id = p.invoice_id
     WHERE ISNULL(p.cancelled_flag, 0) = 0
+      AND ISNULL(p.product_class, '') <> 'Agreement'                       -- recurring: already in addition_cost
+      AND NOT (p.price > 0 AND p.cost > 100 * p.price)                     -- cost typo, see header
     GROUP BY i.company_id, i.month_start
 )
 SELECT k.company_id, c.name AS company_name, c.company_types, c.territory, k.month_start,
@@ -177,4 +190,26 @@ SELECT r.*,
 FROM sb.reviews r
 CROSS JOIN meta.settings s
 LEFT JOIN rpt.v_tickets t ON t.ticket_id = r.ticket_id;
+GO
+
+/* Cost lines left out of profitability as likely data-entry errors (unit
+   cost > 100x unit price). Fix these in ConnectWise; once corrected, the
+   sync picks the change up and they drop off this list automatically. */
+CREATE OR ALTER VIEW rpt.v_cost_data_issues AS
+SELECT 'Agreement addition' AS source, x.addition_id AS record_id, a.company_name, a.name AS agreement_name,
+       x.product_identifier AS product, x.quantity, x.unit_price, x.unit_cost,
+       x.ext_cost AS excluded_cost_per_cycle, x.agreement_status AS status
+FROM cw.agreement_additions x
+JOIN cw.agreements a ON a.agreement_id = x.agreement_id
+WHERE x.deleted = 0 AND x.unit_price > 0 AND x.unit_cost > 100 * x.unit_price
+UNION ALL
+SELECT 'Invoice product', p.product_item_id, c.name, NULL, p.catalog_identifier, p.quantity, p.price, p.cost,
+       p.cost * p.quantity, NULL
+FROM cw.products p
+LEFT JOIN cw.companies c ON c.company_id = p.company_id
+WHERE ISNULL(p.cancelled_flag, 0) = 0 AND ISNULL(p.product_class, '') <> 'Agreement'
+  AND p.price > 0 AND p.cost > 100 * p.price;
+GO
+
+GRANT SELECT ON rpt.v_cost_data_issues TO reporting_reader;
 GO

@@ -1,46 +1,46 @@
 table AgreementMonth
-	lineageTag: 0deefc9a-ae94-478c-8650-b174724bab92
+	lineageTag: 3fdd9dfb-e0e5-44c0-a04d-0a20371703e7
 
 	measure 'Agreement Revenue' = SUM ( AgreementMonth[Revenue] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: b85b5c6a-029e-4b2f-a218-a683af487fde
+		lineageTag: cf157c7b-2244-4f05-9c9f-81232b306e1a
 
 	measure 'Agreement Labor Cost' = SUM ( AgreementMonth[Labor Cost (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: 758dbeea-0320-48a7-bb8a-88ac02d00173
+		lineageTag: 335b0cc8-44fa-4e74-87a5-e7602f319aae
 
 	measure 'Agreement Addition Cost' = SUM ( AgreementMonth[Addition Cost] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: 694c3353-9566-4282-94c7-e2637dbf8f3b
+		lineageTag: b02967f5-158e-4a75-94d6-fb0776ac8ccc
 
 	measure 'Agreement Margin' = SUM ( AgreementMonth[Margin] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: 0c5033a0-d14a-4030-b8ab-b97c71e74fa0
+		lineageTag: cb4919da-0684-4cc5-b521-320d85e1ba35
 
 	measure 'Agreement Margin %' = DIVIDE ( [Agreement Margin], [Agreement Revenue] )
 		formatString: 0.0%
 		displayFolder: Agreement
-		lineageTag: fc3894f6-255c-4b70-a0c8-915de4d29f5a
+		lineageTag: 15d74461-363a-4f70-b9c4-481a7189f518
 
 	measure 'Agreement Hours' = SUM ( AgreementMonth[Hours] )
 		formatString: #,0.0
 		displayFolder: Agreement
-		lineageTag: 4be11760-35d0-4a17-a286-a31bcf954443
+		lineageTag: e6dbae59-a8d4-4143-8e79-c86223869981
 
 	measure 'Agreement Effective Hourly Rate' = DIVIDE ( [Agreement Revenue], [Agreement Hours] )
 		formatString: \$#,0.00
 		displayFolder: Agreement
-		lineageTag: 3a3478ee-9755-40b3-b79c-f39dca2c404b
+		lineageTag: 283ee900-63ca-45e3-8e28-6627bd794fed
 
 	column AgreementId
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: 8824df95-226b-44f4-aa9c-9dd3fc929fa8
+		lineageTag: 117a57d4-3cbe-471a-86cd-9d8468c4d5f9
 		summarizeBy: none
 		sourceColumn: AgreementId
 
@@ -50,7 +50,7 @@ table AgreementMonth
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: 343e74fc-4ff6-4ced-b1bf-d4e3709cc39e
+		lineageTag: 1836f90f-ffae-422c-9dfe-25be98a778ee
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -59,7 +59,7 @@ table AgreementMonth
 	column 'Month Start'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 801a1ec6-7540-49b4-b965-2fb77d02f5cd
+		lineageTag: 49f17f76-5015-4167-b5cd-d49ee5681b76
 		summarizeBy: none
 		sourceColumn: Month Start
 
@@ -68,7 +68,7 @@ table AgreementMonth
 	column Revenue
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 89539706-1710-4295-bcc5-ae2f1c63d9fc
+		lineageTag: 9b7d310d-fd75-4845-9ef4-a840da6e331b
 		summarizeBy: none
 		sourceColumn: Revenue
 
@@ -77,7 +77,7 @@ table AgreementMonth
 	column Hours
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 485686c2-8a32-4d28-be34-8c700ce54bf8
+		lineageTag: d1b93e54-3bae-4379-ab02-585bec68e049
 		summarizeBy: none
 		sourceColumn: Hours
 
@@ -87,7 +87,7 @@ table AgreementMonth
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
-		lineageTag: 8b1e4ecf-b6d2-4152-96cd-20e30f41cc81
+		lineageTag: c5bc9893-57c5-4bb8-b7c9-e93f3831c83c
 		summarizeBy: none
 		sourceColumn: Labor Cost
 
@@ -97,7 +97,7 @@ table AgreementMonth
 		dataType: double
 		formatString: #,0.0
 		isHidden
-		lineageTag: 04a3354a-5d05-49a2-b736-9cf86958d23a
+		lineageTag: ee75800a-d65d-4caa-8af0-2b17417305f3
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
 
@@ -106,7 +106,7 @@ table AgreementMonth
 	column 'Addition Cost'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 7c091063-31b7-4bdd-83d0-548f1de0ed62
+		lineageTag: d68698ea-7451-41f2-9ec7-c1c76065f14c
 		summarizeBy: none
 		sourceColumn: Addition Cost
 
@@ -115,7 +115,7 @@ table AgreementMonth
 	column Margin
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 3a3d97b0-7bf1-4875-b481-c2ecaaaa9d4a
+		lineageTag: 8af3aca9-a1dc-4cca-9281-6542de2db664
 		summarizeBy: none
 		sourceColumn: Margin
 

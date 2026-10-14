@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "9c873c1e2f8296a1df8a",
   "position": {
     "x": 10,
     "y": 122,
     "z": 0,
-    "width": 1260,
     "height": 420,
+    "width": 1260,
     "tabOrder": 0
   },
   "visual": {
@@ -285,11 +285,9 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -311,6 +309,263 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "0e28b019422fe10a1dff",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tech"
+              }
+            },
+            "Property": "Tech"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "749596156bb57b249990",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Inbound Calls"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "3892ffc7544d3633ff56",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Calls Answered"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "b472e819e17b4c010fb9",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Calls Missed"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "1ba0c387db6f48b4b98c",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Answer Rate"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "732d423a3fd131076085",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Rejected Calls"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "fa02ec1b1ac7e8587e48",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Ring No Answer"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "49f34cbe881507fbc9c6",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Voicemails"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "0734800a36c8ab7bd2a9",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Outbound Calls"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "951ca1facd753deff320",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Outbound Connected"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "861348703a3f406730c7",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Talk Hours"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "808ec60c1dd55a9f99eb",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Avg Talk Time (min)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "7fbd9e716964169e0d19",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Avg Hold Time (min)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "4cccdbe86276094de44b",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Avg Ring Time (sec)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "f43bb8a4c6e0d0fc4f84",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Transfers Out"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "8c365cd7eab8691b7469",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Calls per Day"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "ee6ae7b7fe0a5c6f0c51",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Talk % of Available Hours"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "113362e5ce38709ba637",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Closed"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

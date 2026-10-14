@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "d8b918ce6027ae3973e6",
   "position": {
     "x": 1015,
     "y": 8,
     "z": 0,
-    "width": 123,
     "height": 104,
+    "width": 123,
     "tabOrder": 0
   },
   "visual": {
@@ -34,5 +34,23 @@
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "65e9d1fc5aa28d02a641",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Avg Talk Time (min)"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

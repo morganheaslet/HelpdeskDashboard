@@ -95,11 +95,15 @@ SELECT c.company_id AS [CompanyId], c.name AS [Company], c.company_types AS [Com
        c.territory AS [Territory], c.status_name AS [Company Status],
        -- ~190 of ~1,600 companies have had a ticket since 2025; client
        -- pickers filter on this instead of listing every company.
-       CAST(CASE WHEN r.company_id IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS [Has Recent Tickets]
+       CAST(CASE WHEN r.company_id IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS [Has Recent Tickets],
+       -- TH2 itself (ConnectWise company type "Owner"): internal admin/PTO/
+       -- meeting time lands here — ~$1.2M of 2025 labor with no revenue —
+       -- so client profitability filters it out as overhead.
+       CAST(CASE WHEN c.company_types LIKE '%Owner%' THEN 1 ELSE 0 END AS BIT) AS [Is Internal]
 FROM cw.companies c
 LEFT JOIN recent r ON r.company_id = c.company_id
 UNION ALL
-SELECT -1, '(No company)', NULL, NULL, NULL, CAST(0 AS BIT);
+SELECT -1, '(No company)', NULL, NULL, NULL, CAST(0 AS BIT), CAST(0 AS BIT);
 GO
 
 CREATE OR ALTER VIEW pbi.Agreement AS

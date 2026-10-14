@@ -1,105 +1,105 @@
 table PhoneDaily
-	lineageTag: 41ca2f2f-1198-47c6-9c63-294d4fed3548
+	lineageTag: 0d37b28d-8512-4f1a-a8a7-cdc5cd5780a4
 
 	measure 'Inbound Calls' = SUM ( PhoneDaily[Inbound Calls (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: d185be6f-0dd3-4537-b98c-2762ec19e439
+		lineageTag: af367809-b47d-4ebf-8231-7fb453738a2f
 
 	measure 'Calls Answered' = SUM ( PhoneDaily[Answered] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 0cb38b78-7f35-4beb-9eef-4480a7b6173f
+		lineageTag: 7c512fd2-441d-427a-95b2-390a28b6cb89
 
 	measure 'Calls Missed' = SUM ( PhoneDaily[Missed] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 39ece3e8-4be5-4408-926d-2ea6f72297ed
+		lineageTag: d1fce0cc-4f90-446b-a305-5f8d11e0f01a
 
 	measure 'Answer Rate' = DIVIDE ( [Calls Answered], [Inbound Calls] )
 		formatString: 0.0%
 		displayFolder: Phones
-		lineageTag: 4e45f9f1-92f5-4764-a0b6-aeb7c6352f69
+		lineageTag: ba1cc3ab-1b7c-4c51-9ca4-b8e574501f84
 
 	measure 'Rejected Calls' = SUM ( PhoneDaily[Rejected] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 3aba45ec-3369-4b80-beb9-4f8ab8ddf860
+		lineageTag: 9497f7c1-0c27-4448-b95b-05b7198ce5a6
 
 	measure 'Ring No Answer' = SUM ( PhoneDaily[Ring No Answer (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 8d0e15f7-5b09-4b86-abae-490babfa3263
+		lineageTag: b95de566-bc1b-47cc-a821-afb2ca1eeb66
 
 	measure Voicemails = SUM ( PhoneDaily[Voicemails (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: dfad06ba-67fc-42bd-bed9-e704536a3bd9
+		lineageTag: 55236123-0691-431f-93cd-c3e0cafac691
 
 	measure 'Outbound Calls' = SUM ( PhoneDaily[Outbound Calls (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 49b13419-93a2-4656-85e4-d2529bc8609c
+		lineageTag: 8e512360-028b-481b-84ab-80b3dbad3da0
 
 	measure 'Outbound Connected' = SUM ( PhoneDaily[Outbound Connected (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 17d7d551-a73b-45b6-80bf-e4d3277389d6
+		lineageTag: da3aefb1-8d46-42b3-9d7d-77443326bf49
 
 	measure 'Calls Handled' = SUM ( PhoneDaily[Handled] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 3973d0a6-bbbc-49a4-80bf-8220f9b683e1
+		lineageTag: 7b89b8e1-69b4-4fac-988a-507577f79464
 
 	measure 'Transfers Out' = SUM ( PhoneDaily[Transfers Out (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 40c90c23-e2de-4150-be08-844f6c9f4f9e
+		lineageTag: 4ba46c65-727d-4506-b34a-9d5c6f7b5289
 
 	measure 'Talk Hours' = SUM ( PhoneDaily[Talk Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Phones
-		lineageTag: 5b752cfc-b41a-4dbf-8cff-b9c515973fdd
+		lineageTag: 8e3704e7-fdae-41f4-a971-cb16eaf46e1a
 
 	measure 'Hold Hours' = SUM ( PhoneDaily[Hold Seconds] ) / 3600
 		formatString: #,0.0
 		displayFolder: Phones
-		lineageTag: accf0905-eb69-4b25-baf7-ecc174e42727
+		lineageTag: f4336f68-de65-452a-ab43-592e2bfea416
 
 	measure 'Avg Talk Time (min)' = DIVIDE ( SUM ( PhoneDaily[Talk Seconds] ) / 60, [Calls Handled] )
 		formatString: #,0.0
 		displayFolder: Phones
-		lineageTag: b8f192b0-e0e6-435f-92ef-3a4c5e1e5506
+		lineageTag: f34f21d2-1cbb-42a8-94df-e99217406a47
 
 	measure 'Avg Hold Time (min)' = DIVIDE ( SUM ( PhoneDaily[Hold Seconds] ) / 60, [Calls Handled] )
 		formatString: #,0.0
 		displayFolder: Phones
-		lineageTag: 10841b6e-83ad-4293-8761-3938307fd743
+		lineageTag: 287fd708-6a21-4dd7-8054-6e11cb8100a8
 
 	measure 'Avg Ring Time (sec)' = DIVIDE ( SUM ( PhoneDaily[Ring Seconds] ), [Inbound Calls] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 8eaff0da-61da-4b41-bac6-68f6b3168760
+		lineageTag: 0f95835b-7d18-4b24-986a-d881eddff1cf
 
 	measure 'Days on Phones' = CALCULATE ( DISTINCTCOUNT ( PhoneDaily[Date] ), PhoneDaily[Handled] > 0 )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 1821546b-e310-455d-a52f-41731c154717
+		lineageTag: d6c22de5-fba7-432e-b28d-a48a7de108db
 
 	measure 'Calls per Day' = DIVIDE ( [Calls Handled], [Days on Phones] )
 		formatString: #,0.0
 		displayFolder: Phones
-		lineageTag: 0ea3c52d-1cf6-44e7-b098-7df11f828943
+		lineageTag: 1ffea5e1-f437-46dd-9e7d-c86a4e326fe4
 
 	measure 'Talk % of Available Hours' = DIVIDE ( [Talk Hours], [Available Hours] )
 		formatString: 0.0%
 		displayFolder: Phones
-		lineageTag: 17edb9bf-0ce2-4af9-92a3-59191e0b540a
+		lineageTag: 6d43476f-a8c0-49ad-8512-22c6a89eeb54
 
 	column Date
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 34c6a98f-f001-428a-bb9f-178a7cd59202
+		lineageTag: 75cc88e9-55c2-40ee-9683-28e09a8a9235
 		summarizeBy: none
 		sourceColumn: Date
 
@@ -107,7 +107,7 @@ table PhoneDaily
 
 	column Agent
 		dataType: string
-		lineageTag: 1d6e4884-6b22-4739-806c-ba12a3bf8a5b
+		lineageTag: 4ae59536-c9d4-41bd-b2bf-a98c881fc34d
 		summarizeBy: none
 		sourceColumn: Agent
 
@@ -116,7 +116,7 @@ table PhoneDaily
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: c532d3e4-e55f-4550-a8a2-d3e48bed5950
+		lineageTag: f95203c0-b256-4037-8d78-a102ebeb261c
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -124,7 +124,7 @@ table PhoneDaily
 
 	column 'Agent Type'
 		dataType: string
-		lineageTag: f54e6ca6-0b28-497d-9c5f-ac9e63a96a89
+		lineageTag: 0700aa35-e018-4a84-99a7-891013e48316
 		summarizeBy: none
 		sourceColumn: Agent Type
 
@@ -133,7 +133,7 @@ table PhoneDaily
 	column 'Inbound Calls (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: f75101af-ac2c-4f0e-aff9-01facbd501ec
+		lineageTag: 1de9568f-7327-46d7-add4-93ac8ed6d656
 		summarizeBy: none
 		sourceColumn: Inbound Calls
 
@@ -141,7 +141,7 @@ table PhoneDaily
 
 	column Answered
 		dataType: int64
-		lineageTag: 2a0a145d-29a2-49a8-a4ec-a43f9fe84391
+		lineageTag: f1a4bcd0-658c-4d07-93f2-efa2d187dbc0
 		summarizeBy: none
 		sourceColumn: Answered
 
@@ -149,7 +149,7 @@ table PhoneDaily
 
 	column Missed
 		dataType: int64
-		lineageTag: b21f422f-e665-4a1a-86fe-f4b126b0dced
+		lineageTag: 59230c52-c76b-4d91-b209-3f29d7094a6a
 		summarizeBy: none
 		sourceColumn: Missed
 
@@ -157,7 +157,7 @@ table PhoneDaily
 
 	column Rejected
 		dataType: int64
-		lineageTag: 53e45b33-e13c-4c31-9753-b2c160150b7b
+		lineageTag: 0b8df926-eab7-4fd5-8a78-9348d1c08fe6
 		summarizeBy: none
 		sourceColumn: Rejected
 
@@ -166,7 +166,7 @@ table PhoneDaily
 	column 'Ring No Answer (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: 1d45357d-1bbb-4808-9882-c68bb3d241e5
+		lineageTag: bcad3740-c1cd-4651-9384-775f695a6153
 		summarizeBy: none
 		sourceColumn: Ring No Answer
 
@@ -174,7 +174,7 @@ table PhoneDaily
 
 	column Abandoned
 		dataType: int64
-		lineageTag: 33ca4ae4-e948-42d6-866d-bcd2a0ba994a
+		lineageTag: 789579a6-b59a-4a11-8e85-a0590396a030
 		summarizeBy: none
 		sourceColumn: Abandoned
 
@@ -183,7 +183,7 @@ table PhoneDaily
 	column 'Voicemails (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: cbb410e4-00c1-4f25-9d63-8afe73050f48
+		lineageTag: 0469897a-3a0d-4398-b4bd-2ee6400bb96c
 		summarizeBy: none
 		sourceColumn: Voicemails
 
@@ -192,7 +192,7 @@ table PhoneDaily
 	column 'Outbound Calls (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: 5ea842c9-9a8f-443d-9306-576df09b3bec
+		lineageTag: e78f4ad2-69dc-4475-a668-e8717ac81a96
 		summarizeBy: none
 		sourceColumn: Outbound Calls
 
@@ -201,7 +201,7 @@ table PhoneDaily
 	column 'Outbound Connected (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: 8155f4ef-fc66-410a-8872-0325158ed2cd
+		lineageTag: 15567505-ae99-49ca-af08-fb8b81425437
 		summarizeBy: none
 		sourceColumn: Outbound Connected
 
@@ -209,7 +209,7 @@ table PhoneDaily
 
 	column Handled
 		dataType: int64
-		lineageTag: 085d2d2d-a26d-4a35-b5f8-637a6ea49012
+		lineageTag: e681faff-56d7-45ef-b336-f30cb595be09
 		summarizeBy: none
 		sourceColumn: Handled
 
@@ -217,7 +217,7 @@ table PhoneDaily
 
 	column 'Transfers In'
 		dataType: int64
-		lineageTag: ae830fc9-07a1-4dc9-a31e-dff1b24811de
+		lineageTag: a3ef93b8-5acb-452d-8789-a2925c3e7c61
 		summarizeBy: none
 		sourceColumn: Transfers In
 
@@ -226,7 +226,7 @@ table PhoneDaily
 	column 'Transfers Out (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: 188641dd-903d-4860-a6c7-0db2810750f9
+		lineageTag: 0a3daf4a-6712-41be-813b-69c27e8b96eb
 		summarizeBy: none
 		sourceColumn: Transfers Out
 
@@ -235,7 +235,7 @@ table PhoneDaily
 	column 'Talk Seconds'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: d1d8695a-05c1-42bf-b9a0-f402b528dadc
+		lineageTag: fe9307bf-9d6e-4adb-b467-5b028d7b088f
 		summarizeBy: none
 		sourceColumn: Talk Seconds
 
@@ -244,7 +244,7 @@ table PhoneDaily
 	column 'Hold Seconds'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 836822b3-8204-4f01-9642-415470257b28
+		lineageTag: 3d9764cd-bed2-4288-91b0-0cdeaf71162f
 		summarizeBy: none
 		sourceColumn: Hold Seconds
 
@@ -253,7 +253,7 @@ table PhoneDaily
 	column 'Ring Seconds'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 1762d497-5dd6-4c56-816c-62e1d8c12d48
+		lineageTag: c1caef70-609f-411d-9ec0-df654bd80bb2
 		summarizeBy: none
 		sourceColumn: Ring Seconds
 
@@ -263,7 +263,7 @@ table PhoneDaily
 		dataType: double
 		formatString: #,0.0
 		isHidden
-		lineageTag: 5ef2cf40-1e7d-4c8e-8cb8-a2b6eb0e8334
+		lineageTag: e7933390-34cc-4e96-92ec-d81b852b7433
 		summarizeBy: none
 		sourceColumn: Talk Hours
 
