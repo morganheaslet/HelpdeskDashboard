@@ -90,6 +90,8 @@ table ClientMonth
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Invoiced Revenue (raw)'
 		dataType: double
 		isHidden

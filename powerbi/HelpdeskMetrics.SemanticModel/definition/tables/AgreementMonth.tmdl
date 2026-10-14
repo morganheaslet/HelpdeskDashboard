@@ -65,6 +65,8 @@ table AgreementMonth
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Revenue
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0

@@ -12,6 +12,8 @@ table Calendar
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Year
 		dataType: int64
 		formatString: 0
@@ -29,6 +31,8 @@ table Calendar
 		sourceColumn: Month Start
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column Month
 		dataType: string
@@ -57,6 +61,8 @@ table Calendar
 		sourceColumn: Week Start
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column Week
 		dataType: string

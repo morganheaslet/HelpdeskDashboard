@@ -43,6 +43,8 @@ table TicketAssignments
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Assignment Kind'
 		dataType: string
 		lineageTag: 8a02925a-cb4d-42c2-b87a-716b2a392bcc

@@ -39,6 +39,8 @@ table Capacity
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Capacity Hours (raw)'
 		dataType: double
 		isHidden

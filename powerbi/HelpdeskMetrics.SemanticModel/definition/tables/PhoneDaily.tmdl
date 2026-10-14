@@ -35,6 +35,8 @@ table PhoneDaily
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Agent
 		dataType: string
 		lineageTag: 8f32d930-7dd4-4f2e-a317-26adeeed534a

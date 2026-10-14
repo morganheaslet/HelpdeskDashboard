@@ -73,6 +73,8 @@ table TimeEntries
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column CompanyId
 		dataType: int64
 		isHidden
