@@ -1,0 +1,95 @@
+table Tech
+	lineageTag: 6afaeafb-c32f-4cf5-87c4-77446ae99cb2
+
+	column TechKey
+		dataType: string
+		lineageTag: 4ebb4c00-dc93-447f-a800-1ec04e0ef063
+		summarizeBy: none
+		sourceColumn: TechKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Tech
+		dataType: string
+		lineageTag: 48a0ca07-e168-42ad-91a8-f551cc0aa969
+		summarizeBy: none
+		sourceColumn: Tech
+
+		annotation SummarizationSetBy = Automatic
+
+	column Identifier
+		dataType: string
+		lineageTag: 698f2568-6ca6-4130-b61c-8c9dfeae62ba
+		summarizeBy: none
+		sourceColumn: Identifier
+
+		annotation SummarizationSetBy = Automatic
+
+	column Title
+		dataType: string
+		lineageTag: 5063ee0c-184c-4b1f-9279-160ddd6ae0b1
+		summarizeBy: none
+		sourceColumn: Title
+
+		annotation SummarizationSetBy = Automatic
+
+	column Department
+		dataType: string
+		lineageTag: aa60505f-3c4b-40d6-a2ba-427ed6ddeca2
+		summarizeBy: none
+		sourceColumn: Department
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Active'
+		dataType: boolean
+		lineageTag: 2a8894b7-554b-45b7-862c-f245f9bc7322
+		summarizeBy: none
+		sourceColumn: Is Active
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'In CW Utilization'
+		dataType: boolean
+		lineageTag: 1d64dc6f-12fe-4551-94ec-e56fe0bb0176
+		summarizeBy: none
+		sourceColumn: In CW Utilization
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Automation'
+		dataType: boolean
+		lineageTag: 350fedf1-460f-4936-999a-053cde53d862
+		summarizeBy: none
+		sourceColumn: Is Automation
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Daily Capacity Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 60f2adb3-795b-44ea-bce3-f0a8b630c2dd
+		summarizeBy: none
+		sourceColumn: Daily Capacity Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Hourly Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 9aa0f858-ef35-4b24-a67d-36dadf9fafca
+		summarizeBy: none
+		sourceColumn: Hourly Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Tech = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Tech"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

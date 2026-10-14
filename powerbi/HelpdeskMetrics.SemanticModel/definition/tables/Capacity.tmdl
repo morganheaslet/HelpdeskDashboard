@@ -1,0 +1,60 @@
+table Capacity
+	lineageTag: a74feef0-6f55-4cfe-95ff-2ef67bda8257
+
+	measure 'Capacity Hours' = SUM ( Capacity[Capacity Hours] )
+		formatString: #,0.0
+		displayFolder: Utilization
+		lineageTag: dadee5af-309e-4bd9-85e9-c7107fe50b18
+
+	measure 'Available Hours' = [Capacity Hours] - [PTO Hours]
+		formatString: #,0.0
+		displayFolder: Utilization
+		lineageTag: 9faabfe8-88cf-4d2b-8f40-b6d2f46b06b8
+
+	measure 'Utilization %' = DIVIDE ( [Utilized Hours], [Available Hours] )
+		formatString: 0.0%
+		displayFolder: Utilization
+		lineageTag: e7f18098-549c-4200-bfc8-2bb6456bb8c2
+
+	measure 'Billable %' = DIVIDE ( [Billable Hours], [Available Hours] )
+		formatString: 0.0%
+		displayFolder: Utilization
+		lineageTag: 6bd9dcea-9bcb-48a5-9e00-9f4c35b0450a
+
+	column TechKey
+		dataType: string
+		isHidden
+		lineageTag: 6334bca8-12d9-45b7-8be5-c647f401c62e
+		summarizeBy: none
+		sourceColumn: TechKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: e6e32f5f-6efe-4280-80a6-604dfdaf2495
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Capacity Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 1958f23f-ac4a-40ee-b9f9-8ff8b582168c
+		summarizeBy: none
+		sourceColumn: Capacity Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Capacity = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Capacity"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

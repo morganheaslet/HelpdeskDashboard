@@ -1,0 +1,187 @@
+table ClientMonth
+	lineageTag: 1537f46f-5a45-4459-acde-78260f7f7f58
+
+	measure 'Normalized Revenue' = SUM ( ClientMonth[Normalized Revenue] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: 38e0fa3d-2be6-4f09-8b13-8b5b53a73f52
+
+	measure 'Invoiced Revenue' = SUM ( ClientMonth[Invoiced Revenue] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: f2c675ec-189b-48d3-ab38-c7ac9ddd7b85
+
+	measure 'Agreement Revenue (Client)' = SUM ( ClientMonth[Agreement Revenue] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: 89852e73-2965-42ea-ba6b-15f21bbe0a9f
+
+	measure 'Client Labor Cost' = SUM ( ClientMonth[Labor Cost] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: cc83c122-a7cc-48ce-8b9b-3367295be82a
+
+	measure 'Client Addition Cost' = SUM ( ClientMonth[Addition Cost] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: 7f74c44a-a7b1-4217-9e4c-65a85a7353e9
+
+	measure 'Client Product Cost' = SUM ( ClientMonth[Product Cost] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: ad5200ea-b70b-41b2-b123-251921d1bebe
+
+	measure 'Client Total Cost' = [Client Labor Cost] + [Client Addition Cost] + [Client Product Cost]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: 82d6700c-7746-4fd6-8586-65684fc52884
+
+	measure 'Client Margin' = SUM ( ClientMonth[Margin] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: 5b15a601-5227-4af2-a113-e7ca6f7df56f
+
+	measure 'Client Margin %' = DIVIDE ( [Client Margin], [Normalized Revenue] )
+		formatString: 0.0%
+		displayFolder: Client
+		lineageTag: e9de8035-3319-4252-b854-2f5b82d00789
+
+	measure 'Client Invoiced Margin' = SUM ( ClientMonth[Invoiced Margin] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Client
+		lineageTag: b622e4e0-c115-490b-b462-5a3d405d8cb3
+
+	measure 'Client Hours' = SUM ( ClientMonth[Hours] )
+		formatString: #,0.0
+		displayFolder: Client
+		lineageTag: 3ed4193e-c642-42bb-814b-aaf75eca534d
+
+	measure 'Client Uncosted Hours' = SUM ( ClientMonth[Uncosted Hours] )
+		formatString: #,0.0
+		displayFolder: Client
+		lineageTag: 76215a01-b4a0-44be-ad69-eaa023a0aa66
+
+	measure 'Client Effective Hourly Rate' = DIVIDE ( [Normalized Revenue], [Client Hours] )
+		formatString: \$#,0.00
+		displayFolder: Client
+		lineageTag: 7786bf90-0b2e-4753-90d6-b6893e497fbb
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: e366d37a-33f0-4fb7-b284-bccf6fe6f9c4
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Start'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 1d30ab53-5792-42f0-8ecc-7db52da6b390
+		summarizeBy: none
+		sourceColumn: Month Start
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Invoiced Revenue'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 22c3f4da-732f-44dc-bea1-5314b468cd51
+		summarizeBy: none
+		sourceColumn: Invoiced Revenue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Normalized Revenue'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 00043edb-e17e-4bb2-b3d6-8e748f101598
+		summarizeBy: none
+		sourceColumn: Normalized Revenue
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Agreement Revenue'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: bc885654-be8c-4efe-b5a6-dde0f065543e
+		summarizeBy: none
+		sourceColumn: Agreement Revenue
+
+		annotation SummarizationSetBy = Automatic
+
+	column Hours
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 0be4c71b-e7ed-4921-992b-b3f2c1cf4e78
+		summarizeBy: none
+		sourceColumn: Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Labor Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: e7c9ae89-6f7a-40bb-9372-b7628a74afc4
+		summarizeBy: none
+		sourceColumn: Labor Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Uncosted Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 0b397048-6fce-493d-b939-54beb22d1fb4
+		summarizeBy: none
+		sourceColumn: Uncosted Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Addition Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 259353e5-5c7e-423b-91f2-ced4bf0f3cf2
+		summarizeBy: none
+		sourceColumn: Addition Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Product Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: fbf57a9c-95f5-4f55-bc85-bbccc852ca05
+		summarizeBy: none
+		sourceColumn: Product Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column Margin
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: bd1abc2c-73a1-4f56-a28c-4371a8b89232
+		summarizeBy: none
+		sourceColumn: Margin
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Invoiced Margin'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 76c37183-8fd9-4ad2-a9a2-e6ada717b1fe
+		summarizeBy: none
+		sourceColumn: Invoiced Margin
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ClientMonth = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="ClientMonth"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

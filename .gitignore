@@ -8,3 +8,7 @@ __pycache__/
 
 # Azure Functions Core Tools
 .python_packages/
+
+# Power BI Desktop local state (PBIP)
+**/.pbi/localSettings.json
+**/.pbi/cache.abf

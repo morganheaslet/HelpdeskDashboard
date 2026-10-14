@@ -1,0 +1,91 @@
+table TicketAssignments
+	lineageTag: f7c419c7-6f30-4c87-a631-89acdfbe7623
+
+	measure 'Tickets Assigned' = COUNTROWS ( TicketAssignments )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 1d14aff1-7417-431d-8851-b686825be8f9
+
+	measure 'Assigned - Closed' = [Tickets Assigned] - [Tickets Closed]
+		formatString: +#,0;-#,0;0
+		displayFolder: Volume
+		lineageTag: f50374a9-0f19-4866-9cb1-43c293f0da94
+
+	measure 'Close Rate' = DIVIDE ( [Tickets Closed], [Tickets Assigned] )
+		formatString: 0.0%
+		displayFolder: Volume
+		lineageTag: 32211999-88a0-4f8d-a13e-9a20ca26ee93
+
+	column TicketId
+		dataType: int64
+		formatString: 0
+		lineageTag: 5ac124c1-67fd-4848-86ab-d56821c14654
+		summarizeBy: none
+		sourceColumn: TicketId
+
+		annotation SummarizationSetBy = Automatic
+
+	column TechKey
+		dataType: string
+		isHidden
+		lineageTag: 6430589b-468b-472a-be50-9c1ce3cbcb2e
+		summarizeBy: none
+		sourceColumn: TechKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Assigned Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 1fd1bc86-635c-4527-828e-d24e65169093
+		summarizeBy: none
+		sourceColumn: Assigned Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Assignment Kind'
+		dataType: string
+		lineageTag: 3d987f79-0b41-4e64-9b97-aada6f80066e
+		summarizeBy: none
+		sourceColumn: Assignment Kind
+
+		annotation SummarizationSetBy = Automatic
+
+	column BoardId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: afc1d77c-d0aa-4e86-812f-764258d23863
+		summarizeBy: none
+		sourceColumn: BoardId
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 920e2e90-ddf6-473c-86be-34128bc90b1d
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority
+		dataType: string
+		lineageTag: 0a3e3cd8-0533-4f42-933b-fbc5e6ca8438
+		summarizeBy: none
+		sourceColumn: Priority
+
+		annotation SummarizationSetBy = Automatic
+
+	partition TicketAssignments = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="TicketAssignments"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

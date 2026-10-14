@@ -19,7 +19,7 @@ GO
 CREATE OR ALTER VIEW rpt.v_agreement_mrr_monthly AS
 WITH months AS (
     SELECT DISTINCT DATEFROMPARTS(YEAR(cal_date), MONTH(cal_date), 1) AS month_start
-    FROM meta.calendar WHERE cal_date <= CAST(SYSUTCDATETIME() AS DATE)
+    FROM meta.calendar WHERE cal_date >= '2025-01-01' AND cal_date <= CAST(SYSUTCDATETIME() AS DATE)
 ),
 active AS (
     SELECT a.*, m.month_start, EOMONTH(m.month_start) AS month_end

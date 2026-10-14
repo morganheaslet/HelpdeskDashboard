@@ -1,0 +1,131 @@
+table AgreementMonth
+	lineageTag: 81ee1e2a-bf5d-4cd7-8e5f-6f5453b5fa82
+
+	measure 'Agreement Revenue' = SUM ( AgreementMonth[Revenue] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Agreement
+		lineageTag: 957e49e8-7c6b-48c7-bdd7-c4da9b011dbf
+
+	measure 'Agreement Labor Cost' = SUM ( AgreementMonth[Labor Cost] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Agreement
+		lineageTag: 724d7531-20e9-4b1c-9f67-4c1121b7e704
+
+	measure 'Agreement Addition Cost' = SUM ( AgreementMonth[Addition Cost] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Agreement
+		lineageTag: ed7dcba6-f914-4310-9772-819f74dced8a
+
+	measure 'Agreement Margin' = SUM ( AgreementMonth[Margin] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Agreement
+		lineageTag: 3c8ef754-8979-4f36-afe2-5069bb32733d
+
+	measure 'Agreement Margin %' = DIVIDE ( [Agreement Margin], [Agreement Revenue] )
+		formatString: 0.0%
+		displayFolder: Agreement
+		lineageTag: d0a7ef96-ecda-4193-a45d-1679786beb6a
+
+	measure 'Agreement Hours' = SUM ( AgreementMonth[Hours] )
+		formatString: #,0.0
+		displayFolder: Agreement
+		lineageTag: 1d736ef0-39a6-403a-8fc3-b0ca4bc523fa
+
+	measure 'Agreement Effective Hourly Rate' = DIVIDE ( [Agreement Revenue], [Agreement Hours] )
+		formatString: \$#,0.00
+		displayFolder: Agreement
+		lineageTag: b65fbdd4-3b1d-4318-a213-d847a42e38f4
+
+	column AgreementId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 135fe6b3-e21d-46db-959a-eb225d0ffcbd
+		summarizeBy: none
+		sourceColumn: AgreementId
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 77a2597d-b103-457a-a50d-1a684469e6a1
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Start'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: ab0c56e7-3c35-4c36-9103-b5ae6c3c1549
+		summarizeBy: none
+		sourceColumn: Month Start
+
+		annotation SummarizationSetBy = Automatic
+
+	column Revenue
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 1ebb98fa-eb51-4ed4-9ac4-7198e4e1d710
+		summarizeBy: none
+		sourceColumn: Revenue
+
+		annotation SummarizationSetBy = Automatic
+
+	column Hours
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 2277ce94-cfd2-483e-850c-eaa1bad1155c
+		summarizeBy: none
+		sourceColumn: Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Labor Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: a0da7850-340e-4017-89a5-2f85b592e2aa
+		summarizeBy: none
+		sourceColumn: Labor Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Uncosted Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: f9bf8f45-a34d-4342-880c-24f87c1f879b
+		summarizeBy: none
+		sourceColumn: Uncosted Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Addition Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 8442fdc7-5fdf-4463-a62a-abe3a245fe92
+		summarizeBy: none
+		sourceColumn: Addition Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column Margin
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: d162ba57-6ea3-4d93-9fd0-57376d1fd615
+		summarizeBy: none
+		sourceColumn: Margin
+
+		annotation SummarizationSetBy = Automatic
+
+	partition AgreementMonth = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="AgreementMonth"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

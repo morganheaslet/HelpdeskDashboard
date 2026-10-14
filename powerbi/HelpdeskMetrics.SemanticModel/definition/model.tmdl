@@ -1,0 +1,26 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["SQL Server", "SQL Database", "Calendar", "Tech", "Board", "Company", "Agreement", "Tickets", "TicketAssignments", "BacklogDaily", "TimeEntries", "Capacity", "ClientMonth", "AgreementMonth", "PhoneDaily"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+ref table Calendar
+ref table Tech
+ref table Board
+ref table Company
+ref table Agreement
+ref table Tickets
+ref table TicketAssignments
+ref table BacklogDaily
+ref table TimeEntries
+ref table Capacity
+ref table ClientMonth
+ref table AgreementMonth
+ref table PhoneDaily
+ref table Period

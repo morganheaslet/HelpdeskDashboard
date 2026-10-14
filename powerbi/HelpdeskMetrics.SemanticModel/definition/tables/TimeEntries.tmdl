@@ -1,0 +1,195 @@
+table TimeEntries
+	lineageTag: 3a6f9d21-367e-4bbf-bddd-0bcb534fa9da
+
+	measure 'Hours Logged' = SUM ( TimeEntries[Hours] )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: 4591ec67-9858-4699-93f4-9fe76829ede5
+
+	measure 'Utilized Hours' = SUM ( TimeEntries[Utilized Hours] )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: 17f65146-2dc3-4c58-b83d-8c305f739ee0
+
+	measure 'Billable Hours' = SUM ( TimeEntries[Billable Hours] )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: a4cd5403-2187-4c78-b755-4b65765ae9ac
+
+	measure 'PTO Hours' = SUM ( TimeEntries[PTO Hours] )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: 630e86d7-1da1-43e8-88c5-444556185134
+
+	measure 'Ticket Hours' = CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = "ServiceTicket" )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: 4dd3871c-c1b5-48b4-9f61-b8248860d97f
+
+	measure 'Project Hours' = CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = "ProjectTicket" )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: 3738d12e-0763-4950-962e-f31222331dbb
+
+	measure 'Labor Cost' = SUM ( TimeEntries[Labor Cost] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Time
+		lineageTag: 7a642319-7924-4aa2-b843-ec2133c853e1
+
+	measure 'Uncosted Hours' = SUM ( TimeEntries[Uncosted Hours] )
+		formatString: #,0.0
+		displayFolder: Time
+		lineageTag: 8585564e-c103-43f7-9c83-9f72c4262985
+
+	column TimeEntryId
+		dataType: int64
+		formatString: 0
+		lineageTag: e70b058c-8c73-4c50-af1b-1440dffacc37
+		summarizeBy: none
+		sourceColumn: TimeEntryId
+
+		annotation SummarizationSetBy = Automatic
+
+	column TechKey
+		dataType: string
+		isHidden
+		lineageTag: f7aa6308-0302-4160-b5e4-3902ebebeca3
+		summarizeBy: none
+		sourceColumn: TechKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: fa67e5b1-3f18-4e11-846a-a6e8755ace9d
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 970b3b9f-6840-4195-ac28-eec60eeeeecb
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column AgreementId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 8e5176e4-2014-47d4-9a6f-2fe0ea1c908c
+		summarizeBy: none
+		sourceColumn: AgreementId
+
+		annotation SummarizationSetBy = Automatic
+
+	column TicketId
+		dataType: int64
+		formatString: 0
+		lineageTag: 64e07eed-e7d4-4427-8653-2c54202a2aa8
+		summarizeBy: none
+		sourceColumn: TicketId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Charge Type'
+		dataType: string
+		lineageTag: 8154f19f-e1f3-4d0f-bea8-3bda8562ff40
+		summarizeBy: none
+		sourceColumn: Charge Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Work Type'
+		dataType: string
+		lineageTag: 79f6550e-08a7-4e14-b398-0735b6a04804
+		summarizeBy: none
+		sourceColumn: Work Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Work Role'
+		dataType: string
+		lineageTag: 5c1e2230-ac52-4a5b-9282-6b6061dea7c2
+		summarizeBy: none
+		sourceColumn: Work Role
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Billable Option'
+		dataType: string
+		lineageTag: e5696b1f-60f8-400d-a2be-f99fc67e87c6
+		summarizeBy: none
+		sourceColumn: Billable Option
+
+		annotation SummarizationSetBy = Automatic
+
+	column Hours
+		dataType: double
+		formatString: #,0.0
+		lineageTag: baa6c4f9-ce1b-4acc-b750-262f35c851b6
+		summarizeBy: none
+		sourceColumn: Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Utilized Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: c7acb951-6271-44ec-97be-e743c7c48583
+		summarizeBy: none
+		sourceColumn: Utilized Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Billable Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: d74dde83-e578-4436-a0a3-ab97dd3b104f
+		summarizeBy: none
+		sourceColumn: Billable Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'PTO Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 2448f336-6700-4ead-9b35-c013b85c4209
+		summarizeBy: none
+		sourceColumn: PTO Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Labor Cost'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 593c50e6-d0fe-4587-ad00-bd4182bde00a
+		summarizeBy: none
+		sourceColumn: Labor Cost
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Uncosted Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 41687317-be8a-456c-8e68-c83921846a52
+		summarizeBy: none
+		sourceColumn: Uncosted Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	partition TimeEntries = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="TimeEntries"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

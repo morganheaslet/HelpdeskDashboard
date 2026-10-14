@@ -1,0 +1,54 @@
+table Company
+	lineageTag: 2501123d-95d2-4c3a-99b9-e4bc5455b31f
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		lineageTag: fcf990a4-db1a-48ff-bb09-1a6765d606fa
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Company
+		dataType: string
+		lineageTag: cb544dab-c8a9-44c7-ba6f-a5571d515642
+		summarizeBy: none
+		sourceColumn: Company
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Company Types'
+		dataType: string
+		lineageTag: 96c211f5-c548-4102-aa72-06503dec3259
+		summarizeBy: none
+		sourceColumn: Company Types
+
+		annotation SummarizationSetBy = Automatic
+
+	column Territory
+		dataType: string
+		lineageTag: f2a9a8a9-567e-45d6-b5dc-32549c93ff46
+		summarizeBy: none
+		sourceColumn: Territory
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Company Status'
+		dataType: string
+		lineageTag: baa66a6f-1de8-443b-b30e-d97f877e0800
+		summarizeBy: none
+		sourceColumn: Company Status
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Company = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Company"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

@@ -194,5 +194,7 @@ def log_run(conn, entity, started_at, status, rows_upserted=None, message=None):
     if status == "error":
         set_state(conn, entity, last_error_at=utcnow(), last_error=(message or "")[:2000])
     else:
-        set_state(conn, entity, last_success_at=utcnow())
+        # Clear the previous error so sync health reflects the current state;
+        # the error itself stays in meta.sync_log.
+        set_state(conn, entity, last_success_at=utcnow(), last_error=None, last_error_at=None)
     logging.info("sync %s: %s (%s rows) %s", entity, status, rows_upserted, message or "")

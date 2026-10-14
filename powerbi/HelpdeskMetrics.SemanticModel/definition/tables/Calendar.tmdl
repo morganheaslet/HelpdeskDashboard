@@ -1,0 +1,130 @@
+table Calendar
+	lineageTag: 8424bf8a-cf2e-4fd7-9309-2a6100a71f78
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: caf81059-4a96-4bf2-b279-28ed5f456976
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 8661edfd-33c5-4e6a-9a97-e87a514add18
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Start'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: c9eea22c-241c-4e98-8581-44074b6d9259
+		summarizeBy: none
+		sourceColumn: Month Start
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		lineageTag: 379ec845-04fc-42e8-89ae-cc25c45163cb
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: 'Month Sort'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Month Sort'
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: b8bb74a8-898f-460f-a4f5-e55d01a91b70
+		summarizeBy: none
+		sourceColumn: Month Sort
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Week Start'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: a8897376-e8c8-4e6c-9a58-042bec0f4d07
+		summarizeBy: none
+		sourceColumn: Week Start
+
+		annotation SummarizationSetBy = Automatic
+
+	column Week
+		dataType: string
+		lineageTag: b62cf6c9-7ce6-4eb9-8960-6495dec0e267
+		summarizeBy: none
+		sourceColumn: Week
+		sortByColumn: 'Week Start'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Weekday
+		dataType: string
+		lineageTag: f89544b3-a268-4303-bc95-ac2faf82e999
+		summarizeBy: none
+		sourceColumn: Weekday
+		sortByColumn: 'Weekday Sort'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Weekday Sort'
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: ec29141c-c9c0-4764-af61-d0ff0d5adc6d
+		summarizeBy: none
+		sourceColumn: Weekday Sort
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Weekday'
+		dataType: boolean
+		lineageTag: 75eb2843-c713-443e-b4e9-5a1b91dbd7b6
+		summarizeBy: none
+		sourceColumn: Is Weekday
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Holiday'
+		dataType: boolean
+		lineageTag: b52746d8-58bc-4ec1-a614-0d2593802839
+		summarizeBy: none
+		sourceColumn: Is Holiday
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Working Day'
+		dataType: boolean
+		lineageTag: 87c7fa99-097d-4dc4-9cce-7989183327b3
+		summarizeBy: none
+		sourceColumn: Is Working Day
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Full History'
+		dataType: boolean
+		lineageTag: daaa3128-e89b-4a36-ae02-31ca4e5a8f4a
+		summarizeBy: none
+		sourceColumn: Is Full History
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Calendar = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Calendar"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

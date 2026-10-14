@@ -1,0 +1,70 @@
+table BacklogDaily
+	lineageTag: d37b8b56-51d4-442c-951f-0b707c791072
+
+	measure 'Open at Start of Day' = VAR d = CALCULATE ( MAX ( BacklogDaily[Date] ) ) RETURN CALCULATE ( SUM ( BacklogDaily[Open Tickets] ), BacklogDaily[Date] = d )
+		formatString: #,0
+		displayFolder: Backlog
+		lineageTag: a7791514-e079-42f2-af10-b36912a94d43
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: d205c103-3598-422a-8dc8-f910dc7d9eb9
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column BoardId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: b30d98b8-50e2-47dd-a349-ef41dbc26685
+		summarizeBy: none
+		sourceColumn: BoardId
+
+		annotation SummarizationSetBy = Automatic
+
+	column TechKey
+		dataType: string
+		isHidden
+		lineageTag: 517dc3d1-b6e8-4c90-8a42-3cc557f78a1d
+		summarizeBy: none
+		sourceColumn: TechKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		lineageTag: 6e9f0df2-cd62-489c-a659-e45fa102792b
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority
+		dataType: string
+		lineageTag: 287367be-bd28-4c19-af6f-9ee977cd2887
+		summarizeBy: none
+		sourceColumn: Priority
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Open Tickets'
+		dataType: int64
+		lineageTag: 33785c6b-f4be-4f85-a05b-997f70e2a71b
+		summarizeBy: none
+		sourceColumn: Open Tickets
+
+		annotation SummarizationSetBy = Automatic
+
+	partition BacklogDaily = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="BacklogDaily"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

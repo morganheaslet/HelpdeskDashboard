@@ -1,0 +1,90 @@
+table Agreement
+	lineageTag: 7ef8a355-0f9f-4d2d-88f3-82dbdfb21f92
+
+	column AgreementId
+		dataType: int64
+		formatString: 0
+		lineageTag: 6ade263e-f8c1-40f8-a37b-4f0931b0d9b7
+		summarizeBy: none
+		sourceColumn: AgreementId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Agreement
+		dataType: string
+		lineageTag: 2273d0c5-970f-47c8-bbfa-0e31c57cef90
+		summarizeBy: none
+		sourceColumn: Agreement
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Agreement Type'
+		dataType: string
+		lineageTag: 98f21894-3b94-4cc8-bbbf-57c4298d7567
+		summarizeBy: none
+		sourceColumn: Agreement Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		lineageTag: 951a37c1-3bb6-4b63-9026-a2ddca5c76c3
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Agreement Status'
+		dataType: string
+		lineageTag: b79720c7-352a-4c3b-9fdf-388cc74c8e07
+		summarizeBy: none
+		sourceColumn: Agreement Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Billing Cycle'
+		dataType: string
+		lineageTag: 63aa93d5-9bf7-4684-a893-2ed6323cf40c
+		summarizeBy: none
+		sourceColumn: Billing Cycle
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Bill Amount'
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		lineageTag: 63d0acb9-af90-4b88-9d69-250dcce8b846
+		summarizeBy: none
+		sourceColumn: Bill Amount
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Start Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 05f77060-76fc-484d-8b28-34483dba96e6
+		summarizeBy: none
+		sourceColumn: Start Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'End Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 378fc909-df92-43b4-a752-089af6b1be03
+		summarizeBy: none
+		sourceColumn: End Date
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Agreement = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Agreement"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

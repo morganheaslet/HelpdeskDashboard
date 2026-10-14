@@ -1,0 +1,105 @@
+table PhoneDaily
+	lineageTag: ee61961c-7fe5-4618-926b-87d736cb3a8c
+
+	measure 'Inbound Calls' = SUM ( PhoneDaily[Inbound Calls] )
+		formatString: #,0
+		displayFolder: Phones
+		lineageTag: 3bd892b7-b28f-4a11-b8f8-b66eb7ed4e1f
+
+	measure 'Calls Answered' = SUM ( PhoneDaily[Answered] )
+		formatString: #,0
+		displayFolder: Phones
+		lineageTag: ee191783-18b2-4b27-990f-2f0a16798373
+
+	measure 'Calls Missed' = SUM ( PhoneDaily[Missed] )
+		formatString: #,0
+		displayFolder: Phones
+		lineageTag: d2578a35-40fa-48ec-82c3-3a5b4d52c321
+
+	measure 'Answer Rate' = DIVIDE ( [Calls Answered], [Inbound Calls] )
+		formatString: 0.0%
+		displayFolder: Phones
+		lineageTag: dc9f4eef-5e71-4433-ab67-082f2b46ea83
+
+	measure 'Talk Hours' = SUM ( PhoneDaily[Talk Hours] )
+		formatString: #,0.0
+		displayFolder: Phones
+		lineageTag: 38b9a6c8-0477-4e89-a242-82cdab63bb26
+
+	column Date
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 9d8a266f-b15f-47bd-b1d5-c2ac050c2af8
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Agent
+		dataType: string
+		lineageTag: 707b0d80-d9ca-45f1-a153-9466a783d51d
+		summarizeBy: none
+		sourceColumn: Agent
+
+		annotation SummarizationSetBy = Automatic
+
+	column TechKey
+		dataType: string
+		isHidden
+		lineageTag: a3e15de4-2525-4b7f-ae4f-9991b7b20860
+		summarizeBy: none
+		sourceColumn: TechKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Inbound Calls'
+		dataType: int64
+		lineageTag: 82cc6177-1f69-48a9-9cb1-c1468ef2a3ed
+		summarizeBy: none
+		sourceColumn: Inbound Calls
+
+		annotation SummarizationSetBy = Automatic
+
+	column Answered
+		dataType: int64
+		lineageTag: d5fb3932-793e-49b3-91f7-11d65ef5c962
+		summarizeBy: none
+		sourceColumn: Answered
+
+		annotation SummarizationSetBy = Automatic
+
+	column Missed
+		dataType: int64
+		lineageTag: 8b1e9e29-616c-4e78-beba-4519b311dbf4
+		summarizeBy: none
+		sourceColumn: Missed
+
+		annotation SummarizationSetBy = Automatic
+
+	column Abandoned
+		dataType: int64
+		lineageTag: 5bd4c544-dc9b-4d7e-b5af-42dd0ec55113
+		summarizeBy: none
+		sourceColumn: Abandoned
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Talk Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: d745b7d2-f7ef-417e-a346-9ffb876a9231
+		summarizeBy: none
+		sourceColumn: Talk Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	partition PhoneDaily = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="PhoneDaily"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

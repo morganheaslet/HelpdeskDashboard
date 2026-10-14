@@ -1,0 +1,54 @@
+table Board
+	lineageTag: 27440a5e-388a-4c14-a4f6-3fdb81a65b1d
+
+	column BoardId
+		dataType: int64
+		formatString: 0
+		lineageTag: 3944c965-e226-4380-a7c1-99507a08e3a3
+		summarizeBy: none
+		sourceColumn: BoardId
+
+		annotation SummarizationSetBy = Automatic
+
+	column Board
+		dataType: string
+		lineageTag: d9acf826-2070-41d4-8325-81885eac53a1
+		summarizeBy: none
+		sourceColumn: Board
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Throughput Board'
+		dataType: boolean
+		lineageTag: e68f53bc-60ee-4b62-baa7-04770fee9072
+		summarizeBy: none
+		sourceColumn: Is Throughput Board
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Alerts'
+		dataType: boolean
+		lineageTag: 8417876f-7057-462d-a5db-e8c18936b4f8
+		summarizeBy: none
+		sourceColumn: Is Alerts
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Active'
+		dataType: boolean
+		lineageTag: 5ece3625-124f-46df-b546-c3d54e5b2fa2
+		summarizeBy: none
+		sourceColumn: Is Active
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Board = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Board"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table

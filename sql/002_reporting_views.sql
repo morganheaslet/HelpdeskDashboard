@@ -58,6 +58,22 @@ BEGIN
     SELECT cal_date, CASE WHEN DATEDIFF(DAY, '19000101', cal_date) % 7 < 5 THEN 1 ELSE 0 END
     FROM d OPTION (MAXRECURSION 0);
 END;
+
+-- Extend back to 2010: the sync pulls every ticket UPDATED since 2025, which
+-- includes tickets entered as far back as 2010 (and old still-open ones), so
+-- their dates need calendar rows. Monthly rollups still start at 2025-01-01
+-- (the synced-history start), see v_utilization_monthly / v_agreement_mrr_monthly.
+IF NOT EXISTS (SELECT 1 FROM meta.calendar WHERE cal_date = '2010-01-01')
+BEGIN
+    WITH d AS (
+        SELECT CAST('2010-01-01' AS DATE) AS cal_date
+        UNION ALL SELECT DATEADD(DAY, 1, cal_date) FROM d WHERE cal_date < '2024-12-31'
+    )
+    INSERT INTO meta.calendar (cal_date, is_weekday)
+    SELECT cal_date, CASE WHEN DATEDIFF(DAY, '19000101', cal_date) % 7 < 5 THEN 1 ELSE 0 END
+    FROM d WHERE NOT EXISTS (SELECT 1 FROM meta.calendar c WHERE c.cal_date = d.cal_date)
+    OPTION (MAXRECURSION 0);
+END;
 GO
 
 /* --------------------------------------------------------------- tickets */
@@ -71,9 +87,10 @@ SELECT
               AND cs.name IS NULL THEN 1 ELSE 0 END                         AS is_open,
     CASE WHEN ws.name IS NOT NULL THEN 1 ELSE 0 END                          AS is_waiting,
     COALESCE(NULLIF(mo.display_name, ''), t.owner_identifier)                AS owner_name,
-    -- Who actually closed/resolved it; falls back to the owner when CW
-    -- didn't stamp closedBy (older tickets, or automated closes).
-    COALESCE(t.resolved_by, t.closed_by, t.owner_identifier)                 AS closer_identifier,
+    -- Who actually closed it. Owner is only set on ~25% of tickets and
+    -- differs from closedBy on about half of closed ones, so closedBy is the
+    -- per-tech "closed" credit; owner/resolvedBy are fallbacks.
+    COALESCE(t.closed_by, t.resolved_by, t.owner_identifier)                 AS closer_identifier,
     -- Calendar-hour durations. respond/resolve_minutes from ConnectWise are
     -- the SLA-clock (business-hours) equivalents — use those for SLA.
     DATEDIFF(MINUTE, t.date_entered, t.date_responded) / 60.0                AS hours_to_respond,
@@ -101,7 +118,13 @@ SELECT
     CAST((e.time_start AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS local_date,
     COALESCE(NULLIF(m.display_name, ''), e.member_identifier)   AS member_name,
     ISNULL(wt.utilization_flag, 0)                               AS counts_toward_utilization,
-    wt.accrual_type,                                              -- non-null = PTO/holiday/sick/vacation
+    wt.accrual_type,
+    -- TH2's "PTO/Holiday" work type has no accrual type set in ConnectWise,
+    -- so PTO is also recognized by work type name.
+    CASE WHEN wt.accrual_type IS NOT NULL
+           OR e.work_type_name LIKE '%PTO%' OR e.work_type_name LIKE '%Holiday%'
+           OR e.work_type_name LIKE '%Vacation%' OR e.work_type_name LIKE '%Sick%'
+         THEN 1 ELSE 0 END                                       AS is_pto,
     CASE WHEN e.billable_option = 'Billable' THEN 1 ELSE 0 END   AS is_billable,
     -- Labor cost: the entry's own cost if CW recorded one, else the member's.
     -- NULL when neither is visible to the API member's security role.
@@ -125,7 +148,7 @@ CREATE OR ALTER VIEW rpt.v_utilization_monthly AS
 WITH months AS (
     SELECT DATEFROMPARTS(YEAR(cal_date), MONTH(cal_date), 1) AS month_start, cal_date, is_weekday, is_holiday
     FROM meta.calendar
-    WHERE cal_date <= CAST(SYSUTCDATETIME() AS DATE)
+    WHERE cal_date >= '2025-01-01' AND cal_date <= CAST(SYSUTCDATETIME() AS DATE)
 ),
 capacity AS (
     SELECT m.identifier, mo.month_start,
@@ -141,9 +164,9 @@ capacity AS (
 hours AS (
     SELECT member_identifier, DATEFROMPARTS(YEAR(local_date), MONTH(local_date), 1) AS month_start,
            SUM(actual_hours) AS total_hours,
-           SUM(CASE WHEN counts_toward_utilization = 1 AND accrual_type IS NULL THEN actual_hours ELSE 0 END) AS utilized_hours,
+           SUM(CASE WHEN counts_toward_utilization = 1 AND is_pto = 0 THEN actual_hours ELSE 0 END) AS utilized_hours,
            SUM(CASE WHEN is_billable = 1 THEN actual_hours ELSE 0 END) AS billable_hours,
-           SUM(CASE WHEN accrual_type IS NOT NULL THEN actual_hours ELSE 0 END) AS pto_hours,
+           SUM(CASE WHEN is_pto = 1 THEN actual_hours ELSE 0 END) AS pto_hours,
            SUM(CASE WHEN charge_to_type = 'ServiceTicket' THEN actual_hours ELSE 0 END) AS ticket_hours,
            SUM(CASE WHEN charge_to_type = 'ProjectTicket' THEN actual_hours ELSE 0 END) AS project_hours
     FROM rpt.v_time_entries

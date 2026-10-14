@@ -412,6 +412,8 @@ The web app keeps the live operational tabs.
   - `003`: agreements/invoices/products, Dialpad daily, SmileBack reviews.
   - `004`: MRR plus client and contract profitability (monthly and annual), phones, CSAT.
   - `005`: Function App identity access + the read-only `reporting_reader` role for Power BI.
+  - `006`: the `pbi.*` star schema the Power BI model imports. The project and
+    page recipes are in [`powerbi/`](powerbi/README.md).
 - **Sync:** the `SyncMetrics` timer runs every 15 minutes (offset 7 minutes
   from `PullSnapshot`). It runs `shared/sync_all.py`. It is incremental by
   `lastUpdated` from 2025-01-01, so the first runs ARE the backfill: each

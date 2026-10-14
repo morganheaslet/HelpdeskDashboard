@@ -1,0 +1,125 @@
+relationship 188c1fec-5321-52aa-a1ae-b437b7d67531
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Tickets.'Entered Date'
+	toColumn: Calendar.Date
+
+relationship 254e8fdd-a0a4-59b1-8639-6ca6b544eaec
+	isActive: false
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Tickets.'Closed Date'
+	toColumn: Calendar.Date
+
+relationship e4fc784a-2be6-5248-99d3-5af7853919be
+	isActive: false
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Tickets.'Resolved Date'
+	toColumn: Calendar.Date
+
+relationship 0132e57b-7aeb-5bca-843d-6637ee3507e3
+	fromColumn: Tickets.OwnerKey
+	toColumn: Tech.TechKey
+
+relationship 8b1e6c8f-d529-5247-a455-6df28e89e233
+	isActive: false
+	fromColumn: Tickets.CloserKey
+	toColumn: Tech.TechKey
+
+relationship 5186b25b-8999-5db3-a5a1-b98f249ea823
+	isActive: false
+	fromColumn: Tickets.ResolverKey
+	toColumn: Tech.TechKey
+
+relationship 5349ccdf-f358-5a19-a01f-db9ffbd681b3
+	fromColumn: Tickets.BoardId
+	toColumn: Board.BoardId
+
+relationship fb7cc026-e949-568e-ac95-f99b0c6994ed
+	fromColumn: Tickets.CompanyId
+	toColumn: Company.CompanyId
+
+relationship 110d2de8-9403-5b5e-b6cb-77698509f688
+	joinOnDateBehavior: datePartOnly
+	fromColumn: TicketAssignments.'Assigned Date'
+	toColumn: Calendar.Date
+
+relationship a2e9f8e5-e7a8-5a7f-9724-2a250e52beae
+	fromColumn: TicketAssignments.TechKey
+	toColumn: Tech.TechKey
+
+relationship d41aea4d-6b1b-5833-8432-c31195e4e027
+	fromColumn: TicketAssignments.BoardId
+	toColumn: Board.BoardId
+
+relationship e499d757-c7fa-5e31-ba57-0add19dc530e
+	fromColumn: TicketAssignments.CompanyId
+	toColumn: Company.CompanyId
+
+relationship 9395cd64-76bd-59f2-9087-a4c87c5fd721
+	joinOnDateBehavior: datePartOnly
+	fromColumn: BacklogDaily.Date
+	toColumn: Calendar.Date
+
+relationship 28b667a7-0331-599b-9417-4015bc436348
+	fromColumn: BacklogDaily.TechKey
+	toColumn: Tech.TechKey
+
+relationship dcf8377c-29e8-5570-9a01-1739ca005445
+	fromColumn: BacklogDaily.BoardId
+	toColumn: Board.BoardId
+
+relationship b2b2202c-5f02-5154-859d-6c1002c1f632
+	joinOnDateBehavior: datePartOnly
+	fromColumn: TimeEntries.Date
+	toColumn: Calendar.Date
+
+relationship d9aac420-9d95-506a-925e-9388234521b8
+	fromColumn: TimeEntries.TechKey
+	toColumn: Tech.TechKey
+
+relationship 6f12027c-c94b-5149-90ac-6abe63791ece
+	fromColumn: TimeEntries.CompanyId
+	toColumn: Company.CompanyId
+
+relationship 9583ff70-4098-5f5e-8e17-2266ab5e695c
+	fromColumn: TimeEntries.AgreementId
+	toColumn: Agreement.AgreementId
+
+relationship 6f106655-2299-50dc-8f18-88574cae46db
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Capacity.Date
+	toColumn: Calendar.Date
+
+relationship 4036d505-9646-5f25-af11-e1f8d797962f
+	fromColumn: Capacity.TechKey
+	toColumn: Tech.TechKey
+
+relationship ee6dbea9-a3f4-5a79-8320-6b11687ac477
+	joinOnDateBehavior: datePartOnly
+	fromColumn: ClientMonth.'Month Start'
+	toColumn: Calendar.Date
+
+relationship 90290a56-3531-51c1-87ae-4221f5bbe897
+	fromColumn: ClientMonth.CompanyId
+	toColumn: Company.CompanyId
+
+relationship 07457f38-f95a-5a43-a5c8-0edb03bad747
+	joinOnDateBehavior: datePartOnly
+	fromColumn: AgreementMonth.'Month Start'
+	toColumn: Calendar.Date
+
+relationship 4e4c3ad7-fff2-50bc-8f01-4306505fcee3
+	fromColumn: AgreementMonth.AgreementId
+	toColumn: Agreement.AgreementId
+
+relationship db0e6e43-bc84-5743-94e1-f649b3e50d44
+	fromColumn: AgreementMonth.CompanyId
+	toColumn: Company.CompanyId
+
+relationship edaa444e-c8b8-5795-8a94-76774fc0cd4d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: PhoneDaily.Date
+	toColumn: Calendar.Date
+
+relationship 183fd647-15ff-5789-b0bc-cfcabb015ff6
+	fromColumn: PhoneDaily.TechKey
+	toColumn: Tech.TechKey

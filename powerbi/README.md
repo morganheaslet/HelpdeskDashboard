@@ -1,0 +1,158 @@
+# Helpdesk Metrics — Power BI
+
+`HelpdeskMetrics.pbip` is a Power BI project (PBIP). It connects to the
+`pbi.*` views in `th2-metrics-db`, and its model already has every table,
+relationship and measure.
+The report pages are blank. Build them in Power BI Desktop using the
+recipes below, then save. Desktop writes the visuals back into
+`HelpdeskMetrics.Report/`, so commit that folder.
+
+Regenerate the model (not the report) after changing `sql/006_powerbi_views.sql`:
+```
+py powerbi/generate_model.py
+```
+This needs `az login` and the `pyodbc` + `azure-identity` packages. It
+rewrites `HelpdeskMetrics.SemanticModel/` and never overwrites `HelpdeskMetrics.Report/`.
+
+## First open
+
+1. Open `HelpdeskMetrics.pbip` in Power BI Desktop. If Desktop asks about PBIP
+   or TMDL preview features, enable them (File → Options → Preview features).
+2. **Refresh.** When Desktop asks for credentials, choose **Microsoft account**,
+   sign in with your TH2 account, and select **th2-metrics-sql.database.windows.net**.
+   The first refresh pulls about 200k tickets and takes a few minutes on the S0 tier.
+3. **Add a report-level filter:** `Calendar[Is Full History]` = True.
+   - Synced history is complete from 2025-01-01. Older dates exist only for
+     tickets that were touched after that date.
+
+## The model, briefly
+
+| Table | Grain | Notes |
+|---|---|---|
+| Calendar | day | Marked date table, starts 2010. Columns: `Week` (Monday start), `Month`, `Is Working Day`, `Is Full History` |
+| Period | — | **Day / Week / Month switch** (field parameter). Put `Period` on an axis or in matrix columns, and add a slicer on `Period` |
+| Tech | member | `Is Automation` flags API/workflow accounts (NinjaOneAPI, WORKFLOW…). `(Unassigned)` stands in for no owner |
+| Board, Company, Agreement | — | `Board[Is Throughput Board]` (Managed/Technical/Alerts/Security), `Board[Is Alerts]` |
+| Tickets | ticket | Measures are dated by entered date by default. Closed/Resolved measures switch to closed/resolved date **and** the closer/resolver tech automatically |
+| TicketAssignments | assignment | One row per time a ticket landed on a tech |
+| BacklogDaily | day × tech | Start-of-day open backlog. It begins with the first snapshot after the backfill completes |
+| TimeEntries, Capacity | day × tech | Utilization: utilized ÷ (capacity − PTO) |
+| ClientMonth, AgreementMonth | month | Profitability. Month grain only; day/week filters apply by month start |
+| PhoneDaily | day × agent | Dialpad |
+
+**Who counts as "the tech":**
+- **Assigned** goes to the ticket's owner.
+- **Closed** goes to whoever closed it (`closedBy`). That differs from the owner
+  on about half of closed tickets, and only about 25% of tickets have an owner at all.
+- **Resolved** goes to `resolvedBy`.
+- **Assignment dates before 2026-10-14:** ConnectWise's API keeps no
+  assignment history, so a ticket counts as assigned to its first known owner
+  on the day it was entered. Reassignments are tracked exactly from 2026-10-14 on.
+
+## Page recipes
+
+Recommended **page-level filters** on every ticket page:
+- `Tech[Is Automation]` = False
+- `Board[Board]`: whichever boards the page should cover. Alerts tickets
+  have 0-minute SLA times and are mostly auto-closed, so leave them out of SLA
+  and per-tech pages unless you specifically want them.
+
+### 1. Tickets by Tech
+
+| Visual | Fields |
+|---|---|
+| Slicer (Between) | `Calendar[Date]` |
+| Slicer (Tile) | `Period[Period]`, single select (Day / Week / Month) |
+| Slicer (Dropdown) | `Board[Board]` |
+| **Matrix** | Rows `Tech[Tech]` · Columns `Period[Period]` · Values `Tickets Assigned`, `Tickets Closed` · Sort by `Tickets Closed` descending |
+| **Table** | `Tech[Tech]`, `Open Now`, `Waiting Now`, `Avg Open Age (Days)`, `Tickets Assigned`, `Tickets Closed`, `Tickets Resolved`, `Assigned - Closed`, `Close Rate` |
+| Clustered column | X `Period[Period]` · Y `Tickets Assigned`, `Tickets Closed` |
+
+- `Open Now`, `Waiting Now` and `Avg Open Age` ignore the date slicer. They are
+  always the current backlog.
+- Once daily snapshots exist, add `Open at Start of Day` to the matrix for
+  backlog per tech per day.
+
+### 2. SLA
+
+| Visual | Fields |
+|---|---|
+| Cards | `Response SLA %`, `Resolution SLA %`, `Median Response Hours`, `Median Resolution Hours`, `Out of SLA Now` |
+| Line | X `Period[Period]` (or `Calendar[Month]`) · Y `Response SLA %`, `Resolution SLA %` |
+| Matrix | Rows `Tickets[Priority]` · Values `Responses With SLA Target`, `Response SLA %`, `Avg Response Hours`, `Resolutions With SLA Target`, `Resolution SLA %`, `Avg Resolution Hours` |
+| Matrix | Rows `Tech[Tech]`, same values: SLA by ticket owner |
+| Bar | `Board[Board]` × `Response SLA %` |
+
+- **SLA clock:** hours are ConnectWise's SLA-clock (business-hours) minutes ÷ 60.
+  Calendar-hour equivalents are in `Tickets[Response Hours (calendar)]` and
+  `Tickets[Resolution Hours (calendar)]`.
+- **Which date applies:** response SLA is by entered date. Resolution SLA is by
+  closed date.
+
+### 3. Utilization
+
+| Visual | Fields |
+|---|---|
+| Slicers | `Calendar[Date]`, `Period[Period]` |
+| **Matrix** | Rows `Tech[Tech]` · Values `Available Hours`, `Hours Logged`, `Utilized Hours`, `Billable Hours`, `PTO Hours`, `Utilization %`, `Billable %` |
+| Column | X `Period[Period]` · Y `Utilization %`, `Billable %` |
+| Stacked bar | `TimeEntries[Work Type]` × `Hours Logged` |
+| Donut | `TimeEntries[Charge Type]` × `Hours Logged` (ticket vs project vs admin time) |
+
+- **Filters:**
+  - Page filter `Capacity Hours` is not blank, so only techs with capacity appear.
+  - Optionally add `Tech[In CW Utilization]` = True. Only 9 active members have
+    that flag set in ConnectWise today.
+- **How it's calculated:**
+  - **Utilized** counts work types flagged "utilization" in ConnectWise.
+  - **PTO** is any work type named PTO/Holiday/Vacation/Sick. ConnectWise's own
+    PTO category isn't set on TH2's work types.
+  - **Capacity** is 8 h per working day, from the member's daily capacity.
+- **Holidays:** these are not in the calendar yet, so holiday weeks show lower
+  utilization. Mark them once:
+  `UPDATE meta.calendar SET is_holiday = 1 WHERE cal_date IN ('2025-01-01', '2025-05-26', ...)`
+
+### 4. Client Profitability
+
+| Visual | Fields |
+|---|---|
+| Slicers | `Calendar[Year]`, `Calendar[Month]`, `Company[Company Types]` |
+| Cards | `Normalized Revenue`, `Client Total Cost`, `Client Margin`, `Client Margin %` |
+| **Table** | `Company[Company]`, `Normalized Revenue`, `Invoiced Revenue`, `Client Labor Cost`, `Client Addition Cost`, `Client Product Cost`, `Client Margin`, `Client Margin %`, `Client Hours`, `Client Effective Hourly Rate`, `Client Uncosted Hours` · sort by `Client Margin %` ascending to surface the least profitable clients |
+| Scatter | X `Normalized Revenue` · Y `Client Margin %` · Values `Company[Company]` · Size `Client Hours` |
+| Line | X `Calendar[Month]` · Y `Normalized Revenue`, `Invoiced Revenue`, `Client Margin` |
+
+- **Normalized revenue** is agreement revenue spread evenly per month, plus
+  non-agreement invoices.
+- **Invoiced revenue** is what was actually billed that month. It's lumpy for
+  annual agreements.
+- **Monthly vs annual:** this page is monthly. For annual, put `Calendar[Year]`
+  on rows, or set the Year slicer and clear Month.
+- **Uncosted hours** are hours with no cost rate visible to the API account (about
+  10% today), so labor cost is understated by that much.
+
+### 5. Contract Profitability
+
+| Visual | Fields |
+|---|---|
+| Slicers | `Calendar[Year]`, `Calendar[Month]`, `Agreement[Agreement Type]`, `Agreement[Agreement Status]` |
+| **Table** | `Agreement[Agreement]`, `Agreement[Agreement Type]`, `Company[Company]`, `Agreement Revenue`, `Agreement Labor Cost`, `Agreement Addition Cost`, `Agreement Margin`, `Agreement Margin %`, `Agreement Hours`, `Agreement Effective Hourly Rate` |
+| Bar | `Agreement[Agreement Type]` × `Agreement Margin %` |
+
+- **Revenue** is the agreement's base fee plus billable additions, per month.
+- **Cost** is labor charged to that agreement, plus addition costs.
+
+## Publishing
+
+1. Desktop → **Publish** → choose a workspace.
+2. In the Power BI service, open the semantic model → **Settings**:
+   - **Data source credentials:** OAuth2, your TH2 account.
+   - **Scheduled refresh:** e.g. 6am / 12pm / 6pm.
+3. **Access:** share the report, or the workspace app, with the managers.
+   - In Import mode, viewers don't need database access. Only the refresh
+     credential does.
+   - `reporting_reader` in the database is for people building their own
+     reports against SQL.
+4. **Restricting profitability:** consider putting the profitability pages in a
+   separate report, or adding row-level security, if not every viewer should see
+   them.

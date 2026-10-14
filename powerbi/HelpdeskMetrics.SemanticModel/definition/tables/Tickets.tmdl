@@ -1,0 +1,365 @@
+table Tickets
+	lineageTag: 8ac63cb5-8799-4670-bde9-e281876b517d
+
+	measure 'Tickets Opened' = COUNTROWS ( Tickets )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 7033fb27-5f17-48a2-a25b-57d19686a146
+
+	measure 'Tickets Closed' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ), USERELATIONSHIP ( Tickets[CloserKey], Tech[TechKey] ) )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 8d4cbf41-d809-4b78-87bf-f4f2dce95411
+
+	measure 'Tickets Resolved' = CALCULATE ( COUNTROWS ( Tickets ), NOT ISBLANK ( Tickets[Resolved Date] ), USERELATIONSHIP ( Tickets[Resolved Date], 'Calendar'[Date] ), USERELATIONSHIP ( Tickets[ResolverKey], Tech[TechKey] ) )
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: fd863b15-6732-414c-af20-486eea7721b6
+
+	measure 'Open Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
+		formatString: #,0
+		displayFolder: Backlog
+		lineageTag: c3986d5a-ddd3-43aa-b7b7-64d3e14089ad
+
+	measure 'Waiting Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is Waiting] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
+		formatString: #,0
+		displayFolder: Backlog
+		lineageTag: adc2703f-9b7b-406e-bdac-d8256a121f84
+
+	measure 'Avg Open Age (Days)' = CALCULATE ( AVERAGE ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
+		formatString: #,0.0
+		displayFolder: Backlog
+		lineageTag: ecbbc2bd-fe00-444c-969b-e5cfc51d5ab2
+
+	measure 'Out of SLA Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is In SLA Now] = FALSE (), REMOVEFILTERS ( 'Calendar' ) )
+		formatString: #,0
+		displayFolder: SLA
+		lineageTag: 896f20b9-f4c9-49bc-a272-84db5d9c6157
+
+	measure 'Responses With SLA Target' = CALCULATE ( COUNTROWS ( Tickets ), NOT ISBLANK ( Tickets[Met Response SLA] ) )
+		formatString: #,0
+		displayFolder: SLA
+		lineageTag: 7d919ca4-c8b1-4ef2-89e1-c7c710008d9c
+
+	measure 'Response SLA %' = DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Met Response SLA] = 1 ), [Responses With SLA Target] )
+		formatString: 0.0%
+		displayFolder: SLA
+		lineageTag: 342d89d5-e26e-4a6f-8b12-b16fe35b559e
+
+	measure 'Resolutions With SLA Target' = CALCULATE ( COUNTROWS ( Tickets ), NOT ISBLANK ( Tickets[Met Resolution SLA] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
+		formatString: #,0
+		displayFolder: SLA
+		lineageTag: 7b2ac92d-a242-49ac-b2d1-55199a55ad60
+
+	measure 'Resolution SLA %' = DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Met Resolution SLA] = 1, Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) ), [Resolutions With SLA Target] )
+		formatString: 0.0%
+		displayFolder: SLA
+		lineageTag: 7b97e088-9311-4951-b7f8-7e4ce09ef9b0
+
+	measure 'Avg Response Hours' = AVERAGE ( Tickets[Response Hours (SLA clock)] )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: a48c6a21-f017-444a-94e2-2d95e82c7258
+
+	measure 'Median Response Hours' = MEDIAN ( Tickets[Response Hours (SLA clock)] )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: 9a932f5d-993d-420f-bad9-c0073a02354d
+
+	measure 'Avg Resolution Hours' = CALCULATE ( AVERAGE ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: 265816f8-27ec-4efe-a72c-1d7209da7397
+
+	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: 8260e423-44a4-451a-bdcc-8277767c4a2f
+
+	column TicketId
+		dataType: int64
+		formatString: 0
+		lineageTag: 9c679888-54da-4643-9468-14f8007c3ac6
+		summarizeBy: none
+		sourceColumn: TicketId
+
+		annotation SummarizationSetBy = Automatic
+
+	column BoardId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 1c1e16b8-0b92-4da5-87ae-337498493a16
+		summarizeBy: none
+		sourceColumn: BoardId
+
+		annotation SummarizationSetBy = Automatic
+
+	column CompanyId
+		dataType: int64
+		formatString: 0
+		isHidden
+		lineageTag: 353bfdbd-a503-4810-b196-9f51d269fdc7
+		summarizeBy: none
+		sourceColumn: CompanyId
+
+		annotation SummarizationSetBy = Automatic
+
+	column OwnerKey
+		dataType: string
+		isHidden
+		lineageTag: b9a85af5-2bc5-476c-8a89-4cc902d4e1f8
+		summarizeBy: none
+		sourceColumn: OwnerKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column CloserKey
+		dataType: string
+		isHidden
+		lineageTag: ce7716c0-5bb3-4402-b56b-2286b5e5af45
+		summarizeBy: none
+		sourceColumn: CloserKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResolverKey
+		dataType: string
+		isHidden
+		lineageTag: 455ef87a-84da-4548-b70d-371078e42d14
+		summarizeBy: none
+		sourceColumn: ResolverKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResponderKey
+		dataType: string
+		isHidden
+		lineageTag: 93bc3513-ed71-48ba-a118-9b18ca1d6675
+		summarizeBy: none
+		sourceColumn: ResponderKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Entered Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 99959e54-b68f-47e8-8247-60b0207164ff
+		summarizeBy: none
+		sourceColumn: Entered Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Closed Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 2be7dc1c-8ff0-47c6-8d1f-437b00d0cc3c
+		summarizeBy: none
+		sourceColumn: Closed Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resolved Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 19ab9c83-4f87-4a7d-9b25-0e2ce5c22644
+		summarizeBy: none
+		sourceColumn: Resolved Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Responded Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 98ffff19-5e80-47ac-867e-0876a09759e4
+		summarizeBy: none
+		sourceColumn: Responded Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Summary
+		dataType: string
+		lineageTag: 3b7221b8-a759-45e6-bb92-b63a82aaa156
+		summarizeBy: none
+		sourceColumn: Summary
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		lineageTag: 595679ad-2016-4e74-8bc3-68ce2acbf31a
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	column Priority
+		dataType: string
+		lineageTag: b69b48fa-8609-4ea9-a3be-45efce52bebf
+		summarizeBy: none
+		sourceColumn: Priority
+
+		annotation SummarizationSetBy = Automatic
+
+	column Type
+		dataType: string
+		lineageTag: 993ce82b-568a-4ed9-b994-81f7f12ef0be
+		summarizeBy: none
+		sourceColumn: Type
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subtype
+		dataType: string
+		lineageTag: ac95ae0f-3fa0-4994-aed2-a5f852ef59d2
+		summarizeBy: none
+		sourceColumn: Subtype
+
+		annotation SummarizationSetBy = Automatic
+
+	column Source
+		dataType: string
+		lineageTag: f039d839-29ef-4d85-bbac-539333233b18
+		summarizeBy: none
+		sourceColumn: Source
+
+		annotation SummarizationSetBy = Automatic
+
+	column SLA
+		dataType: string
+		lineageTag: 0d180862-72a4-4741-a102-ecaa8d8bb6a9
+		summarizeBy: none
+		sourceColumn: SLA
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Open'
+		dataType: boolean
+		lineageTag: e3c46b58-559d-402a-8078-2a30bb27fc6c
+		summarizeBy: none
+		sourceColumn: Is Open
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Waiting'
+		dataType: boolean
+		lineageTag: b4a66a9e-69d1-45ae-ab31-c081ad32f2b5
+		summarizeBy: none
+		sourceColumn: Is Waiting
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is Closed'
+		dataType: boolean
+		lineageTag: 7379b7e5-ed72-4d89-ac09-d1f554e42e0b
+		summarizeBy: none
+		sourceColumn: Is Closed
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Is In SLA Now'
+		dataType: boolean
+		lineageTag: af2548e3-719e-412f-8856-cd2afcfc9254
+		summarizeBy: none
+		sourceColumn: Is In SLA Now
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Response Hours (SLA clock)'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: dcf0de8a-078a-43d9-87b0-b1f2afec370a
+		summarizeBy: none
+		sourceColumn: Response Hours (SLA clock)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resolution Hours (SLA clock)'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 5dde13d2-2e94-43bc-95e1-b4055a68c87b
+		summarizeBy: none
+		sourceColumn: Resolution Hours (SLA clock)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Response Hours (calendar)'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 7b791cf6-e3a0-4026-a1b9-3ea89899de2f
+		summarizeBy: none
+		sourceColumn: Response Hours (calendar)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resolution Hours (calendar)'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 39125ae7-825f-4b93-ba4b-aa0ffd692c9b
+		summarizeBy: none
+		sourceColumn: Resolution Hours (calendar)
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Response Target Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: e27739d3-8c82-4e34-a95b-7a9e492d65d2
+		summarizeBy: none
+		sourceColumn: Response Target Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Resolution Target Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: b25481bb-ca08-42e3-b301-fbbac95efcc2
+		summarizeBy: none
+		sourceColumn: Resolution Target Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Met Response SLA'
+		dataType: int64
+		lineageTag: 83507634-5328-441a-8414-71847f19da3f
+		summarizeBy: none
+		sourceColumn: Met Response SLA
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Met Resolution SLA'
+		dataType: int64
+		lineageTag: a7234668-e611-4023-bfc4-14a60ad10982
+		summarizeBy: none
+		sourceColumn: Met Resolution SLA
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Open Age Days'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: 249e2f3c-b7db-49fe-b09a-de822086fa0a
+		summarizeBy: none
+		sourceColumn: Open Age Days
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Ticket Hours'
+		dataType: double
+		formatString: #,0.0
+		lineageTag: dbb86eb6-2ab9-4aac-9a27-64197ef9d21b
+		summarizeBy: none
+		sourceColumn: Ticket Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Tickets = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(#"SQL Server", #"SQL Database"),
+				    Data = Source{[Schema="pbi",Item="Tickets"]}[Data]
+				in
+				    Data
+
+	annotation PBI_ResultType = Table
