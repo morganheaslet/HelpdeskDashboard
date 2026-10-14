@@ -71,6 +71,11 @@ table Tickets
 		displayFolder: SLA
 		lineageTag: 16f926f6-809d-456c-af79-dc744ac45d87
 
+	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: 8d8f4139-632a-483b-a46d-093327f4e1f4
+
 	measure 'Max Open Age (Days)' = CALCULATE ( MAX ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: Backlog
@@ -101,11 +106,6 @@ table Tickets
 		displayFolder: Client
 		lineageTag: 203fef09-ae17-4173-9f0f-a8f0a5601c3c
 
-	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
-		formatString: #,0.0
-		displayFolder: SLA
-		lineageTag: 8d8f4139-632a-483b-a46d-093327f4e1f4
-
 	column TicketId
 		dataType: int64
 		formatString: 0
@@ -117,8 +117,8 @@ table Tickets
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 41d9ee17-3089-4f5b-b315-c3126262f60c
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -127,8 +127,8 @@ table Tickets
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 73fed442-b944-4e18-b89b-e15915d710c4
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -180,6 +180,8 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Closed Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
@@ -188,6 +190,8 @@ table Tickets
 		sourceColumn: Closed Date
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Resolved Date'
 		dataType: dateTime
@@ -198,6 +202,8 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Responded Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
@@ -206,6 +212,8 @@ table Tickets
 		sourceColumn: Responded Date
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column Summary
 		dataType: string
@@ -247,35 +255,11 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
-	column Item
-		dataType: string
-		lineageTag: bee020f8-44bf-44c5-9844-6c58ee1a4717
-		summarizeBy: none
-		sourceColumn: Item
-
-		annotation SummarizationSetBy = Automatic
-
 	column Source
 		dataType: string
 		lineageTag: 4ecd7121-6fbe-4e55-8a0f-89c38047e2f7
 		summarizeBy: none
 		sourceColumn: Source
-
-		annotation SummarizationSetBy = Automatic
-
-	column Contact
-		dataType: string
-		lineageTag: 554cf7d9-908b-4a39-848b-b0fc5eee9ba0
-		summarizeBy: none
-		sourceColumn: Contact
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Entered After Hours'
-		dataType: boolean
-		lineageTag: fbc3cf60-9ca3-49af-aa55-1a9447854a60
-		summarizeBy: none
-		sourceColumn: Entered After Hours
 
 		annotation SummarizationSetBy = Automatic
 
@@ -400,11 +384,35 @@ table Tickets
 
 	column 'Ticket Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 9bfe347e-760d-42dc-afa6-83faec6f821e
 		summarizeBy: none
 		sourceColumn: Ticket Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: string
+		lineageTag: bee020f8-44bf-44c5-9844-6c58ee1a4717
+		summarizeBy: none
+		sourceColumn: Item
+
+		annotation SummarizationSetBy = Automatic
+
+	column Contact
+		dataType: string
+		lineageTag: 554cf7d9-908b-4a39-848b-b0fc5eee9ba0
+		summarizeBy: none
+		sourceColumn: Contact
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Entered After Hours'
+		dataType: boolean
+		lineageTag: fbc3cf60-9ca3-49af-aa55-1a9447854a60
+		summarizeBy: none
+		sourceColumn: Entered After Hours
 
 		annotation SummarizationSetBy = Automatic
 
@@ -418,3 +426,4 @@ table Tickets
 				    Data
 
 	annotation PBI_ResultType = Table
+

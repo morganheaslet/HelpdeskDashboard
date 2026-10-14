@@ -17,8 +17,8 @@ table BacklogDaily
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 4b401842-56f6-4993-afc3-426e7ffb4bfb
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -68,3 +68,4 @@ table BacklogDaily
 				    Data
 
 	annotation PBI_ResultType = Table
+

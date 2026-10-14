@@ -53,8 +53,8 @@ table TicketAssignments
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 234b690f-9827-44e8-9f47-0dd65cebeba6
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -63,8 +63,8 @@ table TicketAssignments
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: e9c34f0f-346a-4a96-b1bd-67f16424623e
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -89,3 +89,4 @@ table TicketAssignments
 				    Data
 
 	annotation PBI_ResultType = Table
+

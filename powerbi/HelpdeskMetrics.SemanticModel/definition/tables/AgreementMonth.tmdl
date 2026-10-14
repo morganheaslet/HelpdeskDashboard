@@ -38,8 +38,8 @@ table AgreementMonth
 
 	column AgreementId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 13715dc5-8477-40c9-ad74-81bdabb348e6
 		summarizeBy: none
 		sourceColumn: AgreementId
@@ -48,8 +48,8 @@ table AgreementMonth
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 2c4e2583-5ca8-431a-a132-eba92cdb6621
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -85,8 +85,8 @@ table AgreementMonth
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: 4a93231e-c971-4d3d-be31-74f531fcb756
 		summarizeBy: none
 		sourceColumn: Labor Cost
@@ -95,8 +95,8 @@ table AgreementMonth
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: b2a69b6d-cbf3-4fbb-bb20-272dd61835c0
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
@@ -131,3 +131,4 @@ table AgreementMonth
 				    Data
 
 	annotation PBI_ResultType = Table
+

@@ -87,8 +87,8 @@ table PhoneDaily
 
 	column 'Talk Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 2206469a-8613-4340-a769-851597c984e9
 		summarizeBy: none
 		sourceColumn: Talk Hours
@@ -105,3 +105,4 @@ table PhoneDaily
 				    Data
 
 	annotation PBI_ResultType = Table
+

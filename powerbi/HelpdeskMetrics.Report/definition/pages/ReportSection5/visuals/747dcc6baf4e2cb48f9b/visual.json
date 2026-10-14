@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "747dcc6baf4e2cb48f9b",
   "position": {
     "x": 10,
     "y": 122,
     "z": 0,
-    "width": 1260,
     "height": 400,
+    "width": 1260,
     "tabOrder": 0
   },
   "visual": {
@@ -243,11 +243,9 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -269,7 +267,8 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   },
   "filterConfig": {
     "filters": [
@@ -326,6 +325,216 @@
           ]
         },
         "howCreated": "User"
+      },
+      {
+        "name": "55d4c3c8f04458e4f9ec",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Company"
+              }
+            },
+            "Property": "Company"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "04e502705bd3323b2599",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Opened"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "817d991615ba4d1f6323",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Closed"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "b9e1020a0c9054316669",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Open Now"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "0ae9be8f5b08e4f9f251",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Waiting Now"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "7d0622e450cba7ee58e0",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Avg Open Age (Days)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "a1087aa640228077da97",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Max Open Age (Days)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "ce47e56ed7d472a04398",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Response SLA %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "149fec6376ef8580c118",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Resolution SLA %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "11013e6c4490ee8447c0",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TimeEntries"
+              }
+            },
+            "Property": "Hours Logged"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "2a666a66b48d8ff9e56d",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TimeEntries"
+              }
+            },
+            "Property": "Avg Hours per Closed Ticket"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "9c6e0f7292427f020408",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "After-Hours %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "79d0787e6c72b9db937a",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Phone %"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "92f4d258b48bb8d23a89",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Requesting Contacts"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "45464ed102e7d1583e08",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "ClientMonth"
+              }
+            },
+            "Property": "Revenue per Ticket"
+          }
+        },
+        "type": "Advanced"
       }
     ]
   }

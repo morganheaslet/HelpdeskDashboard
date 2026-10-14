@@ -73,8 +73,8 @@ table ClientMonth
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: f9dbb161-771a-4e0c-8b61-d30f3545e358
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -92,8 +92,8 @@ table ClientMonth
 
 	column 'Invoiced Revenue (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: d298fe29-8a27-46bb-9b77-953d626c3b65
 		summarizeBy: none
 		sourceColumn: Invoiced Revenue
@@ -102,8 +102,8 @@ table ClientMonth
 
 	column 'Normalized Revenue (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: e23640c7-58f7-4834-9d10-3688c0e1d739
 		summarizeBy: none
 		sourceColumn: Normalized Revenue
@@ -112,8 +112,8 @@ table ClientMonth
 
 	column 'Agreement Revenue (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: bc0c059f-6904-401b-9f6b-6ddaab0a389b
 		summarizeBy: none
 		sourceColumn: Agreement Revenue
@@ -131,8 +131,8 @@ table ClientMonth
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: 26e0a80f-7484-4dda-8b9d-4ed5da62e334
 		summarizeBy: none
 		sourceColumn: Labor Cost
@@ -141,8 +141,8 @@ table ClientMonth
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: cf9a4797-1971-4b85-8be2-20e09280668e
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
@@ -195,3 +195,4 @@ table ClientMonth
 				    Data
 
 	annotation PBI_ResultType = Table
+

@@ -47,6 +47,11 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {}
+        }
       ]
     },
     "visualContainerObjects": {

@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "f9efcd28ba1097c43f47",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "021a29bef493c68b558b",
   "position": {
-    "x": 530,
-    "y": 8,
-    "z": 0,
-    "width": 230,
-    "height": 104,
-    "tabOrder": 0
+    "x": 520.34134988363076,
+    "y": 6.951124903025601,
+    "z": 2,
+    "height": 104.26687354538402,
+    "width": 249.24747866563226,
+    "tabOrder": 2
   },
   "visual": {
     "visualType": "slicer",
@@ -27,13 +27,13 @@
                 }
               },
               "queryRef": "Board.Board",
-              "nativeQueryRef": "Board"
+              "nativeQueryRef": "Board",
+              "active": true
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -46,6 +46,11 @@
               }
             }
           }
+        }
+      ],
+      "general": [
+        {
+          "properties": {}
         }
       ]
     },
@@ -70,12 +75,18 @@
           }
         }
       ]
-    }
+    },
+    "syncGroup": {
+      "groupName": "Board",
+      "fieldChanges": true,
+      "filterChanges": true
+    },
+    "drillFilterOtherVisuals": true
   },
   "filterConfig": {
     "filters": [
       {
-        "name": "activeBoards_ReportSection5",
+        "name": "activeBoards_ReportSection0",
         "field": {
           "Column": {
             "Expression": {
@@ -129,7 +140,7 @@
         "howCreated": "User"
       },
       {
-        "name": "noProjectBoards_ReportSection5",
+        "name": "noProjectBoards_ReportSection0",
         "field": {
           "Column": {
             "Expression": {
@@ -211,8 +222,7 @@
               }
             }
           ]
-        },
-        "howCreated": "User"
+        }
       }
     ]
   }

@@ -75,8 +75,8 @@ table TimeEntries
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: b543b695-111f-415c-a4ab-1086df77e168
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -85,8 +85,8 @@ table TimeEntries
 
 	column AgreementId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: b52c0649-fc5c-4c31-9c09-a744645d4721
 		summarizeBy: none
 		sourceColumn: AgreementId
@@ -145,8 +145,8 @@ table TimeEntries
 
 	column 'Utilized Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: c8a8ef0b-6099-42e6-822e-354ed8b6b2fb
 		summarizeBy: none
 		sourceColumn: Utilized Hours
@@ -155,8 +155,8 @@ table TimeEntries
 
 	column 'Billable Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 8dca990f-f57c-4576-a18d-a2421634806b
 		summarizeBy: none
 		sourceColumn: Billable Hours
@@ -165,8 +165,8 @@ table TimeEntries
 
 	column 'PTO Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 313ea4b8-9e10-44ba-b2b6-9f05efbda77d
 		summarizeBy: none
 		sourceColumn: PTO Hours
@@ -175,8 +175,8 @@ table TimeEntries
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: 6c32dbcd-6c03-4a73-b64d-046b36b2c8dd
 		summarizeBy: none
 		sourceColumn: Labor Cost
@@ -185,8 +185,8 @@ table TimeEntries
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: be7158a6-8400-46cc-8aee-318f5ba5be7b
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
@@ -203,3 +203,4 @@ table TimeEntries
 				    Data
 
 	annotation PBI_ResultType = Table
+

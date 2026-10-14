@@ -10,10 +10,10 @@
     "tabOrder": 0
   },
   "visual": {
-    "visualType": "pivotTable",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Rows": {
+        "Values": {
           "projections": [
             {
               "field": {
@@ -42,11 +42,7 @@
               },
               "queryRef": "Tech.Tech",
               "nativeQueryRef": "Tech"
-            }
-          ]
-        },
-        "Values": {
-          "projections": [
+            },
             {
               "field": {
                 "Measure": {
@@ -126,7 +122,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Tickets per client by tech (expand a client)'"
+                  "Value": "'Tickets per client by tech'"
                 }
               }
             }

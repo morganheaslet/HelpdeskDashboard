@@ -320,10 +320,13 @@ def tickets_by_client(p):
                            "[Requesting Contacts]", "[Revenue per Ticket]"]},
                title="Client overview (click a client to focus the page)",
                sort=("[Tickets Opened]", "Descending"), filters=[recent("overview")]),
-        visual(p, "bytech", "pivotTable", (10, BODY_Y + 410, 620, 340),
-               {"Rows": ["Company[Company]", "Tech[Tech]"],
-                "Values": ["[Tickets Assigned]", "[Tickets Closed]", "[Open Now]"]},
-               title="Tickets per client by tech (expand a client)", sort=("[Tickets Assigned]", "Descending")),
+        # Flat table, not a Company > Tech matrix: a matrix opens collapsed
+        # at the client level with its expand buttons hidden by default, so
+        # the tech rows were never visible.
+        visual(p, "bytech", "tableEx", (10, BODY_Y + 410, 620, 340),
+               {"Values": ["Company[Company]", "Tech[Tech]", "[Tickets Assigned]", "[Tickets Closed]",
+                           "[Open Now]"]},
+               title="Tickets per client by tech", sort=("[Tickets Assigned]", "Descending")),
         visual(p, "category", "barChart", (640, BODY_Y + 410, 630, 340),
                {"Category": ["Tickets[Subtype]"], "Series": ["Tickets[Type]"], "Y": ["[Tickets Opened]"]},
                title="Tickets by category (subtype, split by type)", sort=("[Tickets Opened]", "Descending")),

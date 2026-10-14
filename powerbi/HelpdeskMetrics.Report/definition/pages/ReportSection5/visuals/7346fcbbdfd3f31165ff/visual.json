@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "7346fcbbdfd3f31165ff",
   "position": {
     "x": 640,
     "y": 532,
     "z": 0,
-    "width": 630,
     "height": 340,
+    "width": 630,
     "tabOrder": 0
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Tickets.Subtype",
-              "nativeQueryRef": "Subtype"
+              "nativeQueryRef": "Subtype",
+              "active": true
             }
           ]
         },
@@ -83,11 +84,9 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -109,6 +108,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

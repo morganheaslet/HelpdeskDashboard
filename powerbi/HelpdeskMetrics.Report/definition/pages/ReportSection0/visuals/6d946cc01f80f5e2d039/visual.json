@@ -47,6 +47,11 @@
             }
           }
         }
+      ],
+      "general": [
+        {
+          "properties": {}
+        }
       ]
     },
     "visualContainerObjects": {
@@ -217,8 +222,7 @@
               }
             }
           ]
-        },
-        "howCreated": "User"
+        }
       }
     ]
   }

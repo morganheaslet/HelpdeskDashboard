@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "e8da8f4cc8129b17a500",
   "position": {
-    "x": 770,
-    "y": 8,
+    "x": 769.588828549263,
+    "y": 7.9441427463149727,
     "z": 0,
-    "width": 119,
-    "height": 104,
+    "height": 104.26687354538402,
+    "width": 185.69433669511247,
     "tabOrder": 0
   },
   "visual": {
@@ -34,5 +34,23 @@
       }
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "11ea5c12a19caae33dfd",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Opened"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }
