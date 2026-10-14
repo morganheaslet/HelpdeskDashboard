@@ -104,6 +104,7 @@ LEADERBOARD_FIELDS = ["id", "owner", "priority", "source"]
 # just "still missing from phoneHistoryByWeek," which the logic above
 # already retries every run) instead of risking the whole function.
 PHONE_HISTORY_WEEKS = 8
+DIALPAD_UNITS_VERSION = "minutes-v2"   # bump to force a one-time re-pull of cached weeks
 DIALPAD_HISTORY_BUDGET_S = 300
 
 
@@ -270,9 +271,12 @@ def run_refresh(now=None):
         # Weeks stored before the timezone fix were pulled with UTC day
         # boundaries (no "_tz" marker) — drop them so they're re-fetched once
         # with local boundaries, instead of mixing the two in one chart.
+        # Same for weeks stored before the 2026-10-14 duration-units fix
+        # (Dialpad durations are minutes; they were read as seconds) — no
+        # "_units" marker means talk/wait times are 60x too small.
         by_week = {
             wk: v for wk, v in (existing.get("phoneHistoryByWeek") or {}).items()
-            if v.get("_tz") == tz_name
+            if v.get("_tz") == tz_name and v.get("_units") == DIALPAD_UNITS_VERSION
         }
         current_week = phone_weeks[-1]
         today_str = local_now.date().isoformat()
@@ -308,6 +312,7 @@ def run_refresh(now=None):
                     # the local today_str above.
                     week_data["_fetchedAt"] = local_now.isoformat()
                     week_data["_tz"] = tz_name
+                    week_data["_units"] = DIALPAD_UNITS_VERSION
                     by_week[wk] = week_data
                 fetched.append(wk)
             except Exception:

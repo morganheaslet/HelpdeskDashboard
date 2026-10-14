@@ -32,7 +32,16 @@ def _store(conn, stats):
         "stat_date": date.fromisoformat(day), "agent_name": agent[:200],
         "inbound_calls": v["inbound"], "answered": v["answered"], "missed": v["missed"],
         "abandoned": v["abandoned"], "talk_seconds": round(v["talk_seconds"], 1),
-        "ring_seconds": round(v["ring_seconds"], 1), "synced_at": now,
+        "ring_seconds": round(v["ring_seconds"], 1), "hold_seconds": round(v.get("hold_seconds", 0.0), 1),
+        "all_calls": v.get("all_calls", 0), "outbound_calls": v.get("outbound", 0),
+        "outbound_connected": v.get("outbound_connected", 0), "handled": v.get("handled", 0),
+        "rejected": v.get("rejected", 0), "ring_no_answer": v.get("ring_no_answer", 0),
+        "voicemails": v.get("voicemails", 0), "transferred_in": v.get("transferred_in", 0),
+        "transferred_out": v.get("transferred_out", 0),
+        "dialpad_user_id": (v.get("user_id") or None) and v["user_id"][:50],
+        "email": (v.get("email") or None) and v["email"][:200],
+        "agent_type": (v.get("agent_type") or None) and v["agent_type"][:50],
+        "synced_at": now,
     } for (day, agent), v in stats.items()])
 
 

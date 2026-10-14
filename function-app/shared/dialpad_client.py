@@ -136,9 +136,10 @@ class DialpadClient:
         so the same substring patterns apply to both.
 
         Confirmed against a real export on 2026-09-13 (one row per user per
-        hour): columns are exactly 'name', 'answered', 'missed',
-        'talk_duration' (cumulative seconds, NOT an average), 'abandoned',
-        'inbound_calls', and 'ringing_duration' (also cumulative). Two of the
+        hour): columns include 'name', 'answered', 'missed',
+        'talk_duration' (cumulative MINUTES, NOT an average — see
+        _to_seconds), 'abandoned', 'inbound_calls', and 'ringing_duration'
+        (also cumulative minutes). Two of the
         original patterns matched the wrong column the first time this ran
         for real, both fixed here:
           - name: "user" matched 'user_id' before "name" ever got a chance
@@ -167,11 +168,16 @@ class DialpadClient:
 
     @staticmethod
     def _to_seconds(val):
-        """Handles either a raw seconds number or an H:MM:SS / MM:SS string."""
+        """Dialpad stats-export duration -> seconds. Plain numbers are MINUTES
+        (2 decimals, e.g. 0.13 = 8s) per Dialpad's export docs — confirmed
+        2026-10-14 against TH2's data: read as seconds, avg talk time per
+        answered call came out at ~15 "seconds" (really ~15 minutes). Before
+        that fix, every talk/ring/hold figure was 60x too small. H:MM:SS /
+        MM:SS strings are also accepted."""
         if val in (None, ""):
             return 0.0
         try:
-            return float(val)
+            return float(val) * 60.0
         except (TypeError, ValueError):
             pass
         parts = str(val).split(":")
@@ -281,7 +287,9 @@ class DialpadClient:
         fall back to one day per request.
 
         Returns {(date_iso, agent_name): {inbound, answered, missed,
-        abandoned, talk_seconds, ring_seconds}}.
+        abandoned, talk/ring/hold_seconds, all_calls, outbound,
+        outbound_connected, handled, rejected, ring_no_answer, voicemails,
+        transferred_in/out, user_id, email, agent_type}}.
 
         days_ago_start/days_ago_end follow the same convention as
         get_call_stats_for_week() (start = the older edge), which is what
@@ -309,6 +317,16 @@ class DialpadClient:
         if not date_col and start_date != end_date:
             raise DialpadNoDateColumn(f"no date column in {fieldnames}")
 
+        # Count columns summed as-is, by the exact header Dialpad sent on
+        # 2026-10-14 (any missing from a future export just stay 0).
+        counts = {
+            "all_calls": "all_calls", "outbound": "outbound_calls", "outbound_connected": "outbound_connected",
+            "handled": "handled", "rejected": "rejected", "ring_no_answer": "ring_no_answer",
+            "voicemails": "voicemails", "transferred_in": "transferred_in", "transferred_out": "transferred_out",
+        }
+        present = {k: c for k, c in counts.items() if c in fieldnames}
+        hold_col = "hold_duration" if "hold_duration" in fieldnames else None
+
         out = {}
         for row in rows:
             day = (row.get(date_col) or "")[:10] if date_col else start_date.isoformat()
@@ -317,7 +335,12 @@ class DialpadClient:
             agent = (row.get(cols["name"]) or "Unknown").strip() if cols["name"] else "Unknown"
             e = out.setdefault((day, agent), {
                 "inbound": 0, "answered": 0, "missed": 0, "abandoned": 0,
-                "talk_seconds": 0.0, "ring_seconds": 0.0,
+                "talk_seconds": 0.0, "ring_seconds": 0.0, "hold_seconds": 0.0,
+                **{k: 0 for k in counts},
+                # identity, from the first row seen for this agent-day
+                "user_id": (row.get("user_id") or "").strip() or None,
+                "email": (row.get("email") or "").strip() or None,
+                "agent_type": (row.get("type") or "").strip() or None,
             })
             e["inbound"] += self._to_int(row.get(cols["inbound"])) if cols["inbound"] else 0
             e["answered"] += self._to_int(row.get(cols["answered"])) if cols["answered"] else 0
@@ -325,6 +348,9 @@ class DialpadClient:
             e["abandoned"] += self._to_int(row.get(cols["abandoned"])) if cols["abandoned"] else 0
             e["talk_seconds"] += self._to_seconds(row.get(cols["talk_duration"])) if cols["talk_duration"] else 0.0
             e["ring_seconds"] += self._to_seconds(row.get(cols["ring_duration"])) if cols["ring_duration"] else 0.0
+            e["hold_seconds"] += self._to_seconds(row.get(hold_col)) if hold_col else 0.0
+            for k, c in present.items():
+                e[k] += self._to_int(row.get(c))
         return out
 
     def get_call_stats_for_week(self, week_start_iso, now=None):
