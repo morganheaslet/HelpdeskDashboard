@@ -10,8 +10,6 @@ annotation PBI_QueryOrder = ["SQL Server", "SQL Database", "Calendar", "Tech", "
 
 annotation __PBI_TimeIntelligenceEnabled = 0
 
-annotation PBI_ProTooling = ["DevMode"]
-
 ref table Calendar
 ref table Tech
 ref table Board
@@ -26,4 +24,3 @@ ref table ClientMonth
 ref table AgreementMonth
 ref table PhoneDaily
 ref table Period
-

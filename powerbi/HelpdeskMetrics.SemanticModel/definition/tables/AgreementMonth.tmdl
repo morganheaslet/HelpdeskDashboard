@@ -1,46 +1,46 @@
 table AgreementMonth
-	lineageTag: 71dc9cba-22b7-495a-a70b-15dd60829015
+	lineageTag: 6810f238-a551-4cab-9487-fb701ea9d65a
 
 	measure 'Agreement Revenue' = SUM ( AgreementMonth[Revenue] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: 2b04049e-49e4-4c7e-89cf-c53546bb590b
+		lineageTag: 3a189d6f-b14c-4077-bdf8-37f8f7f16fbb
 
 	measure 'Agreement Labor Cost' = SUM ( AgreementMonth[Labor Cost (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: 215cb30b-65cd-4da1-b453-adb4fe6dfc4f
+		lineageTag: 877923cd-d179-4df0-8f9a-28ab91ae74d6
 
 	measure 'Agreement Addition Cost' = SUM ( AgreementMonth[Addition Cost] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: d3c2c1b6-31f9-49f8-bbb1-8653244a967d
+		lineageTag: 8790c968-d248-455f-b373-2e4a471bf39d
 
 	measure 'Agreement Margin' = SUM ( AgreementMonth[Margin] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Agreement
-		lineageTag: 9f253ef4-255c-4bee-93f2-3d760e3e3598
+		lineageTag: 017ba859-ac72-42fd-8d63-94d3bf55e96b
 
 	measure 'Agreement Margin %' = DIVIDE ( [Agreement Margin], [Agreement Revenue] )
 		formatString: 0.0%
 		displayFolder: Agreement
-		lineageTag: b841dc38-40e2-485b-b80c-f5abf2584bb4
+		lineageTag: 4e224263-7965-4ace-8b8b-bcbc1c8ee87b
 
 	measure 'Agreement Hours' = SUM ( AgreementMonth[Hours] )
 		formatString: #,0.0
 		displayFolder: Agreement
-		lineageTag: 4d9567b5-1200-46cf-b8f9-3d6d1b54b2cd
+		lineageTag: 1f60bd1f-c918-4a71-afaa-89c2395e81e7
 
 	measure 'Agreement Effective Hourly Rate' = DIVIDE ( [Agreement Revenue], [Agreement Hours] )
 		formatString: \$#,0.00
 		displayFolder: Agreement
-		lineageTag: 80a59c7f-b2f3-4219-9ef3-7acafabbfb84
+		lineageTag: cb598a95-89a2-4162-b234-d0d29bb6b1af
 
 	column AgreementId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 506aecd2-1dad-4e55-811c-95574541c386
+		isHidden
+		lineageTag: 13715dc5-8477-40c9-ad74-81bdabb348e6
 		summarizeBy: none
 		sourceColumn: AgreementId
 
@@ -48,9 +48,9 @@ table AgreementMonth
 
 	column CompanyId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: e555797a-53fd-45cf-9c5b-5fe567fc2ce6
+		isHidden
+		lineageTag: 2c4e2583-5ca8-431a-a132-eba92cdb6621
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -59,18 +59,16 @@ table AgreementMonth
 	column 'Month Start'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 7440f4f4-4e8c-41fb-85dd-09c65923c2a4
+		lineageTag: 60d137b3-f0e3-4528-9346-fedebeef3369
 		summarizeBy: none
 		sourceColumn: Month Start
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column Revenue
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 1a7cae60-b96e-4cb6-8d40-6af82e41d165
+		lineageTag: 776c83d8-ebd5-46e6-b727-ee611eeded5d
 		summarizeBy: none
 		sourceColumn: Revenue
 
@@ -79,7 +77,7 @@ table AgreementMonth
 	column Hours
 		dataType: double
 		formatString: #,0.0
-		lineageTag: bc650e9f-6af1-4009-9188-2e2e40ff4708
+		lineageTag: 7993e4d9-2474-4be8-8736-3dbf7bad1540
 		summarizeBy: none
 		sourceColumn: Hours
 
@@ -87,9 +85,9 @@ table AgreementMonth
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		isHidden
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 2cdee779-cd5b-45f0-be41-cb87cfc5160a
+		isHidden
+		lineageTag: 4a93231e-c971-4d3d-be31-74f531fcb756
 		summarizeBy: none
 		sourceColumn: Labor Cost
 
@@ -97,9 +95,9 @@ table AgreementMonth
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: 37b28820-e681-4f5e-9074-bc748f29ca59
+		isHidden
+		lineageTag: b2a69b6d-cbf3-4fbb-bb20-272dd61835c0
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
 
@@ -108,7 +106,7 @@ table AgreementMonth
 	column 'Addition Cost'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 9bb950e4-5149-4a46-836e-d450f1ec6878
+		lineageTag: 40e4f137-b0c0-4b87-83e6-f93f4f749f75
 		summarizeBy: none
 		sourceColumn: Addition Cost
 
@@ -117,7 +115,7 @@ table AgreementMonth
 	column Margin
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 81215625-7af0-410c-85db-de6150e48617
+		lineageTag: a06f0f5a-9534-4922-b6c2-00c1e774de72
 		summarizeBy: none
 		sourceColumn: Margin
 
@@ -133,4 +131,3 @@ table AgreementMonth
 				    Data
 
 	annotation PBI_ResultType = Table
-

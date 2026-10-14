@@ -1,45 +1,43 @@
 table PhoneDaily
-	lineageTag: a9fdef69-7f7f-4745-b3b8-af7da36c39e7
+	lineageTag: efa42505-95f3-4cdf-bb31-3dae2b18d5fd
 
 	measure 'Inbound Calls' = SUM ( PhoneDaily[Inbound Calls (raw)] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: dad60ba7-5132-4f44-ac34-4f009f492be3
+		lineageTag: b66b06f7-6853-4363-832d-fcbbd658d959
 
 	measure 'Calls Answered' = SUM ( PhoneDaily[Answered] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 9edcd8ea-b40b-4672-8935-11ad44ee4b15
+		lineageTag: c025846a-4902-4370-95d2-58b560340555
 
 	measure 'Calls Missed' = SUM ( PhoneDaily[Missed] )
 		formatString: #,0
 		displayFolder: Phones
-		lineageTag: 259da6b9-1ad0-4063-8413-69d19801b092
+		lineageTag: 7e5955b8-a6d8-4981-a456-ad18f8820df3
 
 	measure 'Answer Rate' = DIVIDE ( [Calls Answered], [Inbound Calls] )
 		formatString: 0.0%
 		displayFolder: Phones
-		lineageTag: 3930b351-942a-41e1-8b95-c23fed8dfd49
+		lineageTag: 3ad0f1c6-9200-41a2-b3bc-047cd0c9da6a
 
 	measure 'Talk Hours' = SUM ( PhoneDaily[Talk Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Phones
-		lineageTag: aebfd3e7-8bab-404f-bcd5-875408743d9e
+		lineageTag: a5187438-674f-4e92-9ea0-0663049db7a8
 
 	column Date
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 85e38bf8-69a5-4c8c-a4d1-ac4a0da36865
+		lineageTag: 2aab337f-de78-442f-8cf2-9c36ead0cc99
 		summarizeBy: none
 		sourceColumn: Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column Agent
 		dataType: string
-		lineageTag: 9f7d1245-7798-43f9-bd64-4c75988fdf79
+		lineageTag: 8f32d930-7dd4-4f2e-a317-26adeeed534a
 		summarizeBy: none
 		sourceColumn: Agent
 
@@ -48,7 +46,7 @@ table PhoneDaily
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: 4e7479c9-ea0b-47d0-a83a-940911c21ef5
+		lineageTag: 37c30d2e-ef19-4c75-8d10-fe28568b95aa
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -57,7 +55,7 @@ table PhoneDaily
 	column 'Inbound Calls (raw)'
 		dataType: int64
 		isHidden
-		lineageTag: fe16477d-a52b-4fc5-aa52-ea4a70e8f616
+		lineageTag: 00417159-b3a1-4339-9c01-0d4cdbbb42c3
 		summarizeBy: none
 		sourceColumn: Inbound Calls
 
@@ -65,7 +63,7 @@ table PhoneDaily
 
 	column Answered
 		dataType: int64
-		lineageTag: a5ce74b4-d193-4db1-92bf-3e2474e3a59d
+		lineageTag: c994f7d1-059f-476c-9b86-21b1dec24d2d
 		summarizeBy: none
 		sourceColumn: Answered
 
@@ -73,7 +71,7 @@ table PhoneDaily
 
 	column Missed
 		dataType: int64
-		lineageTag: 02862cf9-8c1d-4067-b5c7-4cdecbeadd3c
+		lineageTag: fc514acf-bdbd-49b5-9946-63fd3405538a
 		summarizeBy: none
 		sourceColumn: Missed
 
@@ -81,7 +79,7 @@ table PhoneDaily
 
 	column Abandoned
 		dataType: int64
-		lineageTag: c0cd1ddc-d348-45a7-8064-780fbdc678db
+		lineageTag: 2ac5199a-612f-498b-a145-1ffbcaa1442d
 		summarizeBy: none
 		sourceColumn: Abandoned
 
@@ -89,9 +87,9 @@ table PhoneDaily
 
 	column 'Talk Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: a007d18d-242f-4663-bb4b-73db0593acfd
+		isHidden
+		lineageTag: 2206469a-8613-4340-a769-851597c984e9
 		summarizeBy: none
 		sourceColumn: Talk Hours
 
@@ -107,4 +105,3 @@ table PhoneDaily
 				    Data
 
 	annotation PBI_ResultType = Table
-

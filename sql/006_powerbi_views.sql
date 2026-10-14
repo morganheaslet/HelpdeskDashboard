@@ -90,11 +90,16 @@ SELECT -1, '(No board)', CAST(0 AS BIT), CAST(0 AS BIT), CAST(0 AS BIT);
 GO
 
 CREATE OR ALTER VIEW pbi.Company AS
-SELECT company_id AS [CompanyId], name AS [Company], company_types AS [Company Types],
-       territory AS [Territory], status_name AS [Company Status]
-FROM cw.companies
+WITH recent AS (SELECT DISTINCT company_id FROM cw.tickets WHERE date_entered >= '2025-01-01' AND deleted = 0)
+SELECT c.company_id AS [CompanyId], c.name AS [Company], c.company_types AS [Company Types],
+       c.territory AS [Territory], c.status_name AS [Company Status],
+       -- ~190 of ~1,600 companies have had a ticket since 2025; client
+       -- pickers filter on this instead of listing every company.
+       CAST(CASE WHEN r.company_id IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS [Has Recent Tickets]
+FROM cw.companies c
+LEFT JOIN recent r ON r.company_id = c.company_id
 UNION ALL
-SELECT -1, '(No company)', NULL, NULL, NULL;
+SELECT -1, '(No company)', NULL, NULL, NULL, CAST(0 AS BIT);
 GO
 
 CREATE OR ALTER VIEW pbi.Agreement AS
@@ -125,7 +130,14 @@ SELECT
     t.priority_name                                     AS [Priority],
     t.type_name                                         AS [Type],
     t.subtype_name                                      AS [Subtype],
+    t.item_name                                         AS [Item],
     t.source_name                                       AS [Source],
+    t.contact_name                                      AS [Contact],
+    -- Entered outside business hours (local): before 7am, from 6pm, or on a
+    -- weekend. Weekday from a known Monday (1900-01-01) so DATEFIRST doesn't matter.
+    CAST(CASE WHEN DATEDIFF(DAY, '19000101', CAST(lt.entered_local AS DATE)) % 7 >= 5
+               OR DATEPART(HOUR, lt.entered_local) < 7
+               OR DATEPART(HOUR, lt.entered_local) >= 18 THEN 1 ELSE 0 END AS BIT) AS [Entered After Hours],
     t.sla_name                                          AS [SLA],
     CAST(t.is_open AS BIT)                              AS [Is Open],
     CAST(t.is_waiting AS BIT)                           AS [Is Waiting],
@@ -144,7 +156,8 @@ SELECT
     CASE WHEN t.is_open = 1 THEN DATEDIFF(MINUTE, t.date_entered, SYSUTCDATETIME()) / 1440.0 END AS [Open Age Days],
     t.actual_hours                                      AS [Ticket Hours]
 FROM rpt.v_tickets t
-CROSS JOIN meta.settings s;
+CROSS JOIN meta.settings s
+CROSS APPLY (SELECT CAST((t.date_entered AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATETIME2(0)) AS entered_local) lt;
 GO
 
 /*

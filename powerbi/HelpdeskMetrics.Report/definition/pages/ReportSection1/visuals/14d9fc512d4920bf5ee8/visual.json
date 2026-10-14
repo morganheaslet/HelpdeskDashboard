@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "14d9fc512d4920bf5ee8",
   "position": {
     "x": 10,
     "y": 122,
-    "z": 0,
-    "width": 620,
+    "z": 2000,
     "height": 240,
-    "tabOrder": 0
+    "width": 620,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "lineChart",
@@ -20,14 +20,48 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Period"
+                      "Entity": "Calendar"
                     }
                   },
-                  "Property": "Period"
+                  "Property": "Month"
                 }
               },
-              "queryRef": "Period.Period",
-              "nativeQueryRef": "Period"
+              "queryRef": "Calendar.Month",
+              "nativeQueryRef": "Month",
+              "active": true,
+              "displayName": "Month"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendar"
+                    }
+                  },
+                  "Property": "Week"
+                }
+              },
+              "queryRef": "Calendar.Week",
+              "nativeQueryRef": "Week",
+              "active": false,
+              "displayName": "Week"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendar"
+                    }
+                  },
+                  "Property": "Date"
+                }
+              },
+              "queryRef": "Calendar.Date",
+              "nativeQueryRef": "Day",
+              "active": false,
+              "displayName": "Day"
             }
           ],
           "fieldParameters": [
@@ -43,7 +77,7 @@
                 }
               },
               "index": 0,
-              "length": 1
+              "length": 3
             }
           ]
         },
@@ -81,7 +115,6 @@
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -103,6 +136,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

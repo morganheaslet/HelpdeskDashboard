@@ -1,76 +1,81 @@
 table ClientMonth
-	lineageTag: e2b9c813-6b85-40b7-bc71-86f8af8ba478
+	lineageTag: a4116ca5-c66c-4778-8de1-e4495babf080
 
 	measure 'Normalized Revenue' = SUM ( ClientMonth[Normalized Revenue (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: 926efa74-2743-48f5-822c-633d921c196a
+		lineageTag: 20c96330-160e-461a-b5c3-e3d8a3f142a2
 
 	measure 'Invoiced Revenue' = SUM ( ClientMonth[Invoiced Revenue (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: 7008eaf0-b1bd-424d-b9bb-8fd9af1bdaf7
+		lineageTag: dae3b0d8-b7fd-4a0e-87dd-10b0419dc57c
 
 	measure 'Agreement Revenue (Client)' = SUM ( ClientMonth[Agreement Revenue (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: 5d225bb4-48d8-42ed-9a7f-f4fef333dd6e
+		lineageTag: 9b54d168-efce-4438-8c64-40be8b874194
 
 	measure 'Client Labor Cost' = SUM ( ClientMonth[Labor Cost (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: dd027b01-8caf-4f51-a7db-3c4ad8972101
+		lineageTag: b387f44a-6a41-4641-a9ac-67a7021a8406
 
 	measure 'Client Addition Cost' = SUM ( ClientMonth[Addition Cost] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: 354f896e-2068-40db-a6cc-ac0f65c17d65
+		lineageTag: a424f1d5-17a0-4363-979e-546258a65398
 
 	measure 'Client Product Cost' = SUM ( ClientMonth[Product Cost] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: 7794c657-c819-4e47-a08b-0fc2d0daf772
+		lineageTag: c17a698d-f299-4742-9e7b-712dfe181bcf
 
 	measure 'Client Total Cost' = [Client Labor Cost] + [Client Addition Cost] + [Client Product Cost]
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: cd98b32c-3f04-4ec1-b6e5-04af85db08e6
+		lineageTag: 23268b55-21f0-4555-90af-7528f210dfca
 
 	measure 'Client Margin' = SUM ( ClientMonth[Margin] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: b18f6823-35eb-4a01-b361-8d53b8ef2a1b
+		lineageTag: b7e42cb8-8e62-4fd4-adf1-5fa27ebb916d
 
 	measure 'Client Margin %' = DIVIDE ( [Client Margin], [Normalized Revenue] )
 		formatString: 0.0%
 		displayFolder: Client
-		lineageTag: da61cff8-999f-4559-8e9b-904b8c8b7a6e
+		lineageTag: 8fdee949-23dc-4eb8-8e8c-6195986460ff
 
 	measure 'Client Invoiced Margin' = SUM ( ClientMonth[Invoiced Margin] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Client
-		lineageTag: bf314595-9e1b-4cd8-8ff9-d1a3c64f4b0f
+		lineageTag: a110f41c-7de5-4f4b-9465-9aad0e0b07b7
 
 	measure 'Client Hours' = SUM ( ClientMonth[Hours] )
 		formatString: #,0.0
 		displayFolder: Client
-		lineageTag: e021e1cc-9ba9-43dc-8686-b45d45cd76e5
+		lineageTag: 9bca8ce8-f99c-4440-b6eb-9b67d149f17e
 
 	measure 'Client Uncosted Hours' = SUM ( ClientMonth[Uncosted Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Client
-		lineageTag: 53b6c583-7fd0-4d70-a3dd-c17a94701719
+		lineageTag: db87780e-8e47-4708-99cf-b9e807a369f7
 
 	measure 'Client Effective Hourly Rate' = DIVIDE ( [Normalized Revenue], [Client Hours] )
 		formatString: \$#,0.00
 		displayFolder: Client
-		lineageTag: c75c7e3a-a060-45a4-bdd0-cac6d4f01730
+		lineageTag: 294b4518-a228-49b5-9b47-e566c5f514ae
+
+	measure 'Revenue per Ticket' = DIVIDE ( [Normalized Revenue], [Tickets Opened] )
+		formatString: \$#,0.00
+		displayFolder: Client
+		lineageTag: 6afe174f-2620-4264-8eb2-5e526695c0ae
 
 	column CompanyId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: de33347f-c4ee-4137-b5f9-58bff048339b
+		isHidden
+		lineageTag: f9dbb161-771a-4e0c-8b61-d30f3545e358
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -79,19 +84,17 @@ table ClientMonth
 	column 'Month Start'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 677be696-f8d8-452e-a251-d5f96e97ab98
+		lineageTag: b89ab3ff-b33e-46d6-8596-8891f27364df
 		summarizeBy: none
 		sourceColumn: Month Start
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column 'Invoiced Revenue (raw)'
 		dataType: double
-		isHidden
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: b35ed189-aea7-479e-a9ca-6f5955b10472
+		isHidden
+		lineageTag: d298fe29-8a27-46bb-9b77-953d626c3b65
 		summarizeBy: none
 		sourceColumn: Invoiced Revenue
 
@@ -99,9 +102,9 @@ table ClientMonth
 
 	column 'Normalized Revenue (raw)'
 		dataType: double
-		isHidden
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 389cefb1-7b2e-4278-964b-35482a4ba39e
+		isHidden
+		lineageTag: e23640c7-58f7-4834-9d10-3688c0e1d739
 		summarizeBy: none
 		sourceColumn: Normalized Revenue
 
@@ -109,9 +112,9 @@ table ClientMonth
 
 	column 'Agreement Revenue (raw)'
 		dataType: double
-		isHidden
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: f403de0b-1bea-4be4-81c5-9630e1399ce4
+		isHidden
+		lineageTag: bc0c059f-6904-401b-9f6b-6ddaab0a389b
 		summarizeBy: none
 		sourceColumn: Agreement Revenue
 
@@ -120,7 +123,7 @@ table ClientMonth
 	column Hours
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 513260aa-a04e-4221-8835-9fc3354ca1e2
+		lineageTag: bbd03bf7-53ce-48e6-b51f-0b5d6dad3fd6
 		summarizeBy: none
 		sourceColumn: Hours
 
@@ -128,9 +131,9 @@ table ClientMonth
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		isHidden
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: b00c124f-9b43-45a2-8653-b444179afe1d
+		isHidden
+		lineageTag: 26e0a80f-7484-4dda-8b9d-4ed5da62e334
 		summarizeBy: none
 		sourceColumn: Labor Cost
 
@@ -138,9 +141,9 @@ table ClientMonth
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: 17880339-a5f7-4d73-8b61-9d8913d05d83
+		isHidden
+		lineageTag: cf9a4797-1971-4b85-8be2-20e09280668e
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
 
@@ -149,7 +152,7 @@ table ClientMonth
 	column 'Addition Cost'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 62fa29f7-6781-4430-b53a-57f571096478
+		lineageTag: a35423e7-787c-4f2c-a35a-afe3239b9c85
 		summarizeBy: none
 		sourceColumn: Addition Cost
 
@@ -158,7 +161,7 @@ table ClientMonth
 	column 'Product Cost'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: d429a350-b7c0-49e2-b18a-46082b989e9b
+		lineageTag: aa6aee76-eddd-4c8e-9684-c88fd9fa7944
 		summarizeBy: none
 		sourceColumn: Product Cost
 
@@ -167,7 +170,7 @@ table ClientMonth
 	column Margin
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: bdb5ff73-12c3-4bd4-8613-33b404a4cab5
+		lineageTag: 6702126e-0ed9-4608-89cc-dd6f6015e12b
 		summarizeBy: none
 		sourceColumn: Margin
 
@@ -176,7 +179,7 @@ table ClientMonth
 	column 'Invoiced Margin'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 55f8d03b-834c-439d-895a-659e38972684
+		lineageTag: 32d4ef76-1675-41dd-9497-644d42a0c3fc
 		summarizeBy: none
 		sourceColumn: Invoiced Margin
 
@@ -192,4 +195,3 @@ table ClientMonth
 				    Data
 
 	annotation PBI_ResultType = Table
-

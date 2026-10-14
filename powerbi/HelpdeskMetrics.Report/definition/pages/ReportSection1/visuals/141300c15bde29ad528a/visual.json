@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "141300c15bde29ad528a",
   "position": {
     "x": 10,
     "y": 372,
-    "z": 0,
-    "width": 620,
+    "z": 1000,
     "height": 340,
-    "tabOrder": 0
+    "width": 620,
+    "tabOrder": 1000
   },
   "visual": {
     "visualType": "pivotTable",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Tickets.Priority",
-              "nativeQueryRef": "Priority"
+              "nativeQueryRef": "Priority",
+              "active": true
             }
           ]
         },
@@ -121,7 +122,6 @@
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -143,6 +143,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

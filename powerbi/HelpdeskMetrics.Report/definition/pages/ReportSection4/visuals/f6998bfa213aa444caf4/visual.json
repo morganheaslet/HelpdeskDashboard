@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "f6998bfa213aa444caf4",
   "position": {
     "x": 570,
     "y": 8,
-    "z": 0,
-    "width": 170,
+    "z": 8000,
     "height": 104,
-    "tabOrder": 0
+    "width": 170,
+    "tabOrder": 8000
   },
   "visual": {
     "visualType": "slicer",
@@ -27,13 +27,13 @@
                 }
               },
               "queryRef": "Agreement.Agreement Status",
-              "nativeQueryRef": "Agreement Status"
+              "nativeQueryRef": "Agreement Status",
+              "active": true
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -70,6 +70,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

@@ -1,19 +1,19 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "c591dd4012af1af8f754",
+  "name": "97f60471dd555bc119f7",
   "position": {
     "x": 10,
-    "y": 8,
+    "y": 882,
     "z": 0,
-    "width": 200,
-    "height": 104,
+    "width": 410,
+    "height": 300,
     "tabOrder": 0
   },
   "visual": {
-    "visualType": "slicer",
+    "visualType": "clusteredColumnChart",
     "query": {
       "queryState": {
-        "Values": {
+        "Category": {
           "projections": [
             {
               "field": {
@@ -46,45 +46,42 @@
               "length": 1
             }
           ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Tickets Opened"
+                }
+              },
+              "queryRef": "Tickets.Tickets Opened",
+              "nativeQueryRef": "Tickets Opened"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Tickets Closed"
+                }
+              },
+              "queryRef": "Tickets.Tickets Closed",
+              "nativeQueryRef": "Tickets Closed"
+            }
+          ]
         }
       }
     },
     "drillFilterOtherVisuals": true,
-    "objects": {
-      "data": [
-        {
-          "properties": {
-            "mode": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Dropdown'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "selection": [
-        {
-          "properties": {
-            "singleSelect": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "strictSingleSelect": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
     "visualContainerObjects": {
       "title": [
         {
@@ -99,7 +96,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Group by'"
+                  "Value": "'Opened vs. closed over time'"
                 }
               }
             }

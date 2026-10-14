@@ -1,11 +1,11 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "323bf47486f30ed5819e",
+  "name": "f9efcd28ba1097c43f47",
   "position": {
-    "x": 220,
+    "x": 530,
     "y": 8,
     "z": 0,
-    "width": 280,
+    "width": 230,
     "height": 104,
     "tabOrder": 0
   },
@@ -75,7 +75,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "activeBoards_ReportSection1",
+        "name": "activeBoards_ReportSection5",
         "field": {
           "Column": {
             "Expression": {
@@ -129,7 +129,7 @@
         "howCreated": "User"
       },
       {
-        "name": "noProjectBoards_ReportSection1",
+        "name": "noProjectBoards_ReportSection5",
         "field": {
           "Column": {
             "Expression": {

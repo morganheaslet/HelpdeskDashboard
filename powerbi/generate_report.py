@@ -174,6 +174,7 @@ def categorical(name, table, column, values, exclude=False):
 
 NO_AUTOMATION = categorical("noAutomation", "Tech", "Is Automation", ["false"])
 NO_ALERTS = categorical("noAlertsBoard", "Board", "Is Alerts", ["false"])
+ACTIVE_BOARDS_ONLY = categorical("activeBoardsOnly", "Board", "Is Active", ["true"])
 NO_EXCLUDED_BOARDS = categorical("excludedBoards", "Board", "Board", [s(b) for b in EXCLUDED_BOARDS], exclude=True)
 
 # --------------------------------------------------------------- pages
@@ -300,6 +301,49 @@ def contract_profitability(p):
     ]
 
 
+def tickets_by_client(p):
+    """Client monitoring page (taller canvas: scrolls, fits to width).
+    Clicking a client in the overview cross-filters everything else."""
+    def recent(tag):   # filter names must be unique across the whole report
+        return categorical(f"recentClients_{p}_{tag}", "Company", "Has Recent Tickets", ["true"])
+    open_only = categorical(f"openOnly_{p}", "Tickets", "Is Open", ["true"])
+    return [
+        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        slicer(p, "client", (220, TOP_Y, 300, TOP_H), "Company[Company]", "Dropdown", "Client",
+               filters=[recent("slicer")]),
+        board_slicer(p, (530, TOP_Y, 230, TOP_H)),
+        *kpi_row(p, 770, ["[Tickets Opened]", "[Tickets Closed]", "[Open Now]", "[After-Hours %]"]),
+        visual(p, "overview", "tableEx", (10, BODY_Y, 1260, 400),
+               {"Values": ["Company[Company]", "[Tickets Opened]", "[Tickets Closed]", "[Open Now]", "[Waiting Now]",
+                           "[Avg Open Age (Days)]", "[Max Open Age (Days)]", "[Response SLA %]", "[Resolution SLA %]",
+                           "[Hours Logged]", "[Avg Hours per Closed Ticket]", "[After-Hours %]", "[Phone %]",
+                           "[Requesting Contacts]", "[Revenue per Ticket]"]},
+               title="Client overview (click a client to focus the page)",
+               sort=("[Tickets Opened]", "Descending"), filters=[recent("overview")]),
+        visual(p, "bytech", "pivotTable", (10, BODY_Y + 410, 620, 340),
+               {"Rows": ["Company[Company]", "Tech[Tech]"],
+                "Values": ["[Tickets Assigned]", "[Tickets Closed]", "[Open Now]"]},
+               title="Tickets per client by tech (expand a client)", sort=("[Tickets Assigned]", "Descending")),
+        visual(p, "category", "barChart", (640, BODY_Y + 410, 630, 340),
+               {"Category": ["Tickets[Subtype]"], "Series": ["Tickets[Type]"], "Y": ["[Tickets Opened]"]},
+               title="Tickets by category (subtype, split by type)", sort=("[Tickets Opened]", "Descending")),
+        visual(p, "trend", "clusteredColumnChart", (10, BODY_Y + 760, 410, 300),
+               {"Category": [PERIOD], "Y": ["[Tickets Opened]", "[Tickets Closed]"]},
+               title="Opened vs. closed over time"),
+        visual(p, "contacts", "clusteredBarChart", (430, BODY_Y + 760, 410, 300),
+               {"Category": ["Tickets[Contact]"], "Y": ["[Tickets Opened]"]},
+               title="Top requesters", sort=("[Tickets Opened]", "Descending")),
+        visual(p, "source", "donutChart", (850, BODY_Y + 760, 420, 300),
+               {"Category": ["Tickets[Source]"], "Y": ["[Tickets Opened]"]},
+               title="Intake channel"),
+        visual(p, "openlist", "tableEx", (10, BODY_Y + 1070, 1260, 420),
+               {"Values": ["Tickets[TicketId]", "Company[Company]", "Tickets[Summary]", "Tickets[Status]",
+                           "Tickets[Priority]", "Tickets[Subtype]", "Tech[Tech]", "Tickets[Open Age Days]"]},
+               title="Open tickets (oldest first)", sort=("Tickets[Open Age Days]", "Descending"),
+               filters=[open_only]),
+    ]
+
+
 # (folder name Desktop created, display name, builder, page filters)
 PAGES = [
     ("ReportSection0", "Tickets by Tech", tickets_by_tech, [NO_AUTOMATION, NO_ALERTS, NO_EXCLUDED_BOARDS]),
@@ -307,7 +351,18 @@ PAGES = [
     ("ReportSection2", "Utilization", utilization, [NO_AUTOMATION]),
     ("ReportSection3", "Client Profitability", client_profitability, []),
     ("ReportSection4", "Contract Profitability", contract_profitability, []),
+    # Every client's tickets count here — including Alerts and tickets closed
+    # by automation (per Morgan, 2026-10-14) — only inactive boards (the
+    # "(DO NOT USE)" / "(Inactive)" ones, Quartus included) are excluded.
+    ("ReportSection5", "Tickets by Client", tickets_by_client, [ACTIVE_BOARDS_ONLY]),
 ]
+
+# Pages that don't fit 1280x720 (scroll vertically, fit to width).
+PAGE_SIZES = {"ReportSection5": (1280, BODY_Y + 1070 + 420 + 10)}
+# Display order of pages in the report (by folder name).
+PAGE_ORDER = ["ReportSection0", "ReportSection5", "ReportSection1", "ReportSection2",
+              "ReportSection3", "ReportSection4"]
+PAGES_SCHEMA = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.1.0/schema.json"
 
 REPORT_FILTERS = [categorical("fullHistory", "Calendar", "Is Full History", ["true"])]
 
@@ -391,12 +446,27 @@ def check_model_references(docs):
 # --------------------------------------------------------------- main
 
 def main():
+    """py generate_report.py                    -> (re)build every page in PAGES
+       py generate_report.py ReportSection5     -> build only the named pages;
+       all other pages are left exactly as Desktop last saved them."""
     load_measure_tables()
+    only = set(sys.argv[1:])
+    unknown = only - {p[0] for p in PAGES}
+    if unknown:
+        raise SystemExit(f"Unknown page folder(s): {sorted(unknown)} — choose from {[p[0] for p in PAGES]}")
+    pages = [p for p in PAGES if not only or p[0] in only]
     docs = []   # (path, json)
-    for folder, display, build, filters in PAGES:
+    for folder, display, build, filters in pages:
         page_dir = DEF / "pages" / folder
-        page = json.loads((page_dir / "page.json").read_text(encoding="utf-8"))
+        if (page_dir / "page.json").exists():
+            page = json.loads((page_dir / "page.json").read_text(encoding="utf-8"))
+        else:
+            page = {"$schema": PAGE_SCHEMA, "name": folder, "displayOption": "FitToPage",
+                    "height": 720, "width": 1280}
         page["displayName"] = display
+        if folder in PAGE_SIZES:
+            page["width"], page["height"] = PAGE_SIZES[folder]
+            page["displayOption"] = "FitToWidth"
         if filters:
             page["filterConfig"] = {"filters": filters}
         else:
@@ -404,6 +474,13 @@ def main():
         docs.append((page_dir / "page.json", page))
         for v in build(folder):
             docs.append((page_dir / "visuals" / v["name"] / "visual.json", v))
+
+    pages_path = DEF / "pages" / "pages.json"
+    pages_meta = json.loads(pages_path.read_text(encoding="utf-8"))
+    existing = [p for p in pages_meta.get("pageOrder", []) if p not in PAGE_ORDER]
+    pages_meta["pageOrder"] = PAGE_ORDER + existing   # keep any pages added in Desktop, after ours
+    pages_meta["$schema"] = PAGES_SCHEMA
+    docs.append((pages_path, pages_meta))
 
     report_path = DEF / "report.json"
     report = json.loads(report_path.read_text(encoding="utf-8"))
@@ -419,12 +496,13 @@ def main():
     if errors:
         raise SystemExit("Schema validation failed — nothing written:\n  " + "\n  ".join(errors[:40]))
 
-    for folder, *_ in PAGES:
+    for folder, *_ in pages:
         shutil.rmtree(DEF / "pages" / folder / "visuals", ignore_errors=True)
     for path, doc in docs:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(f"Wrote {len(PAGES)} pages, {len(names)} visuals; all files valid against the PBIR schemas.")
+    print(f"Wrote {len(pages)} page(s) ({', '.join(p[1] for p in pages)}), {len(names)} visuals; "
+          f"all files valid against the PBIR schemas.")
 
 
 if __name__ == "__main__":

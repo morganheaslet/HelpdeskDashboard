@@ -1,36 +1,18 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "3e08b6b987de12ea2cca",
   "position": {
     "x": 10,
     "y": 122,
-    "z": 0,
-    "width": 760,
+    "z": 3000,
     "height": 590,
-    "tabOrder": 0
+    "width": 760,
+    "tabOrder": 3000
   },
   "visual": {
     "visualType": "pivotTable",
     "query": {
       "queryState": {
-        "Rows": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Tech"
-                    }
-                  },
-                  "Property": "Tech"
-                }
-              },
-              "queryRef": "Tech.Tech",
-              "nativeQueryRef": "Tech"
-            }
-          ]
-        },
         "Columns": {
           "projections": [
             {
@@ -38,14 +20,48 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Period"
+                      "Entity": "Calendar"
                     }
                   },
-                  "Property": "Period"
+                  "Property": "Month"
                 }
               },
-              "queryRef": "Period.Period",
-              "nativeQueryRef": "Period"
+              "queryRef": "Calendar.Month",
+              "nativeQueryRef": "Month",
+              "active": true,
+              "displayName": "Month"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendar"
+                    }
+                  },
+                  "Property": "Week"
+                }
+              },
+              "queryRef": "Calendar.Week",
+              "nativeQueryRef": "Week",
+              "active": false,
+              "displayName": "Week"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendar"
+                    }
+                  },
+                  "Property": "Date"
+                }
+              },
+              "queryRef": "Calendar.Date",
+              "nativeQueryRef": "Day",
+              "active": false,
+              "displayName": "Day"
             }
           ],
           "fieldParameters": [
@@ -61,7 +77,26 @@
                 }
               },
               "index": 0,
-              "length": 1
+              "length": 3
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tech"
+                    }
+                  },
+                  "Property": "Tech"
+                }
+              },
+              "queryRef": "Tech.Tech",
+              "nativeQueryRef": "Tech",
+              "active": true
             }
           ]
         },
@@ -113,11 +148,9 @@
             },
             "direction": "Descending"
           }
-        ],
-        "isDefaultSort": false
+        ]
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -139,6 +172,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

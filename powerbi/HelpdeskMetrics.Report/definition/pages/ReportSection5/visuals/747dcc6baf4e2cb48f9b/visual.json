@@ -1,0 +1,332 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "747dcc6baf4e2cb48f9b",
+  "position": {
+    "x": 10,
+    "y": 122,
+    "z": 0,
+    "width": 1260,
+    "height": 400,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Company"
+                    }
+                  },
+                  "Property": "Company"
+                }
+              },
+              "queryRef": "Company.Company",
+              "nativeQueryRef": "Company"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Tickets Opened"
+                }
+              },
+              "queryRef": "Tickets.Tickets Opened",
+              "nativeQueryRef": "Tickets Opened"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Tickets Closed"
+                }
+              },
+              "queryRef": "Tickets.Tickets Closed",
+              "nativeQueryRef": "Tickets Closed"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Open Now"
+                }
+              },
+              "queryRef": "Tickets.Open Now",
+              "nativeQueryRef": "Open Now"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Waiting Now"
+                }
+              },
+              "queryRef": "Tickets.Waiting Now",
+              "nativeQueryRef": "Waiting Now"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Avg Open Age (Days)"
+                }
+              },
+              "queryRef": "Tickets.Avg Open Age (Days)",
+              "nativeQueryRef": "Avg Open Age (Days)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Max Open Age (Days)"
+                }
+              },
+              "queryRef": "Tickets.Max Open Age (Days)",
+              "nativeQueryRef": "Max Open Age (Days)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Response SLA %"
+                }
+              },
+              "queryRef": "Tickets.Response SLA %",
+              "nativeQueryRef": "Response SLA %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Resolution SLA %"
+                }
+              },
+              "queryRef": "Tickets.Resolution SLA %",
+              "nativeQueryRef": "Resolution SLA %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TimeEntries"
+                    }
+                  },
+                  "Property": "Hours Logged"
+                }
+              },
+              "queryRef": "TimeEntries.Hours Logged",
+              "nativeQueryRef": "Hours Logged"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TimeEntries"
+                    }
+                  },
+                  "Property": "Avg Hours per Closed Ticket"
+                }
+              },
+              "queryRef": "TimeEntries.Avg Hours per Closed Ticket",
+              "nativeQueryRef": "Avg Hours per Closed Ticket"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "After-Hours %"
+                }
+              },
+              "queryRef": "Tickets.After-Hours %",
+              "nativeQueryRef": "After-Hours %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Phone %"
+                }
+              },
+              "queryRef": "Tickets.Phone %",
+              "nativeQueryRef": "Phone %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Requesting Contacts"
+                }
+              },
+              "queryRef": "Tickets.Requesting Contacts",
+              "nativeQueryRef": "Requesting Contacts"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Revenue per Ticket"
+                }
+              },
+              "queryRef": "ClientMonth.Revenue per Ticket",
+              "nativeQueryRef": "Revenue per Ticket"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Tickets"
+                  }
+                },
+                "Property": "Tickets Opened"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Client overview (click a client to focus the page)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "recentClients_ReportSection5_overview",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Company"
+              }
+            },
+            "Property": "Has Recent Tickets"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "c",
+              "Entity": "Company",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "c"
+                          }
+                        },
+                        "Property": "Has Recent Tickets"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "true"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

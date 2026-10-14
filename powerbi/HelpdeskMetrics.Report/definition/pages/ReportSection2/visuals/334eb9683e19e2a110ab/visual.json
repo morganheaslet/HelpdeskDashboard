@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "334eb9683e19e2a110ab",
   "position": {
     "x": 780,
     "y": 492,
-    "z": 0,
-    "width": 490,
+    "z": 2000,
     "height": 220,
-    "tabOrder": 0
+    "width": 490,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "donutChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "TimeEntries.Charge Type",
-              "nativeQueryRef": "Charge Type"
+              "nativeQueryRef": "Charge Type",
+              "active": true
             }
           ]
         },
@@ -51,7 +52,6 @@
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -73,6 +73,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "09bace03ba9e357214d0",
   "position": {
     "x": 220,
     "y": 8,
-    "z": 0,
-    "width": 230,
+    "z": 1000,
     "height": 104,
-    "tabOrder": 0
+    "width": 230,
+    "tabOrder": 1000
   },
   "visual": {
     "visualType": "slicer",
@@ -27,13 +27,13 @@
                 }
               },
               "queryRef": "Tech.In CW Utilization",
-              "nativeQueryRef": "In CW Utilization"
+              "nativeQueryRef": "In CW Utilization",
+              "active": true
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -46,6 +46,11 @@
               }
             }
           }
+        }
+      ],
+      "general": [
+        {
+          "properties": {}
         }
       ]
     },
@@ -70,6 +75,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

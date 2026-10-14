@@ -118,6 +118,16 @@ MEASURES = {
         ("Avg Resolution Hours",
          "CALCULATE ( AVERAGE ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), "
          "USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )", HOURS, "SLA"),
+        ("Max Open Age (Days)",
+         "CALCULATE ( MAX ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )",
+         "#,0", "Backlog"),
+        ("After-Hours Tickets",
+         "CALCULATE ( COUNTROWS ( Tickets ), Tickets[Entered After Hours] = TRUE () )", COUNT, "Client"),
+        ("After-Hours %", "DIVIDE ( [After-Hours Tickets], [Tickets Opened] )", PCT, "Client"),
+        ("Phone %",
+         "DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Source] = \"Phone\" ), [Tickets Opened] )", PCT, "Client"),
+        ("Requesting Contacts", "DISTINCTCOUNT ( Tickets[Contact] )", COUNT, "Client"),
+        ("Tickets per Contact", "DIVIDE ( [Tickets Opened], [Requesting Contacts] )", HOURS, "Client"),
         ("Median Resolution Hours",
          "CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), "
          "USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )", HOURS, "SLA"),
@@ -141,6 +151,7 @@ MEASURES = {
         ("Project Hours", "CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = \"ProjectTicket\" )", HOURS, "Time"),
         ("Labor Cost", "SUM ( TimeEntries[Labor Cost] )", MONEY, "Time"),
         ("Uncosted Hours", "SUM ( TimeEntries[Uncosted Hours] )", HOURS, "Time"),
+        ("Avg Hours per Closed Ticket", "DIVIDE ( [Ticket Hours], [Tickets Closed] )", HOURS, "Client"),
     ],
     "Capacity": [
         ("Capacity Hours", "SUM ( Capacity[Capacity Hours] )", HOURS, "Utilization"),
@@ -162,6 +173,7 @@ MEASURES = {
         ("Client Hours", "SUM ( ClientMonth[Hours] )", HOURS, "Client"),
         ("Client Uncosted Hours", "SUM ( ClientMonth[Uncosted Hours] )", HOURS, "Client"),
         ("Client Effective Hourly Rate", "DIVIDE ( [Normalized Revenue], [Client Hours] )", RATE, "Client"),
+        ("Revenue per Ticket", "DIVIDE ( [Normalized Revenue], [Tickets Opened] )", RATE, "Client"),
     ],
     "AgreementMonth": [
         ("Agreement Revenue", "SUM ( AgreementMonth[Revenue] )", MONEY, "Agreement"),

@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "c370fd65a5b64893994c",
   "position": {
     "x": 10,
     "y": 8,
-    "z": 0,
-    "width": 140,
+    "z": 6000,
     "height": 104,
-    "tabOrder": 0
+    "width": 140,
+    "tabOrder": 6000
   },
   "visual": {
     "visualType": "slicer",
@@ -27,13 +27,13 @@
                 }
               },
               "queryRef": "Calendar.Year",
-              "nativeQueryRef": "Year"
+              "nativeQueryRef": "Year",
+              "active": true
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -70,6 +70,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

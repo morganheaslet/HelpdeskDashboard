@@ -1,25 +1,25 @@
 table TicketAssignments
-	lineageTag: df4cb905-b63c-4129-a103-0578734ef73f
+	lineageTag: 090023a1-9a91-4c14-ace5-5924ab7868e3
 
 	measure 'Tickets Assigned' = COUNTROWS ( TicketAssignments )
 		formatString: #,0
 		displayFolder: Volume
-		lineageTag: 68e0f5d3-e339-4d0f-9e64-8c3ce508956a
+		lineageTag: 296101d1-d12e-492f-99fc-1651d5f9716e
 
 	measure 'Assigned - Closed' = [Tickets Assigned] - [Tickets Closed]
 		formatString: +#,0;-#,0;0
 		displayFolder: Volume
-		lineageTag: e11788f4-a554-4044-9b8e-04cb0fb8627e
+		lineageTag: 6c1294b2-1fab-4448-92f6-cd027050031b
 
 	measure 'Close Rate' = DIVIDE ( [Tickets Closed], [Tickets Assigned] )
 		formatString: 0.0%
 		displayFolder: Volume
-		lineageTag: a939bf00-e092-4771-a654-29ca0ce5bd71
+		lineageTag: 93578b57-a54e-4236-8156-304561dd444a
 
 	column TicketId
 		dataType: int64
 		formatString: 0
-		lineageTag: b0726354-ca06-4a3a-9336-3dcd354b61b5
+		lineageTag: 1dabb3fd-1095-49ab-a085-2f002aef50d8
 		summarizeBy: none
 		sourceColumn: TicketId
 
@@ -28,7 +28,7 @@ table TicketAssignments
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: 5d564f0c-c4dd-4432-8c91-f74450ae894b
+		lineageTag: 2cf318f9-97a4-4dfc-8765-494cb8a9d74f
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -37,17 +37,15 @@ table TicketAssignments
 	column 'Assigned Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 5c32cead-73b6-4250-90b2-e2821abc766f
+		lineageTag: 95af4fcb-b631-4d13-8f48-ecb950efdf4f
 		summarizeBy: none
 		sourceColumn: Assigned Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column 'Assignment Kind'
 		dataType: string
-		lineageTag: d340e88b-ab2f-4df0-bd1b-a40c2e01ffca
+		lineageTag: 8a02925a-cb4d-42c2-b87a-716b2a392bcc
 		summarizeBy: none
 		sourceColumn: Assignment Kind
 
@@ -55,9 +53,9 @@ table TicketAssignments
 
 	column BoardId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: bf81a9f4-fb38-4a1a-b6f3-97888469b8c1
+		isHidden
+		lineageTag: 234b690f-9827-44e8-9f47-0dd65cebeba6
 		summarizeBy: none
 		sourceColumn: BoardId
 
@@ -65,9 +63,9 @@ table TicketAssignments
 
 	column CompanyId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: f97343ad-edd2-4ce2-aa1c-8faf00c0a56e
+		isHidden
+		lineageTag: e9c34f0f-346a-4a96-b1bd-67f16424623e
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -75,7 +73,7 @@ table TicketAssignments
 
 	column Priority
 		dataType: string
-		lineageTag: 2995d7c4-6522-41e9-b3b1-356e2c0c21fa
+		lineageTag: af6ebc33-76a6-4cdd-bda0-df13e2a305b8
 		summarizeBy: none
 		sourceColumn: Priority
 
@@ -91,4 +89,3 @@ table TicketAssignments
 				    Data
 
 	annotation PBI_ResultType = Table
-

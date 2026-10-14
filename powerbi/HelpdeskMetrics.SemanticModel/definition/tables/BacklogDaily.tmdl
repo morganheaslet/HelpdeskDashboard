@@ -1,27 +1,25 @@
 table BacklogDaily
-	lineageTag: f3dd47d1-6b7b-490a-bdb1-e9a5ed3c5e1a
+	lineageTag: 439cb840-a2cb-42c1-8775-60a51427023b
 
 	measure 'Open at Start of Day' = VAR d = CALCULATE ( MAX ( BacklogDaily[Date] ) ) RETURN CALCULATE ( SUM ( BacklogDaily[Open Tickets] ), BacklogDaily[Date] = d )
 		formatString: #,0
 		displayFolder: Backlog
-		lineageTag: 46850638-dcb4-4e9e-8432-190941f13b5a
+		lineageTag: 51b5427f-5298-440e-a420-3c9629e44696
 
 	column Date
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 6b91fb7e-c4c0-4dc5-bbc3-791ecada0528
+		lineageTag: e973161c-0464-41f2-b21e-8b36a86d2114
 		summarizeBy: none
 		sourceColumn: Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column BoardId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 760af21c-6680-4065-a19b-b14f203b7e21
+		isHidden
+		lineageTag: 4b401842-56f6-4993-afc3-426e7ffb4bfb
 		summarizeBy: none
 		sourceColumn: BoardId
 
@@ -30,7 +28,7 @@ table BacklogDaily
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: 46ddc18a-9ce4-48d9-a293-7d252db735bc
+		lineageTag: e9fad0fa-cb8b-4d1e-b017-8a08ab92608b
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -38,7 +36,7 @@ table BacklogDaily
 
 	column Status
 		dataType: string
-		lineageTag: f9acebb4-f847-42d9-94cd-bdf6708c925d
+		lineageTag: 8425572e-a28f-4962-9855-c8d204a58962
 		summarizeBy: none
 		sourceColumn: Status
 
@@ -46,7 +44,7 @@ table BacklogDaily
 
 	column Priority
 		dataType: string
-		lineageTag: 6caeb407-8160-4aa2-b527-db3f543dee12
+		lineageTag: 81f0b903-0234-4000-abf7-d4d514e0289b
 		summarizeBy: none
 		sourceColumn: Priority
 
@@ -54,7 +52,7 @@ table BacklogDaily
 
 	column 'Open Tickets'
 		dataType: int64
-		lineageTag: c0d09c94-8a5d-4102-8072-7d27543db6e7
+		lineageTag: fce177db-fee3-494f-ab01-5634ffd52ba4
 		summarizeBy: none
 		sourceColumn: Open Tickets
 
@@ -70,4 +68,3 @@ table BacklogDaily
 				    Data
 
 	annotation PBI_ResultType = Table
-

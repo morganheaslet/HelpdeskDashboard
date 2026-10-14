@@ -1,85 +1,115 @@
 table Tickets
-	lineageTag: d0d332bc-2b94-4ba7-bbab-62d4dd976d14
+	lineageTag: a2c20e8e-ee06-4d0b-8f19-dace691dbc1c
 
 	measure 'Tickets Opened' = COUNTROWS ( Tickets )
 		formatString: #,0
 		displayFolder: Volume
-		lineageTag: 9c9115ed-6f05-4072-b2f2-6721c80292f9
+		lineageTag: 6299894d-f60f-4274-a23b-d922aea40800
 
 	measure 'Tickets Closed' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ), USERELATIONSHIP ( Tickets[CloserKey], Tech[TechKey] ) )
 		formatString: #,0
 		displayFolder: Volume
-		lineageTag: c2b3f780-f65b-4354-bf98-4c1cbf6b9890
+		lineageTag: 15cdc06c-d099-42aa-bd42-b684b65d634e
 
 	measure 'Tickets Resolved' = CALCULATE ( COUNTROWS ( Tickets ), NOT ISBLANK ( Tickets[Resolved Date] ), USERELATIONSHIP ( Tickets[Resolved Date], 'Calendar'[Date] ), USERELATIONSHIP ( Tickets[ResolverKey], Tech[TechKey] ) )
 		formatString: #,0
 		displayFolder: Volume
-		lineageTag: c2d830bd-08c8-4804-b343-101d6466977e
+		lineageTag: 74ae1e53-831e-41d5-9276-0a9d313af86c
 
 	measure 'Open Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: Backlog
-		lineageTag: c0afa2b5-d32a-477e-9958-c90aaa393a98
+		lineageTag: 0fb93049-5015-45e5-a6ce-c99053ca7481
 
 	measure 'Waiting Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is Waiting] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: Backlog
-		lineageTag: 9c05e67c-2387-402e-9b1a-64d3e71c6531
+		lineageTag: ca80de07-c360-449c-825d-6d19df91775c
 
 	measure 'Avg Open Age (Days)' = CALCULATE ( AVERAGE ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0.0
 		displayFolder: Backlog
-		lineageTag: 69bf4b04-cecb-4aa7-991f-97fa6c5a4485
+		lineageTag: 6d3a9e5a-6f70-4adf-82e1-8765feb59607
 
 	measure 'Out of SLA Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is In SLA Now] = FALSE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: SLA
-		lineageTag: d9660d6e-63b1-468f-915d-55157af8a14f
+		lineageTag: 13c1a8b4-64f1-496d-96aa-e50d81569e5b
 
 	measure 'Responses With SLA Target' = CALCULATE ( COUNTROWS ( Tickets ), NOT ISBLANK ( Tickets[Met Response SLA] ) )
 		formatString: #,0
 		displayFolder: SLA
-		lineageTag: 5cf29a6e-0c69-45ab-acb1-1fc6b0cc1637
+		lineageTag: 64e5ae5e-194c-461f-a2fc-8dc7d3b9b1e6
 
 	measure 'Response SLA %' = DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Met Response SLA] = 1 ), [Responses With SLA Target] )
 		formatString: 0.0%
 		displayFolder: SLA
-		lineageTag: 99018f11-f1a3-49b9-8d2b-8d570f64fb2e
+		lineageTag: f0e12bf1-01a6-4457-8a81-61d28cd7cec3
 
 	measure 'Resolutions With SLA Target' = CALCULATE ( COUNTROWS ( Tickets ), NOT ISBLANK ( Tickets[Met Resolution SLA] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
 		formatString: #,0
 		displayFolder: SLA
-		lineageTag: bc0b2f1a-3546-487a-9617-1c6db07ef6bc
+		lineageTag: 05b1a5ad-82f9-4637-8c22-b3d2b4dabb51
 
 	measure 'Resolution SLA %' = DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Met Resolution SLA] = 1, Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) ), [Resolutions With SLA Target] )
 		formatString: 0.0%
 		displayFolder: SLA
-		lineageTag: 86205639-2f67-4de7-8ebd-21c16231f688
+		lineageTag: 45584597-df60-4466-803a-aa96c5d43e25
 
 	measure 'Avg Response Hours' = AVERAGE ( Tickets[Response Hours (SLA clock)] )
 		formatString: #,0.0
 		displayFolder: SLA
-		lineageTag: 4e9bc861-8b21-4a24-a970-7f4011b9bcb2
+		lineageTag: 79b20ba9-9d37-4031-972c-3f16134b05ab
 
 	measure 'Median Response Hours' = MEDIAN ( Tickets[Response Hours (SLA clock)] )
 		formatString: #,0.0
 		displayFolder: SLA
-		lineageTag: 6ab6f64d-dc7e-4de9-a664-23856f825856
+		lineageTag: 1af9640f-ac57-4454-b495-bbc1dc755c1d
 
 	measure 'Avg Resolution Hours' = CALCULATE ( AVERAGE ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
 		formatString: #,0.0
 		displayFolder: SLA
-		lineageTag: 4bd7d2e4-3a51-4ab8-a96c-13874c7e57ae
+		lineageTag: 16f926f6-809d-456c-af79-dc744ac45d87
+
+	measure 'Max Open Age (Days)' = CALCULATE ( MAX ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
+		formatString: #,0
+		displayFolder: Backlog
+		lineageTag: 11e48b7b-b07c-48c3-a936-e2deba55ed63
+
+	measure 'After-Hours Tickets' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Entered After Hours] = TRUE () )
+		formatString: #,0
+		displayFolder: Client
+		lineageTag: 7dbd7082-de43-4724-95dd-91234959986a
+
+	measure 'After-Hours %' = DIVIDE ( [After-Hours Tickets], [Tickets Opened] )
+		formatString: 0.0%
+		displayFolder: Client
+		lineageTag: 9786e274-c96b-474d-a9fb-dd36e99d87cc
+
+	measure 'Phone %' = DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Source] = "Phone" ), [Tickets Opened] )
+		formatString: 0.0%
+		displayFolder: Client
+		lineageTag: fd76821e-8c43-463b-b7eb-0287836f085a
+
+	measure 'Requesting Contacts' = DISTINCTCOUNT ( Tickets[Contact] )
+		formatString: #,0
+		displayFolder: Client
+		lineageTag: 79bdb8bb-e9ce-43bf-a1ee-3ed3718c8851
+
+	measure 'Tickets per Contact' = DIVIDE ( [Tickets Opened], [Requesting Contacts] )
+		formatString: #,0.0
+		displayFolder: Client
+		lineageTag: 203fef09-ae17-4173-9f0f-a8f0a5601c3c
 
 	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
 		formatString: #,0.0
 		displayFolder: SLA
-		lineageTag: 66fdd769-0140-4ccb-9bb1-5e1d356004ba
+		lineageTag: 8d8f4139-632a-483b-a46d-093327f4e1f4
 
 	column TicketId
 		dataType: int64
 		formatString: 0
-		lineageTag: 0df822dc-279e-494a-83f8-a1aaa1aeff3b
+		lineageTag: e9281364-74da-4e9e-9c31-74ac4fa9f9df
 		summarizeBy: none
 		sourceColumn: TicketId
 
@@ -87,9 +117,9 @@ table Tickets
 
 	column BoardId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: be94be63-ce76-4c41-a331-886babf41897
+		isHidden
+		lineageTag: 41d9ee17-3089-4f5b-b315-c3126262f60c
 		summarizeBy: none
 		sourceColumn: BoardId
 
@@ -97,9 +127,9 @@ table Tickets
 
 	column CompanyId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 861beeb9-306b-4158-8249-36b4e3b30c0f
+		isHidden
+		lineageTag: 73fed442-b944-4e18-b89b-e15915d710c4
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -108,7 +138,7 @@ table Tickets
 	column OwnerKey
 		dataType: string
 		isHidden
-		lineageTag: 43e12daa-6c3f-4642-b853-01d9eb89ce13
+		lineageTag: d13e22b7-d966-4c58-9532-3caf38fd2beb
 		summarizeBy: none
 		sourceColumn: OwnerKey
 
@@ -117,7 +147,7 @@ table Tickets
 	column CloserKey
 		dataType: string
 		isHidden
-		lineageTag: 81762e28-1eda-4919-8f0c-8116189b2181
+		lineageTag: 0ff33d1f-b484-4d6c-a48c-de0496b14c57
 		summarizeBy: none
 		sourceColumn: CloserKey
 
@@ -126,7 +156,7 @@ table Tickets
 	column ResolverKey
 		dataType: string
 		isHidden
-		lineageTag: f7870608-da21-419a-bf2f-30db8476944a
+		lineageTag: f3c63ede-34d9-431a-af87-beaa356c140f
 		summarizeBy: none
 		sourceColumn: ResolverKey
 
@@ -135,7 +165,7 @@ table Tickets
 	column ResponderKey
 		dataType: string
 		isHidden
-		lineageTag: b4fee7a4-c4fc-4552-a7c5-a47496622fa3
+		lineageTag: aa0bcfd7-6f30-476e-b8fb-aad2935edd93
 		summarizeBy: none
 		sourceColumn: ResponderKey
 
@@ -144,50 +174,42 @@ table Tickets
 	column 'Entered Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 5810efb4-08d8-4f46-bcd7-c8ce959d0bcf
+		lineageTag: fed8b252-d0d2-409f-a7e2-5e9326c1754e
 		summarizeBy: none
 		sourceColumn: Entered Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column 'Closed Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 1a9e2bb6-e5e9-4d18-8bbc-e15eed494281
+		lineageTag: ad7ab3c1-7c82-42cb-9871-376c8dcd1243
 		summarizeBy: none
 		sourceColumn: Closed Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column 'Resolved Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: bb027f59-ab9c-4d9d-acad-6fd99266a002
+		lineageTag: 8ba3ce01-74fe-4e36-ac45-3d2b247529dd
 		summarizeBy: none
 		sourceColumn: Resolved Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column 'Responded Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 45c8e91c-9442-48c6-9e34-eb131db74b7d
+		lineageTag: 771847bd-c727-41cb-b63d-905168d32f59
 		summarizeBy: none
 		sourceColumn: Responded Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column Summary
 		dataType: string
-		lineageTag: 8a66ce8a-92a5-4020-b783-fe6c1ae10a9a
+		lineageTag: 52ed1169-1cc7-48f1-b7ee-0331cd9a3091
 		summarizeBy: none
 		sourceColumn: Summary
 
@@ -195,7 +217,7 @@ table Tickets
 
 	column Status
 		dataType: string
-		lineageTag: 64d7210b-c119-4223-af03-0f62889a2bf1
+		lineageTag: 1a22e4d9-4f53-4e51-aac7-491e3551cb4c
 		summarizeBy: none
 		sourceColumn: Status
 
@@ -203,7 +225,7 @@ table Tickets
 
 	column Priority
 		dataType: string
-		lineageTag: d5bb1a8b-c082-4f0c-9af3-11c69eb19b76
+		lineageTag: 8fb75f98-1ec5-4dd1-8f96-5894041478a7
 		summarizeBy: none
 		sourceColumn: Priority
 
@@ -211,7 +233,7 @@ table Tickets
 
 	column Type
 		dataType: string
-		lineageTag: b87aa099-c25d-4c2c-87ee-9bfad7dd587e
+		lineageTag: e6330d3d-4dbc-47ea-b600-9d9d2ac2f3e6
 		summarizeBy: none
 		sourceColumn: Type
 
@@ -219,23 +241,47 @@ table Tickets
 
 	column Subtype
 		dataType: string
-		lineageTag: 1c5c8457-52fe-44e5-8142-20676629c2a7
+		lineageTag: 1573589c-7681-4a0e-b174-0d47fe17afcd
 		summarizeBy: none
 		sourceColumn: Subtype
 
 		annotation SummarizationSetBy = Automatic
 
+	column Item
+		dataType: string
+		lineageTag: bee020f8-44bf-44c5-9844-6c58ee1a4717
+		summarizeBy: none
+		sourceColumn: Item
+
+		annotation SummarizationSetBy = Automatic
+
 	column Source
 		dataType: string
-		lineageTag: 2d30f8a8-1327-466a-9eb1-f1992d24c855
+		lineageTag: 4ecd7121-6fbe-4e55-8a0f-89c38047e2f7
 		summarizeBy: none
 		sourceColumn: Source
 
 		annotation SummarizationSetBy = Automatic
 
+	column Contact
+		dataType: string
+		lineageTag: 554cf7d9-908b-4a39-848b-b0fc5eee9ba0
+		summarizeBy: none
+		sourceColumn: Contact
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Entered After Hours'
+		dataType: boolean
+		lineageTag: fbc3cf60-9ca3-49af-aa55-1a9447854a60
+		summarizeBy: none
+		sourceColumn: Entered After Hours
+
+		annotation SummarizationSetBy = Automatic
+
 	column SLA
 		dataType: string
-		lineageTag: 7f7c1661-42c3-43ff-8c1f-d05f94deb9f6
+		lineageTag: 14f8ec7d-88f6-41fa-a7aa-1cb321111e0f
 		summarizeBy: none
 		sourceColumn: SLA
 
@@ -243,7 +289,7 @@ table Tickets
 
 	column 'Is Open'
 		dataType: boolean
-		lineageTag: 215e0786-238d-4b28-a059-84485c32f75a
+		lineageTag: d3091700-6977-4287-a697-bf55bf458b3d
 		summarizeBy: none
 		sourceColumn: Is Open
 
@@ -251,7 +297,7 @@ table Tickets
 
 	column 'Is Waiting'
 		dataType: boolean
-		lineageTag: 257c5300-38c4-4178-94e7-2d499e3201a8
+		lineageTag: aba97c45-d5d4-414b-a39b-f01a854e7fd3
 		summarizeBy: none
 		sourceColumn: Is Waiting
 
@@ -259,7 +305,7 @@ table Tickets
 
 	column 'Is Closed'
 		dataType: boolean
-		lineageTag: 4c4c0d5d-6945-4076-90d8-c283ad292850
+		lineageTag: 48ce62d1-8ebb-4917-8c8c-6e67dc52f660
 		summarizeBy: none
 		sourceColumn: Is Closed
 
@@ -267,7 +313,7 @@ table Tickets
 
 	column 'Is In SLA Now'
 		dataType: boolean
-		lineageTag: 8411f30c-5fbd-4f96-92b6-ac4526c63fdd
+		lineageTag: e044c3e7-b9a3-48cd-9203-c836f4a32a4e
 		summarizeBy: none
 		sourceColumn: Is In SLA Now
 
@@ -276,7 +322,7 @@ table Tickets
 	column 'Response Hours (SLA clock)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 30e49654-1bd0-4ca9-8928-fd0a58fa97f8
+		lineageTag: 3ea59a5c-de45-4939-a05c-b7759319c9c4
 		summarizeBy: none
 		sourceColumn: Response Hours (SLA clock)
 
@@ -285,7 +331,7 @@ table Tickets
 	column 'Resolution Hours (SLA clock)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 7a843771-030a-489c-8cbf-9de71dacc71d
+		lineageTag: 407d7886-27d4-4c34-a330-00ddd2010873
 		summarizeBy: none
 		sourceColumn: Resolution Hours (SLA clock)
 
@@ -294,7 +340,7 @@ table Tickets
 	column 'Response Hours (calendar)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 8885cd37-84ca-488e-ac75-845fa9428f36
+		lineageTag: 2868a25a-9ef1-4a1e-95b1-2428f3469e44
 		summarizeBy: none
 		sourceColumn: Response Hours (calendar)
 
@@ -303,7 +349,7 @@ table Tickets
 	column 'Resolution Hours (calendar)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 4d6362ac-590e-475c-b102-fc3dd5e1811c
+		lineageTag: d6936905-377f-4344-b9cc-23e9db1d80bc
 		summarizeBy: none
 		sourceColumn: Resolution Hours (calendar)
 
@@ -312,7 +358,7 @@ table Tickets
 	column 'Response Target Hours'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 6d36539b-23ff-4437-a817-e7b2a6aaa039
+		lineageTag: 94a18f67-cdf9-4f1e-9cff-fe9007e30649
 		summarizeBy: none
 		sourceColumn: Response Target Hours
 
@@ -321,7 +367,7 @@ table Tickets
 	column 'Resolution Target Hours'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: f5772324-aa6a-4efb-87ac-6541178bf57b
+		lineageTag: 5e0d6fd6-8809-436f-ba3a-aa8a334ea907
 		summarizeBy: none
 		sourceColumn: Resolution Target Hours
 
@@ -329,7 +375,7 @@ table Tickets
 
 	column 'Met Response SLA'
 		dataType: int64
-		lineageTag: 7cafe74a-6d25-4b3f-9b49-1dbd990ade67
+		lineageTag: ada5ffb8-fb95-473c-9eed-58e9065cef9f
 		summarizeBy: none
 		sourceColumn: Met Response SLA
 
@@ -337,7 +383,7 @@ table Tickets
 
 	column 'Met Resolution SLA'
 		dataType: int64
-		lineageTag: 344da794-dba1-4e0a-8938-b245e690b98c
+		lineageTag: b1770eb9-3aa5-4293-9318-445a75c7ddf8
 		summarizeBy: none
 		sourceColumn: Met Resolution SLA
 
@@ -346,7 +392,7 @@ table Tickets
 	column 'Open Age Days'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 353d7142-c7bd-4a37-99a8-135e294f5aa9
+		lineageTag: 2732f048-390b-467c-8e4b-934e58022ef0
 		summarizeBy: none
 		sourceColumn: Open Age Days
 
@@ -354,9 +400,9 @@ table Tickets
 
 	column 'Ticket Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: b9de0987-e362-4433-b638-2797928c02f9
+		isHidden
+		lineageTag: 9bfe347e-760d-42dc-afa6-83faec6f821e
 		summarizeBy: none
 		sourceColumn: Ticket Hours
 
@@ -372,4 +418,3 @@ table Tickets
 				    Data
 
 	annotation PBI_ResultType = Table
-

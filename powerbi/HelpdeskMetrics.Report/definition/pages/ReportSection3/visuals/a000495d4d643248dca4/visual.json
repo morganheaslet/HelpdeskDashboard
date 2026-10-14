@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "a000495d4d643248dca4",
   "position": {
     "x": 10,
     "y": 452,
-    "z": 0,
-    "width": 620,
+    "z": 5000,
     "height": 260,
-    "tabOrder": 0
+    "width": 620,
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "scatterChart",
@@ -27,43 +27,8 @@
                 }
               },
               "queryRef": "Company.Company",
-              "nativeQueryRef": "Company"
-            }
-          ]
-        },
-        "X": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "ClientMonth"
-                    }
-                  },
-                  "Property": "Normalized Revenue"
-                }
-              },
-              "queryRef": "ClientMonth.Normalized Revenue",
-              "nativeQueryRef": "Normalized Revenue"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "ClientMonth"
-                    }
-                  },
-                  "Property": "Client Margin %"
-                }
-              },
-              "queryRef": "ClientMonth.Client Margin %",
-              "nativeQueryRef": "Client Margin %"
+              "nativeQueryRef": "Company",
+              "active": true
             }
           ]
         },
@@ -84,10 +49,46 @@
               "nativeQueryRef": "Client Hours"
             }
           ]
+        },
+        "X": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Normalized Revenue"
+                }
+              },
+              "queryRef": "ClientMonth.Normalized Revenue",
+              "nativeQueryRef": "Normalized Revenue",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Margin %"
+                }
+              },
+              "queryRef": "ClientMonth.Client Margin %",
+              "nativeQueryRef": "Client Margin %"
+            }
+          ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "visualContainerObjects": {
       "title": [
         {
@@ -109,6 +110,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }
