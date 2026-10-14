@@ -1,13 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
-  "name": "b19c5218595461ce2e97",
+  "name": "e62ee2214568f950d27a",
   "position": {
     "x": 10,
-    "y": 62,
-    "z": 9000,
+    "y": 8,
+    "z": 7000,
     "width": 200,
-    "height": 50,
-    "tabOrder": 9001
+    "height": 104,
+    "tabOrder": 7000
   },
   "visual": {
     "visualType": "slicer",
@@ -27,9 +27,7 @@
                 }
               },
               "queryRef": "Calendar.Month",
-              "nativeQueryRef": "Month",
-              "active": true,
-              "displayName": "Month"
+              "nativeQueryRef": "Month"
             },
             {
               "field": {
@@ -43,9 +41,7 @@
                 }
               },
               "queryRef": "Calendar.Week",
-              "nativeQueryRef": "Week",
-              "active": false,
-              "displayName": "Week"
+              "nativeQueryRef": "Week"
             },
             {
               "field": {
@@ -59,25 +55,7 @@
                 }
               },
               "queryRef": "Calendar.Date",
-              "nativeQueryRef": "Date",
-              "active": false,
-              "displayName": "Day"
-            }
-          ],
-          "fieldParameters": [
-            {
-              "parameterExpr": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Period"
-                    }
-                  },
-                  "Property": "Period"
-                }
-              },
-              "index": 0,
-              "length": 3
+              "nativeQueryRef": "Date"
             }
           ]
         }
@@ -113,7 +91,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Period'"
+                  "Value": "'Month'"
                 }
               }
             }
@@ -121,51 +99,5 @@
         }
       ]
     }
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "db555d8e2efd11c126e5",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Calendar"
-              }
-            },
-            "Property": "Month"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "12fd0d947f0d62a8ba79",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Calendar"
-              }
-            },
-            "Property": "Week"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "b3599612606a577b0a61",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Calendar"
-              }
-            },
-            "Property": "Date"
-          }
-        },
-        "type": "Categorical"
-      }
-    ]
   }
 }

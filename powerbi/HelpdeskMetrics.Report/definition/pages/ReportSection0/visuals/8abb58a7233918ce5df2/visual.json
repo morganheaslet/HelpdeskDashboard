@@ -27,9 +27,7 @@
                 }
               },
               "queryRef": "Calendar.Month",
-              "nativeQueryRef": "Month",
-              "active": true,
-              "displayName": "Month"
+              "nativeQueryRef": "Month"
             },
             {
               "field": {
@@ -43,9 +41,7 @@
                 }
               },
               "queryRef": "Calendar.Week",
-              "nativeQueryRef": "Week",
-              "active": false,
-              "displayName": "Week"
+              "nativeQueryRef": "Week"
             },
             {
               "field": {
@@ -59,25 +55,7 @@
                 }
               },
               "queryRef": "Calendar.Date",
-              "nativeQueryRef": "Day",
-              "active": false,
-              "displayName": "Day"
-            }
-          ],
-          "fieldParameters": [
-            {
-              "parameterExpr": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Period"
-                    }
-                  },
-                  "Property": "Period"
-                }
-              },
-              "index": 0,
-              "length": 3
+              "nativeQueryRef": "Date"
             }
           ]
         },

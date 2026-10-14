@@ -20,30 +20,42 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Period"
+                      "Entity": "Calendar"
                     }
                   },
-                  "Property": "Period"
+                  "Property": "Month"
                 }
               },
-              "queryRef": "Period.Period",
-              "nativeQueryRef": "Period"
-            }
-          ],
-          "fieldParameters": [
+              "queryRef": "Calendar.Month",
+              "nativeQueryRef": "Month"
+            },
             {
-              "parameterExpr": {
+              "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Period"
+                      "Entity": "Calendar"
                     }
                   },
-                  "Property": "Period"
+                  "Property": "Week"
                 }
               },
-              "index": 0,
-              "length": 1
+              "queryRef": "Calendar.Week",
+              "nativeQueryRef": "Week"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendar"
+                    }
+                  },
+                  "Property": "Date"
+                }
+              },
+              "queryRef": "Calendar.Date",
+              "nativeQueryRef": "Date"
             }
           ]
         },
