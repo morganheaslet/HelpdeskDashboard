@@ -21,11 +21,6 @@ table Tickets
 		displayFolder: Backlog
 		lineageTag: 8a86bbd1-24ef-4197-949c-16b305b0b525
 
-	measure 'Open at End of Period' = VAR d = MIN ( MAX ( 'Calendar'[Date] ), TODAY () ) RETURN IF ( MIN ( 'Calendar'[Date] ) > TODAY (), BLANK (), CALCULATE ( COUNTROWS ( Tickets ), REMOVEFILTERS ( 'Calendar' ), Tickets[Entered Date] <= d, FILTER ( ALL ( Tickets[Done Date] ), ISBLANK ( Tickets[Done Date] ) || Tickets[Done Date] > d ) ) )
-		formatString: #,0
-		displayFolder: Backlog
-		lineageTag: 78bbbbfc-9a85-46f5-ae07-88d44469ca05
-
 	measure 'Waiting Now' = CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is Waiting] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: Backlog
@@ -76,6 +71,11 @@ table Tickets
 		displayFolder: SLA
 		lineageTag: 6cffb3ad-3b81-4463-8338-d8db8e3d0887
 
+	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: 91dd754e-9b50-4731-849c-d45157df93a1
+
 	measure 'Max Open Age (Days)' = CALCULATE ( MAX ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: Backlog
@@ -106,10 +106,10 @@ table Tickets
 		displayFolder: Client
 		lineageTag: bf3854b5-226a-440a-8c61-74076c16a104
 
-	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
-		formatString: #,0.0
-		displayFolder: SLA
-		lineageTag: 91dd754e-9b50-4731-849c-d45157df93a1
+	measure 'Open at End of Period' = VAR d = MIN ( MAX ( 'Calendar'[Date] ), TODAY () ) RETURN IF ( MIN ( 'Calendar'[Date] ) > TODAY (), BLANK (), CALCULATE ( COUNTROWS ( Tickets ), REMOVEFILTERS ( 'Calendar' ), Tickets[Entered Date] <= d, FILTER ( ALL ( Tickets[Done Date] ), ISBLANK ( Tickets[Done Date] ) || Tickets[Done Date] > d ) ) )
+		formatString: #,0
+		displayFolder: Backlog
+		lineageTag: 78bbbbfc-9a85-46f5-ae07-88d44469ca05
 
 	column TicketId
 		dataType: int64
@@ -122,8 +122,8 @@ table Tickets
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 182f3156-8728-4b15-a27b-4414c4b8897f
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -132,8 +132,8 @@ table Tickets
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: c2ff8900-320b-4227-9739-83966da972c5
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -252,14 +252,6 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
-	column Item
-		dataType: string
-		lineageTag: 8097e2d3-0448-4b5a-a6db-541562427dfd
-		summarizeBy: none
-		sourceColumn: Item
-
-		annotation SummarizationSetBy = Automatic
-
 	column Source
 		dataType: string
 		lineageTag: a55c984a-199b-43bc-bdea-41457501a992
@@ -268,36 +260,11 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
-	column Contact
-		dataType: string
-		lineageTag: 7dee3504-7f5b-4afc-b8e3-6051562099d0
-		summarizeBy: none
-		sourceColumn: Contact
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Entered After Hours'
-		dataType: boolean
-		lineageTag: ebac76b2-e4fa-476c-9c14-032648bc5f7b
-		summarizeBy: none
-		sourceColumn: Entered After Hours
-
-		annotation SummarizationSetBy = Automatic
-
 	column SLA
 		dataType: string
 		lineageTag: 2fdbc6cd-3992-410b-b3e7-a7b5330b6201
 		summarizeBy: none
 		sourceColumn: SLA
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Done Date'
-		dataType: dateTime
-		formatString: yyyy-mm-dd
-		lineageTag: 4d90c022-78e0-4c31-9f1c-71494dc4d84e
-		summarizeBy: none
-		sourceColumn: Done Date
 
 		annotation SummarizationSetBy = Automatic
 
@@ -414,11 +381,44 @@ table Tickets
 
 	column 'Ticket Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 3b544251-b81e-4ae9-8647-c5f2780148c2
 		summarizeBy: none
 		sourceColumn: Ticket Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: string
+		lineageTag: 8097e2d3-0448-4b5a-a6db-541562427dfd
+		summarizeBy: none
+		sourceColumn: Item
+
+		annotation SummarizationSetBy = Automatic
+
+	column Contact
+		dataType: string
+		lineageTag: 7dee3504-7f5b-4afc-b8e3-6051562099d0
+		summarizeBy: none
+		sourceColumn: Contact
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Entered After Hours'
+		dataType: boolean
+		lineageTag: ebac76b2-e4fa-476c-9c14-032648bc5f7b
+		summarizeBy: none
+		sourceColumn: Entered After Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Done Date'
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 4d90c022-78e0-4c31-9f1c-71494dc4d84e
+		summarizeBy: none
+		sourceColumn: Done Date
 
 		annotation SummarizationSetBy = Automatic
 
@@ -432,3 +432,4 @@ table Tickets
 				    Data
 
 	annotation PBI_ResultType = Table
+

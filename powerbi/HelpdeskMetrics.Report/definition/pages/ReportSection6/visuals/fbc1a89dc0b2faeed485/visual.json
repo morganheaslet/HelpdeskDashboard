@@ -92,5 +92,37 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "df9ae0eebaa14edfc73a",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tech"
+              }
+            },
+            "Property": "Tech"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "8072a0ac85dac8d03d44",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Talk Hours"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

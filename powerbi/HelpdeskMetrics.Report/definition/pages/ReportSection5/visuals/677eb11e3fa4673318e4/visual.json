@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "677eb11e3fa4673318e4",
   "position": {
     "x": 10,
     "y": 8,
     "z": 11000,
-    "width": 200,
     "height": 104,
+    "width": 200,
     "tabOrder": 11000
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Calendar.Month",
-              "nativeQueryRef": "Month"
+              "nativeQueryRef": "Month",
+              "active": true
             },
             {
               "field": {
@@ -41,7 +42,8 @@
                 }
               },
               "queryRef": "Calendar.Week",
-              "nativeQueryRef": "Week"
+              "nativeQueryRef": "Week",
+              "active": false
             },
             {
               "field": {
@@ -55,13 +57,13 @@
                 }
               },
               "queryRef": "Calendar.Date",
-              "nativeQueryRef": "Date"
+              "nativeQueryRef": "Date",
+              "active": false
             }
           ]
         }
       }
     },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -98,6 +100,7 @@
           }
         }
       ]
-    }
+    },
+    "drillFilterOtherVisuals": true
   }
 }

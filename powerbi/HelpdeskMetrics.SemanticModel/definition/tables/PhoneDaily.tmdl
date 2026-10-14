@@ -21,6 +21,11 @@ table PhoneDaily
 		displayFolder: Phones
 		lineageTag: ae73d289-595a-4ea9-9f5c-1fb8a177b517
 
+	measure 'Talk Hours' = SUM ( PhoneDaily[Talk Hours (raw)] )
+		formatString: #,0.0
+		displayFolder: Phones
+		lineageTag: 88e0c9ad-99ea-4cd0-a145-130df6c7c8f0
+
 	measure 'Rejected Calls' = SUM ( PhoneDaily[Rejected] )
 		formatString: #,0
 		displayFolder: Phones
@@ -55,11 +60,6 @@ table PhoneDaily
 		formatString: #,0
 		displayFolder: Phones
 		lineageTag: 4449896d-a4e9-4f14-92f1-8e4d9b188fbd
-
-	measure 'Talk Hours' = SUM ( PhoneDaily[Talk Hours (raw)] )
-		formatString: #,0.0
-		displayFolder: Phones
-		lineageTag: 88e0c9ad-99ea-4cd0-a145-130df6c7c8f0
 
 	measure 'Hold Hours' = SUM ( PhoneDaily[Hold Seconds] ) / 3600
 		formatString: #,0.0
@@ -122,14 +122,6 @@ table PhoneDaily
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Agent Type'
-		dataType: string
-		lineageTag: 5a8d1ad6-2d64-4779-919e-e64f2d149f85
-		summarizeBy: none
-		sourceColumn: Agent Type
-
-		annotation SummarizationSetBy = Automatic
-
 	column 'Inbound Calls (raw)'
 		dataType: int64
 		isHidden
@@ -155,6 +147,32 @@ table PhoneDaily
 
 		annotation SummarizationSetBy = Automatic
 
+	column Abandoned
+		dataType: int64
+		lineageTag: f8eb94b6-7dbb-4beb-9fec-104b02587cd3
+		summarizeBy: none
+		sourceColumn: Abandoned
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Talk Hours (raw)'
+		dataType: double
+		isHidden
+		formatString: #,0.0
+		lineageTag: acb76c20-dae6-415c-9d1c-05a9d659c928
+		summarizeBy: none
+		sourceColumn: Talk Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Agent Type'
+		dataType: string
+		lineageTag: 5a8d1ad6-2d64-4779-919e-e64f2d149f85
+		summarizeBy: none
+		sourceColumn: Agent Type
+
+		annotation SummarizationSetBy = Automatic
+
 	column Rejected
 		dataType: int64
 		lineageTag: 2f60c2ed-0c6d-485d-a841-61bf12915a3c
@@ -169,14 +187,6 @@ table PhoneDaily
 		lineageTag: 88b3356a-4781-41d3-9e53-7cf08115ec51
 		summarizeBy: none
 		sourceColumn: Ring No Answer
-
-		annotation SummarizationSetBy = Automatic
-
-	column Abandoned
-		dataType: int64
-		lineageTag: f8eb94b6-7dbb-4beb-9fec-104b02587cd3
-		summarizeBy: none
-		sourceColumn: Abandoned
 
 		annotation SummarizationSetBy = Automatic
 
@@ -259,16 +269,6 @@ table PhoneDaily
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Talk Hours (raw)'
-		dataType: double
-		formatString: #,0.0
-		isHidden
-		lineageTag: acb76c20-dae6-415c-9d1c-05a9d659c928
-		summarizeBy: none
-		sourceColumn: Talk Hours
-
-		annotation SummarizationSetBy = Automatic
-
 	partition PhoneDaily = m
 		mode: import
 		source =
@@ -279,3 +279,4 @@ table PhoneDaily
 				    Data
 
 	annotation PBI_ResultType = Table
+

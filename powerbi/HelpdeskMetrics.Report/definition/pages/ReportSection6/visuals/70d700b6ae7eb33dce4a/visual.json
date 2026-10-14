@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Calendar.Month",
-              "nativeQueryRef": "Month"
+              "nativeQueryRef": "Month",
+              "active": true
             },
             {
               "field": {
@@ -41,7 +42,8 @@
                 }
               },
               "queryRef": "Calendar.Week",
-              "nativeQueryRef": "Week"
+              "nativeQueryRef": "Week",
+              "active": false
             },
             {
               "field": {
@@ -55,7 +57,8 @@
                 }
               },
               "queryRef": "Calendar.Date",
-              "nativeQueryRef": "Date"
+              "nativeQueryRef": "Date",
+              "active": false
             }
           ]
         },
@@ -143,6 +146,35 @@
         ]
       }
     },
+    "expansionStates": [
+      {
+        "roles": [
+          "Columns"
+        ],
+        "levels": [
+          {
+            "queryRefs": [
+              "Calendar.Month"
+            ],
+            "isCollapsed": true,
+            "isPinned": true
+          },
+          {
+            "queryRefs": [
+              "Calendar.Week"
+            ],
+            "isCollapsed": true
+          },
+          {
+            "queryRefs": [
+              "Calendar.Date"
+            ],
+            "isCollapsed": true
+          }
+        ],
+        "root": {}
+      }
+    ],
     "visualContainerObjects": {
       "title": [
         {
@@ -166,5 +198,107 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "40c241fee299ea63a99f",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Month"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "4ff410e118a13feefaa6",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Week"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "6555039482b22ac4c8a3",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "603b4a0b0e13832215ba",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tech"
+              }
+            },
+            "Property": "Tech"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "1981b9c71b5a6e83580f",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Calls Answered"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "780d8c42e0cb9471a14e",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Calls Missed"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "9f5d2cc68559fb2ddebb",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "PhoneDaily"
+              }
+            },
+            "Property": "Talk Hours"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

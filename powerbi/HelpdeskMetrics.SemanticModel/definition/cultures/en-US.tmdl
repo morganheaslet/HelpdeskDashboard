@@ -2,71 +2,29 @@ cultureInfo en-US
 
 	linguisticMetadata =
 			{
-			  "Version": "2.0.0",
+			  "Version": "1.0.0",
 			  "Language": "en-US",
 			  "Entities": {
 			    "calendar.month": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "Calendar",
-			          "ConceptualProperty": "Month"
-			        }
+			      "Binding": {
+			        "ConceptualEntity": "Calendar",
+			        "ConceptualProperty": "Month"
 			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "Month": {
-			            "State": "Suggested",
-			            "Source": {
-			              "Type": "External",
-			              "Agent": "PowerBI.VisualColumnRename"
-			            },
-			            "Weight": 0.9
-			          }
-			        }
-			      ]
+			      "State": "Generated"
 			    },
 			    "calendar.week": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "Calendar",
-			          "ConceptualProperty": "Week"
-			        }
+			      "Binding": {
+			        "ConceptualEntity": "Calendar",
+			        "ConceptualProperty": "Week"
 			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "Week": {
-			            "State": "Suggested",
-			            "Source": {
-			              "Type": "External",
-			              "Agent": "PowerBI.VisualColumnRename"
-			            },
-			            "Weight": 0.9
-			          }
-			        }
-			      ]
+			      "State": "Generated"
 			    },
 			    "calendar.date": {
-			      "Definition": {
-			        "Binding": {
-			          "ConceptualEntity": "Calendar",
-			          "ConceptualProperty": "Date"
-			        }
+			      "Binding": {
+			        "ConceptualEntity": "Calendar",
+			        "ConceptualProperty": "Date"
 			      },
-			      "State": "Generated",
-			      "Terms": [
-			        {
-			          "Day": {
-			            "State": "Suggested",
-			            "Source": {
-			              "Type": "External",
-			              "Agent": "PowerBI.VisualColumnRename"
-			            },
-			            "Weight": 0.9
-			          }
-			        }
-			      ]
+			      "State": "Generated"
 			    }
 			  }
 			}

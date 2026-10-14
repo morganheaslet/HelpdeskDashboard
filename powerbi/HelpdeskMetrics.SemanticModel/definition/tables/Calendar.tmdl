@@ -41,8 +41,8 @@ table Calendar
 
 	column 'Month Sort'
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: fddc627f-658b-49db-96f6-832e85717c7d
 		summarizeBy: none
 		sourceColumn: Month Sort
@@ -78,8 +78,8 @@ table Calendar
 
 	column 'Weekday Sort'
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 799c8efe-24fb-4e93-8fa9-aae72bfb1df7
 		summarizeBy: none
 		sourceColumn: Weekday Sort
@@ -128,3 +128,4 @@ table Calendar
 				    Data
 
 	annotation PBI_ResultType = Table
+

@@ -41,8 +41,8 @@ table Capacity
 
 	column 'Capacity Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 72a72818-e305-4cb9-9d01-f0cf28a6c73e
 		summarizeBy: none
 		sourceColumn: Capacity Hours
@@ -59,3 +59,4 @@ table Capacity
 				    Data
 
 	annotation PBI_ResultType = Table
+

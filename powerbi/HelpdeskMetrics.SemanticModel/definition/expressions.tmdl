@@ -7,3 +7,4 @@ expression 'SQL Database' = "th2-metrics-db" meta [IsParameterQuery=true, Type="
 	lineageTag: 89911db6-3e07-429c-b717-93254bf5de79
 
 	annotation PBI_ResultType = Text
+

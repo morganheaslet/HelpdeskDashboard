@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Calendar.Month",
-              "nativeQueryRef": "Month"
+              "nativeQueryRef": "Month",
+              "active": true
             },
             {
               "field": {
@@ -41,7 +42,8 @@
                 }
               },
               "queryRef": "Calendar.Week",
-              "nativeQueryRef": "Week"
+              "nativeQueryRef": "Week",
+              "active": false
             },
             {
               "field": {
@@ -55,7 +57,8 @@
                 }
               },
               "queryRef": "Calendar.Date",
-              "nativeQueryRef": "Date"
+              "nativeQueryRef": "Date",
+              "active": false
             }
           ]
         },
