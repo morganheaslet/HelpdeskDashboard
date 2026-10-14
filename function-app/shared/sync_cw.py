@@ -7,9 +7,9 @@ Incremental by lastUpdated, in bounded time windows:
   forward window by window until it hits its time budget, commits, and the
   next run picks up where it stopped. No separate backfill job, and a run
   that dies mid-way loses at most one window (MERGE makes re-syncing safe).
-- Steady state, each run re-reads from (cursor - OVERLAP) to now, which
-  catches records whose lastUpdated landed just before a run but committed
-  after it.
+- Steady state, each run re-reads everything updated since
+  (cursor - STEADY_LOOKBACK) with no upper bound — see STEADY_LOOKBACK for
+  why a tight [cursor, now) window silently missed updates.
 
 Once per local day (run_daily_cw) it also: refreshes reference tables,
 re-pulls every currently-open ticket (an old open ticket untouched since
@@ -30,7 +30,6 @@ from shared.aggregate import CLOSED_STATUSES, to_local
 
 BACKFILL_START = datetime(2025, 1, 1)          # naive UTC, like every DB timestamp
 BACKFILL_WINDOW = timedelta(days=7)
-OVERLAP = timedelta(minutes=5)
 TIME_ENTRY_RECONCILE_DAYS = 45                  # entries get edited/deleted until approved
 
 # ConnectWise condition field for "last modified". Unconfirmed against this
@@ -217,9 +216,11 @@ def _windowed_sync(cw, conn, entity, path, fields, to_rows, deadline, on_batch=N
     state = db.get_state(conn, entity)
     cursor = state["cursor_utc"] or BACKFILL_START
     total = 0
+    if state["backfill_complete"]:
+        return _steady_state_sync(cw, conn, entity, path, fields, to_rows, cursor, on_batch)
     while datetime.now(timezone.utc) < deadline:
         now = db.utcnow()
-        start = cursor - OVERLAP if state["backfill_complete"] else cursor
+        start = cursor
         end = min(cursor + BACKFILL_WINDOW, now)
         records = cw.get_all(
             path, fields=fields,
@@ -238,6 +239,32 @@ def _windowed_sync(cw, conn, entity, path, fields, to_rows, deadline, on_batch=N
         if caught_up:
             break
     return total
+
+
+# Steady-state look-back. ConnectWise evaluates a lastUpdated condition in a
+# different clock than the "Z" timestamps it returns (observed 2026-10-14:
+# an update returned as 12:35Z only matched a 16:32–16:52Z window, ~4h
+# off). The old steady-state window [cursor - 5min, now) therefore never
+# matched recent updates — they compared as "after now" — and the cursor
+# moved past them, so ticket/time-entry changes were silently skipped all
+# day. Now each run asks for everything updated since (cursor - 26h) with
+# NO upper bound: any offset under 26h is covered, and re-reading unchanged
+# rows is harmless (MERGE, and ticket events only record real diffs).
+STEADY_LOOKBACK = timedelta(hours=26)
+
+
+def _steady_state_sync(cw, conn, entity, path, fields, to_rows, cursor, on_batch):
+    run_start = db.utcnow()
+    since = cursor - STEADY_LOOKBACK
+    records = cw.get_all(path, fields=fields, conditions=f"{UPDATED_FIELD}>={_cw_ts(since)}")
+    rows = to_rows(records, run_start)
+    if on_batch:
+        on_batch(conn, rows, True)
+    n = db.upsert(conn, *_TABLES[entity], rows)
+    db.set_state(conn, entity, cursor_utc=run_start)
+    conn.commit()
+    logging.info("%s: steady-state pull since %s (no upper bound), %d rows", entity, since, len(rows))
+    return n
 
 
 _TABLES = {
