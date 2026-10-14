@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "a2533e37b323e9298181",
   "position": {
-    "x": 780,
-    "y": 122,
+    "x": 403.63636363636363,
+    "y": 121.81818181818181,
     "z": 7000,
-    "height": 330,
-    "width": 490,
+    "height": 340,
+    "width": 876.36363636363626,
     "tabOrder": 7000
   },
   "visual": {
@@ -134,6 +134,34 @@
         ]
       }
     },
+    "objects": {
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
         {
@@ -157,5 +185,107 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "ea4dc8b93de75e9cf5a5",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tech"
+              }
+            },
+            "Property": "Tech"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "4f64ca73599a1dd12b5c",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Open Now"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "dcc6963cb2510e42213e",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Waiting Now"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "a4e2b33ec8c4e65002e7",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Avg Open Age (Days)"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "d6a3f8c75ffc74342cbf",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Resolved"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "2ec45edb84d9143d86ba",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TicketAssignments"
+              }
+            },
+            "Property": "Assigned - Closed"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "72bcdbf77cd60980ed58",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TicketAssignments"
+              }
+            },
+            "Property": "Close Rate"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

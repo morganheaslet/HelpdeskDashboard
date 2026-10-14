@@ -34,23 +34,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "5f6387692b7848906e57",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Tickets"
-              }
-            },
-            "Property": "Tickets Closed"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

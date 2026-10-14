@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "7346fcbbdfd3f31165ff",
   "position": {
-    "x": 640,
-    "y": 532,
-    "z": 0,
-    "height": 340,
-    "width": 630,
-    "tabOrder": 0
+    "x": 640.4965089216447,
+    "y": 532.2575640031032,
+    "z": 3000,
+    "height": 279.03801396431339,
+    "width": 629.57331264546156,
+    "tabOrder": 3000
   },
   "visual": {
     "visualType": "barChart",
@@ -110,5 +110,51 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "1db42122e6529dae1204",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Subtype"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "94dbbbb2069081664e39",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Type"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "a8e6a2c5432ddcc7d53e",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Opened"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

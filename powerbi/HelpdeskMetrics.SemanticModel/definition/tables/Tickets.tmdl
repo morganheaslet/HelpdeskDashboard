@@ -71,6 +71,11 @@ table Tickets
 		displayFolder: SLA
 		lineageTag: 4d0295a2-8360-4091-a324-1d1b422423fb
 
+	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
+		formatString: #,0.0
+		displayFolder: SLA
+		lineageTag: c7c0e306-d65b-408f-a335-511b19306ad2
+
 	measure 'Max Open Age (Days)' = CALCULATE ( MAX ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )
 		formatString: #,0
 		displayFolder: Backlog
@@ -101,11 +106,6 @@ table Tickets
 		displayFolder: Client
 		lineageTag: a18f4510-328f-4c6c-b77a-57cf48c3c3ce
 
-	measure 'Median Resolution Hours' = CALCULATE ( MEDIAN ( Tickets[Resolution Hours (SLA clock)] ), Tickets[Is Closed] = TRUE (), USERELATIONSHIP ( Tickets[Closed Date], 'Calendar'[Date] ) )
-		formatString: #,0.0
-		displayFolder: SLA
-		lineageTag: c7c0e306-d65b-408f-a335-511b19306ad2
-
 	column TicketId
 		dataType: int64
 		formatString: 0
@@ -117,8 +117,8 @@ table Tickets
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 0a88ab4c-60f7-473b-a21d-30cdc77101a2
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -127,8 +127,8 @@ table Tickets
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 1e377bfa-a2cf-4eea-adff-3ba67d3fd5ae
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -247,35 +247,11 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
-	column Item
-		dataType: string
-		lineageTag: ef00dca1-506e-49f8-81d6-4fe80752e7f9
-		summarizeBy: none
-		sourceColumn: Item
-
-		annotation SummarizationSetBy = Automatic
-
 	column Source
 		dataType: string
 		lineageTag: 130c36c4-5e27-4e6d-9550-ef986a1e8388
 		summarizeBy: none
 		sourceColumn: Source
-
-		annotation SummarizationSetBy = Automatic
-
-	column Contact
-		dataType: string
-		lineageTag: 0b5db971-a83c-4bbf-af7b-6e2daa468590
-		summarizeBy: none
-		sourceColumn: Contact
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Entered After Hours'
-		dataType: boolean
-		lineageTag: 8d75d07f-46ff-4965-a0c2-9d317093a98e
-		summarizeBy: none
-		sourceColumn: Entered After Hours
 
 		annotation SummarizationSetBy = Automatic
 
@@ -400,11 +376,35 @@ table Tickets
 
 	column 'Ticket Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 98adbf7c-75ec-4272-917b-74f4286eb2dd
 		summarizeBy: none
 		sourceColumn: Ticket Hours
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: string
+		lineageTag: ef00dca1-506e-49f8-81d6-4fe80752e7f9
+		summarizeBy: none
+		sourceColumn: Item
+
+		annotation SummarizationSetBy = Automatic
+
+	column Contact
+		dataType: string
+		lineageTag: 0b5db971-a83c-4bbf-af7b-6e2daa468590
+		summarizeBy: none
+		sourceColumn: Contact
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Entered After Hours'
+		dataType: boolean
+		lineageTag: 8d75d07f-46ff-4965-a0c2-9d317093a98e
+		summarizeBy: none
+		sourceColumn: Entered After Hours
 
 		annotation SummarizationSetBy = Automatic
 
@@ -418,3 +418,4 @@ table Tickets
 				    Data
 
 	annotation PBI_ResultType = Table
+

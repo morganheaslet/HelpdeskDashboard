@@ -4,10 +4,10 @@
   "position": {
     "x": 1015,
     "y": 8,
-    "z": 0,
+    "z": 10000,
     "height": 104,
     "width": 123,
-    "tabOrder": 0
+    "tabOrder": 10000
   },
   "visual": {
     "visualType": "card",
@@ -34,23 +34,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "65e9d1fc5aa28d02a641",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "PhoneDaily"
-              }
-            },
-            "Property": "Avg Talk Time (min)"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

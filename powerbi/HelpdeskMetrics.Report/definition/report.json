@@ -59,6 +59,21 @@
       }
     ]
   },
+  "objects": {
+    "outspacePane": [
+      {
+        "properties": {
+          "expanded": {
+            "expr": {
+              "Literal": {
+                "Value": "true"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
   "settings": {
     "useEnhancedTooltips": false
   }

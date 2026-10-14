@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "97f60471dd555bc119f7",
   "position": {
-    "x": 10,
-    "y": 882,
-    "z": 0,
+    "x": 9.9301784328937153,
+    "y": 823.211792086889,
+    "z": 6000,
     "height": 300,
     "width": 410,
-    "tabOrder": 0
+    "tabOrder": 6000
   },
   "visual": {
     "visualType": "clusteredColumnChart",
@@ -138,5 +138,79 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "f49810f3939b9300dff5",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Month"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "8b8c6b9fec4f37ed61ca",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Week"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "a6da08d917a904c895ff",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "e6ac9b4ea5f8e9a1e1d3",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Opened"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "36586cfb551eeb3e0863",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Closed"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

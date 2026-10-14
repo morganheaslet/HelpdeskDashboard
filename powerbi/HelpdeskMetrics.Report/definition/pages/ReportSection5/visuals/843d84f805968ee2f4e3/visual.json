@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "843d84f805968ee2f4e3",
   "position": {
-    "x": 850,
-    "y": 882,
-    "z": 0,
+    "x": 850.02327385570209,
+    "y": 811.29557796741653,
+    "z": 5000,
     "height": 300,
     "width": 420,
-    "tabOrder": 0
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "donutChart",
@@ -75,5 +75,37 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "1f5e4e2de7def7e60e2f",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Source"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "e2cd9c08d5139bf344ca",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Opened"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

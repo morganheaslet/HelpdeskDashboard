@@ -4,10 +4,10 @@
   "position": {
     "x": 1125.089216446858,
     "y": 7.9441427463149727,
-    "z": 0,
+    "z": 8000,
     "height": 104.26687354538402,
     "width": 131.07835531419704,
-    "tabOrder": 0
+    "tabOrder": 8000
   },
   "visual": {
     "visualType": "card",
@@ -34,23 +34,5 @@
       }
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "de5a0cbb8c8a8e98746d",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Tickets"
-              }
-            },
-            "Property": "Open Now"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

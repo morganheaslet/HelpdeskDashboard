@@ -138,5 +138,79 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "93bd653bde64dff675b7",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Month"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "9eab581654a6474ff19c",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Week"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "473ac130a37976f4bd69",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendar"
+              }
+            },
+            "Property": "Date"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "c115710119fe4021c59f",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TicketAssignments"
+              }
+            },
+            "Property": "Tickets Assigned"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "196ab9ec6ee41ab8966e",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Closed"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

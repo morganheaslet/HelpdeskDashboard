@@ -2,12 +2,12 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "67bc04a838e53cd8febe",
   "position": {
-    "x": 10,
-    "y": 532,
-    "z": 0,
-    "height": 340,
-    "width": 620,
-    "tabOrder": 0
+    "x": 9.9301784328937153,
+    "y": 532.2575640031032,
+    "z": 2000,
+    "height": 279.03801396431339,
+    "width": 624.60822342901474,
+    "tabOrder": 2000
   },
   "visual": {
     "visualType": "tableEx",
@@ -129,5 +129,79 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "c9547d8f746368af102a",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Company"
+              }
+            },
+            "Property": "Company"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "d206977a7f2cb4598c71",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tech"
+              }
+            },
+            "Property": "Tech"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "3179b7e12bfa85c2855f",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "TicketAssignments"
+              }
+            },
+            "Property": "Tickets Assigned"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "7fa8dde9198387527074",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Tickets Closed"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "ab2cb4b27e312126e4c7",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Tickets"
+              }
+            },
+            "Property": "Open Now"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

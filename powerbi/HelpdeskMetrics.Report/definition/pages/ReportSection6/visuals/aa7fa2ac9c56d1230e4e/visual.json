@@ -4,10 +4,10 @@
   "position": {
     "x": 10,
     "y": 8,
-    "z": 0,
+    "z": 7000,
     "height": 104,
     "width": 200,
-    "tabOrder": 0
+    "tabOrder": 7000
   },
   "visual": {
     "visualType": "slicer",
@@ -199,16 +199,6 @@
                               },
                               "Property": "Month"
                             }
-                          },
-                          {
-                            "Column": {
-                              "Expression": {
-                                "SourceRef": {
-                                  "Source": "c"
-                                }
-                              },
-                              "Property": "Week"
-                            }
                           }
                         ],
                         "Values": [
@@ -216,11 +206,6 @@
                             {
                               "Literal": {
                                 "Value": "'Oct 2026'"
-                              }
-                            },
-                            {
-                              "Literal": {
-                                "Value": "'Wk of 10/12/26'"
                               }
                             }
                           ]
@@ -239,16 +224,6 @@
                               },
                               "Property": "Month"
                             }
-                          },
-                          {
-                            "Column": {
-                              "Expression": {
-                                "SourceRef": {
-                                  "Entity": "Calendar"
-                                }
-                              },
-                              "Property": "Week"
-                            }
                           }
                         ],
                         "decomposedIdentities": {
@@ -259,15 +234,6 @@
                                   {
                                     "Literal": {
                                       "Value": "'Oct 2026'"
-                                    }
-                                  }
-                                ]
-                              },
-                              {
-                                "1": [
-                                  {
-                                    "Literal": {
-                                      "Value": "'Wk of 10/12/26'"
                                     }
                                   }
                                 ]
@@ -286,25 +252,12 @@
                                   "Property": "Month"
                                 }
                               }
-                            },
-                            {
-                              "value": {
-                                "Column": {
-                                  "Expression": {
-                                    "SourceRef": {
-                                      "Entity": "Calendar"
-                                    }
-                                  },
-                                  "Property": "Week"
-                                }
-                              }
                             }
                           ]
                         },
                         "valueMap": [
                           {
-                            "0": "Oct 2026",
-                            "1": "Wk of 10/12/26"
+                            "0": "Oct 2026"
                           }
                         ]
                       }

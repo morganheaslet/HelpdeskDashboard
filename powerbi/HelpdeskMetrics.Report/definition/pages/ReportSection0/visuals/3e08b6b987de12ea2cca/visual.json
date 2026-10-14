@@ -3,10 +3,10 @@
   "name": "3e08b6b987de12ea2cca",
   "position": {
     "x": 10,
-    "y": 122,
+    "y": 121.81818181818181,
     "z": 3000,
-    "height": 590,
-    "width": 760,
+    "height": 353.63636363636363,
+    "width": 393.63636363636363,
     "tabOrder": 3000
   },
   "visual": {
@@ -14,72 +14,7 @@
     "query": {
       "queryState": {
         "Columns": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Calendar"
-                    }
-                  },
-                  "Property": "Month"
-                }
-              },
-              "queryRef": "Calendar.Month",
-              "nativeQueryRef": "Month",
-              "active": true,
-              "displayName": "Month"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Calendar"
-                    }
-                  },
-                  "Property": "Week"
-                }
-              },
-              "queryRef": "Calendar.Week",
-              "nativeQueryRef": "Week",
-              "active": false,
-              "displayName": "Week"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Calendar"
-                    }
-                  },
-                  "Property": "Date"
-                }
-              },
-              "queryRef": "Calendar.Date",
-              "nativeQueryRef": "Day",
-              "active": false,
-              "displayName": "Day"
-            }
-          ],
-          "fieldParameters": [
-            {
-              "parameterExpr": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Period"
-                    }
-                  },
-                  "Property": "Period"
-                }
-              },
-              "index": 0,
-              "length": 3
-            }
-          ]
+          "projections": []
         },
         "Rows": {
           "projections": [
@@ -140,10 +75,10 @@
               "Measure": {
                 "Expression": {
                   "SourceRef": {
-                    "Entity": "Tickets"
+                    "Entity": "TicketAssignments"
                   }
                 },
-                "Property": "Tickets Closed"
+                "Property": "Tickets Assigned"
               }
             },
             "direction": "Descending"
@@ -290,6 +225,20 @@
             ],
             "metadata": "Tickets.Tickets Closed"
           }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "101.63636706486176D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "TicketAssignments.Tickets Assigned"
+          }
         }
       ],
       "rowHeaders": [
@@ -333,49 +282,7 @@
   "filterConfig": {
     "filters": [
       {
-        "name": "31eadba7fdba0d66e15a",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Calendar"
-              }
-            },
-            "Property": "Month"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "66d7873b1fbe873c6558",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Calendar"
-              }
-            },
-            "Property": "Week"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "1af6a61d870b306a8e86",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Calendar"
-              }
-            },
-            "Property": "Date"
-          }
-        },
-        "type": "Categorical"
-      },
-      {
-        "name": "7e46a56d55e53ca32c0c",
+        "name": "9001be492fe4095344c0",
         "field": {
           "Column": {
             "Expression": {
@@ -389,7 +296,7 @@
         "type": "Categorical"
       },
       {
-        "name": "6534296d0143da3dbbc3",
+        "name": "9fa4202fd14f69c0756d",
         "field": {
           "Measure": {
             "Expression": {
@@ -403,7 +310,7 @@
         "type": "Advanced"
       },
       {
-        "name": "a1ae18fbb2eaf8d7ad0b",
+        "name": "4bd985012e65e7ae8a1e",
         "field": {
           "Measure": {
             "Expression": {
