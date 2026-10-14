@@ -1,10 +1,10 @@
 table Board
-	lineageTag: 78bcbc5a-e814-43df-9139-ffed7cd9082b
+	lineageTag: 89d661d9-7e72-4f0f-86c1-d13a08c8915c
 
 	column BoardId
 		dataType: int64
 		formatString: 0
-		lineageTag: e5f5d932-c519-447d-b79b-6d18f86e1192
+		lineageTag: 6b0fab0c-b6d8-409c-bab8-d1b87a54306d
 		summarizeBy: none
 		sourceColumn: BoardId
 
@@ -12,7 +12,7 @@ table Board
 
 	column Board
 		dataType: string
-		lineageTag: 631bb9d0-2a40-4316-baae-f465e77b6025
+		lineageTag: 05598f01-7109-459d-9225-9f6a44b17ec0
 		summarizeBy: none
 		sourceColumn: Board
 
@@ -20,7 +20,7 @@ table Board
 
 	column 'Is Throughput Board'
 		dataType: boolean
-		lineageTag: 11b5c90e-f077-498b-b02f-beabea02efbf
+		lineageTag: 43c4a769-da15-4dc9-8989-9061b163ab87
 		summarizeBy: none
 		sourceColumn: Is Throughput Board
 
@@ -28,7 +28,7 @@ table Board
 
 	column 'Is Alerts'
 		dataType: boolean
-		lineageTag: 8c8ca5bb-aaa5-42ba-be6a-5d5735bed75c
+		lineageTag: 86ae2eac-5453-4e71-9013-c861c4a6a5a3
 		summarizeBy: none
 		sourceColumn: Is Alerts
 
@@ -36,7 +36,7 @@ table Board
 
 	column 'Is Active'
 		dataType: boolean
-		lineageTag: 6f667f55-1326-443c-a013-79dc5b851f63
+		lineageTag: 380eb9bd-599f-4a28-83c1-787d78fe6a2e
 		summarizeBy: none
 		sourceColumn: Is Active
 
@@ -52,4 +52,3 @@ table Board
 				    Data
 
 	annotation PBI_ResultType = Table
-

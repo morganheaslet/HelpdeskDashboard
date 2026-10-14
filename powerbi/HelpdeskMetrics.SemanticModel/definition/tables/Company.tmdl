@@ -1,10 +1,10 @@
 table Company
-	lineageTag: 132d7a1c-e423-438a-b44e-753d02ba59e7
+	lineageTag: 403af1c5-3936-4eb3-adf8-01d74318a933
 
 	column CompanyId
 		dataType: int64
 		formatString: 0
-		lineageTag: a7a0b03a-b128-4e77-b847-eb1f8f966c9a
+		lineageTag: bb9b5a1c-c515-4baf-9fb9-2134095610c8
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -12,7 +12,7 @@ table Company
 
 	column Company
 		dataType: string
-		lineageTag: d8127810-6d17-4d62-ae1a-9226ad74d5c9
+		lineageTag: 6f88bc30-a1bb-4d36-b8c3-bd5f6bf06e4f
 		summarizeBy: none
 		sourceColumn: Company
 
@@ -20,7 +20,7 @@ table Company
 
 	column 'Company Types'
 		dataType: string
-		lineageTag: 97e05b43-dc26-4174-99d9-eafa1be2350e
+		lineageTag: d992c5db-ebfb-42a4-87ca-f004ae985e9e
 		summarizeBy: none
 		sourceColumn: Company Types
 
@@ -28,7 +28,7 @@ table Company
 
 	column Territory
 		dataType: string
-		lineageTag: 03a7d2e6-6cd4-494b-b92a-98ab5d79fb1b
+		lineageTag: f68a8b3e-2066-47e1-999f-a10dec60c434
 		summarizeBy: none
 		sourceColumn: Territory
 
@@ -36,7 +36,7 @@ table Company
 
 	column 'Company Status'
 		dataType: string
-		lineageTag: dbbd29fb-32ac-471a-b5b5-4bade5cd3b8d
+		lineageTag: 77415c0a-8e02-49ac-9ae3-180c800ee6a0
 		summarizeBy: none
 		sourceColumn: Company Status
 
@@ -44,7 +44,7 @@ table Company
 
 	column 'Has Recent Tickets'
 		dataType: boolean
-		lineageTag: 47dd94c2-3ff8-4199-aa77-e2f11dd58952
+		lineageTag: 06f16567-1f78-4f93-997f-692626c095d4
 		summarizeBy: none
 		sourceColumn: Has Recent Tickets
 
@@ -52,7 +52,7 @@ table Company
 
 	column 'Is Internal'
 		dataType: boolean
-		lineageTag: 46da25c6-7a40-4d8a-a01c-84efe61d0afc
+		lineageTag: ac2fc5cb-dbeb-457b-90ae-4ffabf0cc18b
 		summarizeBy: none
 		sourceColumn: Is Internal
 
@@ -68,4 +68,3 @@ table Company
 				    Data
 
 	annotation PBI_ResultType = Table
-

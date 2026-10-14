@@ -1,10 +1,9 @@
 expression 'SQL Server' = "th2-metrics-sql.database.windows.net" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: 2a3d3414-eb87-452e-b376-9b9887a049fa
+	lineageTag: 91c9bb94-6099-46c6-b69c-3fbb969a6812
 
 	annotation PBI_ResultType = Text
 
 expression 'SQL Database' = "th2-metrics-db" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
-	lineageTag: 98fe4e05-dd51-472c-98ff-9e7881654034
+	lineageTag: 89911db6-3e07-429c-b717-93254bf5de79
 
 	annotation PBI_ResultType = Text
-

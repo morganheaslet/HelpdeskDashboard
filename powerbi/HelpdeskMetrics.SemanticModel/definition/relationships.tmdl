@@ -123,4 +123,3 @@ relationship edaa444e-c8b8-5795-8a94-76774fc0cd4d
 relationship 183fd647-15ff-5789-b0bc-cfcabb015ff6
 	fromColumn: PhoneDaily.TechKey
 	toColumn: Tech.TechKey
-

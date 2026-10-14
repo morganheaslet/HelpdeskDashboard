@@ -93,6 +93,18 @@ MEASURES = {
         ("Open Now",
          "CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )",
          COUNT, "Backlog"),
+        # Backlog history rebuilt from ticket dates, valid back to 2025-01-01:
+        # a ticket was open at the end of the period if entered on/before its
+        # last day and not done (resolved/closed) by then. Owner is the
+        # CURRENT owner (ConnectWise keeps no owner history); exact per-tech
+        # history comes from BacklogDaily snapshots (Oct 14 2026 onward).
+        ("Open at End of Period",
+         "VAR d = MIN ( MAX ( 'Calendar'[Date] ), TODAY () ) "
+         "RETURN IF ( MIN ( 'Calendar'[Date] ) > TODAY (), BLANK (), "
+         "CALCULATE ( COUNTROWS ( Tickets ), REMOVEFILTERS ( 'Calendar' ), "
+         "Tickets[Entered Date] <= d, "
+         "FILTER ( ALL ( Tickets[Done Date] ), ISBLANK ( Tickets[Done Date] ) || Tickets[Done Date] > d ) ) )",
+         COUNT, "Backlog"),
         ("Waiting Now",
          "CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is Waiting] = TRUE (), "
          "REMOVEFILTERS ( 'Calendar' ) )", COUNT, "Backlog"),

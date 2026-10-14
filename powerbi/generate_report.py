@@ -125,7 +125,16 @@ def slicer(page, key, pos, ref, mode, title=None, single=False, filters=None):
     objects = {"data": [{"properties": {"mode": lit(s(mode))}}]}
     if single:
         objects["selection"] = [{"properties": {"singleSelect": lit("true"), "strictSingleSelect": lit("true")}}]
-    return visual(page, key, "slicer", pos, {"Values": [ref]}, title=title, objects=objects, filters=filters)
+    v = visual(page, key, "slicer", pos, {"Values": [ref]}, title=title, objects=objects, filters=filters)
+    # A slicer that CHOOSES the field parameter (lists Month/Week/Day) must
+    # NOT carry fieldParameters metadata — that marks the slicer as one whose
+    # field is SWITCHED by the parameter, and Desktop then turns it into a
+    # Calendar[Month]/[Week]/[Date] value picker. With single-select that
+    # pinned every visual to one month (2026-10-14). Only visuals that
+    # display the parameter (matrix columns, chart axes) get fieldParameters.
+    for state in v["visual"]["query"]["queryState"].values():
+        state.pop("fieldParameters", None)
+    return v
 
 
 # Project boards never have tickets here (project tickets aren't synced), so
@@ -209,6 +218,10 @@ def tickets_by_tech(p):
         visual(p, "trend", "clusteredColumnChart", (780, BODY_Y + 340, 490, 720 - BODY_Y - 348),
                {"Category": [PERIOD], "Y": ["[Tickets Assigned]", "[Tickets Closed]"]},
                title="Assigned vs. closed over time"),
+        # Below the original 720px layout (page is taller, fits to width).
+        visual(p, "backlog_trend", "lineChart", (10, 730, 1260, 300),
+               {"Category": [PERIOD], "Y": ["[Open at End of Period]"]},
+               title="Open backlog at end of each period (by current owner; Resolved counts as done)"),
     ]
 
 
@@ -381,8 +394,10 @@ def phones(p):
 
 # (folder name Desktop created, display name, builder, page filters)
 PAGES = [
-    ("ReportSection0", "Tickets by Tech", tickets_by_tech, [NO_AUTOMATION, NO_ALERTS, NO_EXCLUDED_BOARDS]),
-    ("ReportSection1", "SLA", sla, [NO_AUTOMATION, NO_ALERTS, NO_EXCLUDED_BOARDS]),
+    # Alerts included on every page since 2026-10-14 (per Morgan) — use the
+    # Board picker to look at it, or at everything but it.
+    ("ReportSection0", "Tickets by Tech", tickets_by_tech, [NO_AUTOMATION, NO_EXCLUDED_BOARDS]),
+    ("ReportSection1", "SLA", sla, [NO_AUTOMATION, NO_EXCLUDED_BOARDS]),
     ("ReportSection2", "Utilization", utilization, [NO_AUTOMATION]),
     ("ReportSection3", "Client Profitability", client_profitability, []),
     ("ReportSection4", "Contract Profitability", contract_profitability, []),
@@ -394,7 +409,8 @@ PAGES = [
 ]
 
 # Pages that don't fit 1280x720 (scroll vertically, fit to width).
-PAGE_SIZES = {"ReportSection5": (1280, BODY_Y + 1070 + 420 + 10),
+PAGE_SIZES = {"ReportSection0": (1280, 730 + 300 + 10),
+              "ReportSection5": (1280, BODY_Y + 1070 + 420 + 10),
               "ReportSection6": (1280, BODY_Y + 800 + 300 + 10)}
 # Display order of pages in the report (by folder name).
 PAGE_ORDER = ["ReportSection0", "ReportSection5", "ReportSection6", "ReportSection1", "ReportSection2",
@@ -427,13 +443,31 @@ def validator_for(schema_url):
 
 
 def validate(docs):
-    validators = {}
+    """Validates each doc against the schema it declares. Desktop can write a
+    schema version newer than Microsoft has published yet (it saved
+    visualContainer 2.13.0 in Oct 2026 while 2.12.0 was the latest online);
+    those fall back to the newest published version of the same schema, which
+    flags anything 2.13-specific rather than silently passing it."""
+    import urllib.error
+    validators, used = {}, {}
     errors = []
+    fallbacks = {"visualContainer": VC_SCHEMA, "page": PAGE_SCHEMA, "report": REPORT_SCHEMA}
     for path, doc in docs:
         url = doc["$schema"]
         if url not in validators:
-            validators[url] = validator_for(url)
-        for e in validators[url].iter_errors(doc):
+            try:
+                validators[url], used[url] = validator_for(url), url
+            except urllib.error.HTTPError:
+                kind = url.rstrip("/").split("/")[-3]
+                if kind not in fallbacks:
+                    raise
+                print(f"  note: {url.split('/definition/')[-1]} not published yet — validating against "
+                      f"{fallbacks[kind].split('/definition/')[-1]}")
+                validators[url], used[url] = validator_for(fallbacks[kind]), fallbacks[kind]
+        # Each schema pins its own $schema URL; validate a copy declaring the
+        # schema actually used (the file on disk keeps what Desktop wrote).
+        checked = doc if used[url] == url else {**doc, "$schema": used[url]}
+        for e in validators[url].iter_errors(checked):
             errors.append(f"{path}: {'/'.join(map(str, e.absolute_path))}: {e.message[:300]}")
     return errors
 

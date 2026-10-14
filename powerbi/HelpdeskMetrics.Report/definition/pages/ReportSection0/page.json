@@ -2,8 +2,8 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
   "name": "ReportSection0",
   "displayName": "Tickets by Tech",
-  "displayOption": "FitToPage",
-  "height": 720,
+  "displayOption": "FitToWidth",
+  "height": 1040,
   "width": 1280,
   "filterConfig": {
     "filters": [

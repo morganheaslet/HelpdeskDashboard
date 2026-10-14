@@ -143,6 +143,16 @@ SELECT
                OR DATEPART(HOUR, t.entered_local) < 7
                OR DATEPART(HOUR, t.entered_local) >= 18 THEN 1 ELSE 0 END AS BIT) AS [Entered After Hours],
     t.sla_name                                          AS [SLA],
+    -- When the ticket stopped being open, for rebuilding "open on date D":
+    -- the earlier of resolved/closed ("Resolved" counts as done — Morgan,
+    -- 2026-10-14). NULL while open. Legacy closed-type tickets with neither
+    -- date fall back to their entered date (never counted open historically).
+    CASE WHEN t.is_open = 1 THEN NULL
+         ELSE COALESCE(
+                CASE WHEN t.resolved_local_date IS NOT NULL
+                      AND (t.closed_local_date IS NULL OR t.resolved_local_date < t.closed_local_date)
+                     THEN t.resolved_local_date ELSE t.closed_local_date END,
+                t.entered_local_date) END              AS [Done Date],
     CAST(t.is_open AS BIT)                              AS [Is Open],
     CAST(t.is_waiting AS BIT)                           AS [Is Waiting],
     CAST(t.closed_flag AS BIT)                          AS [Is Closed],
