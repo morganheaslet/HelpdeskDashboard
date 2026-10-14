@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "52c3a79d26dc8e247b20",
+  "position": {
+    "x": 1102,
+    "y": 8,
+    "z": 0,
+    "width": 168,
+    "height": 104,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Margin %"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Margin %",
+              "nativeQueryRef": "Agreement Margin %"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

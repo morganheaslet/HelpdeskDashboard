@@ -71,14 +71,13 @@ Recommended **page-level filters** on every ticket page:
 
 | Visual | Fields |
 |---|---|
-| Slicer (Between) | `Calendar[Date]` |
-| Slicer (Tile) | `Period[Period]`, single select (Day / Week / Month) |
-| Slicer (Dropdown) | `Board[Board]` |
+| Slicer (Dropdown) | `Period[Period]` "Group by", single select (Month / Week / Day) |
+| Slicer (Dropdown) | `Board[Board]`, listing active boards only (visual filter `Board[Is Active]` = True) |
 | **Matrix** | Rows `Tech[Tech]` · Columns `Period[Period]` · Values `Tickets Assigned`, `Tickets Closed` · Sort by `Tickets Closed` descending |
 | **Table** | `Tech[Tech]`, `Open Now`, `Waiting Now`, `Avg Open Age (Days)`, `Tickets Assigned`, `Tickets Closed`, `Tickets Resolved`, `Assigned - Closed`, `Close Rate` |
 | Clustered column | X `Period[Period]` · Y `Tickets Assigned`, `Tickets Closed` |
 
-- `Open Now`, `Waiting Now` and `Avg Open Age` ignore the date slicer. They are
+- `Open Now`, `Waiting Now` and `Avg Open Age` ignore the period grouping. They are
   always the current backlog.
 - Once daily snapshots exist, add `Open at Start of Day` to the matrix for
   backlog per tech per day.
@@ -103,7 +102,7 @@ Recommended **page-level filters** on every ticket page:
 
 | Visual | Fields |
 |---|---|
-| Slicers | `Calendar[Date]`, `Period[Period]` |
+| Slicers | `Period[Period]` (Group by), `Tech[In CW Utilization]` |
 | **Matrix** | Rows `Tech[Tech]` · Values `Available Hours`, `Hours Logged`, `Utilized Hours`, `Billable Hours`, `PTO Hours`, `Utilization %`, `Billable %` |
 | Column | X `Period[Period]` · Y `Utilization %`, `Billable %` |
 | Stacked bar | `TimeEntries[Work Type]` × `Hours Logged` |

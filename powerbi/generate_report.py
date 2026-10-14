@@ -93,7 +93,7 @@ def title_objects(title):
     return {"title": [{"properties": {"show": lit("true"), "text": lit(s(title))}}]}
 
 
-def visual(page, key, vtype, pos, roles, title=None, sort=None, objects=None):
+def visual(page, key, vtype, pos, roles, title=None, sort=None, objects=None, filters=None):
     x, y, w, h = pos
     v = {
         "visualType": vtype,
@@ -108,19 +108,33 @@ def visual(page, key, vtype, pos, roles, title=None, sort=None, objects=None):
         v["objects"] = objects
     if title:
         v["visualContainerObjects"] = title_objects(title)
-    return {
+    container = {
         "$schema": VC_SCHEMA,
         "name": vname(page, key),
         "position": {"x": x, "y": y, "z": 0, "width": w, "height": h, "tabOrder": 0},
         "visual": v,
     }
+    if filters:
+        # Visual-level filters: scope only this visual (e.g. which options a
+        # slicer lists), not the rest of the page.
+        container["filterConfig"] = {"filters": filters}
+    return container
 
 
-def slicer(page, key, pos, ref, mode, title=None, single=False):
+def slicer(page, key, pos, ref, mode, title=None, single=False, filters=None):
     objects = {"data": [{"properties": {"mode": lit(s(mode))}}]}
     if single:
         objects["selection"] = [{"properties": {"singleSelect": lit("true"), "strictSingleSelect": lit("true")}}]
-    return visual(page, key, "slicer", pos, {"Values": [ref]}, title=title, objects=objects)
+    return visual(page, key, "slicer", pos, {"Values": [ref]}, title=title, objects=objects, filters=filters)
+
+
+def board_slicer(page, pos):
+    """Board dropdown listing only active boards. Inactive boards — the
+    "z(Inactive)…", "z(DO NOT USE)…" and "zzzz… (DO NOT USE)" ones, all
+    marked inactive in ConnectWise — are hidden from the options only; their
+    tickets still count in totals when no board is selected."""
+    active = categorical(f"activeBoards_{page}", "Board", "Is Active", ["true"])
+    return slicer(page, "board", pos, "Board[Board]", "Dropdown", "Board", filters=[active])
 
 
 def card(page, key, pos, measure):
@@ -152,25 +166,34 @@ NO_ALERTS = categorical("noAlertsBoard", "Board", "Is Alerts", ["false"])
 
 # --------------------------------------------------------------- pages
 # Canvas 1280 x 720. Positions are (x, y, width, height).
+# Top band (slicers + KPI cards) is TOP_H tall — cards need ~100px or their
+# value and label get clipped. Content starts at BODY_Y.
+TOP_Y, TOP_H = 8, 104
+BODY_Y = TOP_Y + TOP_H + 10
+
+
+def kpi_row(p, x0, measures, width=1270):
+    """Evenly spaced cards from x0 to the right edge of the canvas."""
+    gap = 8
+    w = (width - x0 - gap * (len(measures) - 1)) / len(measures)
+    return [card(p, f"c{i}", (round(x0 + i * (w + gap)), TOP_Y, round(w), TOP_H), m)
+            for i, m in enumerate(measures)]
+
 
 def tickets_by_tech(p):
     return [
-        slicer(p, "date", (10, 8, 300, 72), "Calendar[Date]", "Between", "Date range"),
-        slicer(p, "period", (320, 8, 150, 72), PERIOD, "Dropdown", "Group by", single=True),
-        slicer(p, "board", (480, 8, 230, 72), "Board[Board]", "Dropdown", "Board"),
-        card(p, "c_assigned", (720, 8, 135, 72), "[Tickets Assigned]"),
-        card(p, "c_closed", (860, 8, 135, 72), "[Tickets Closed]"),
-        card(p, "c_open", (1000, 8, 135, 72), "[Open Now]"),
-        card(p, "c_waiting", (1140, 8, 130, 72), "[Waiting Now]"),
-        visual(p, "matrix", "pivotTable", (10, 90, 760, 620),
+        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        board_slicer(p, (220, TOP_Y, 280, TOP_H)),
+        *kpi_row(p, 510, ["[Tickets Assigned]", "[Tickets Closed]", "[Open Now]", "[Waiting Now]"]),
+        visual(p, "matrix", "pivotTable", (10, BODY_Y, 760, 720 - BODY_Y - 8),
                {"Rows": ["Tech[Tech]"], "Columns": [PERIOD],
                 "Values": ["[Tickets Assigned]", "[Tickets Closed]"]},
                title="Assigned vs. closed per tech", sort=("[Tickets Closed]", "Descending")),
-        visual(p, "backlog", "tableEx", (780, 90, 490, 360),
+        visual(p, "backlog", "tableEx", (780, BODY_Y, 490, 330),
                {"Values": ["Tech[Tech]", "[Open Now]", "[Waiting Now]", "[Avg Open Age (Days)]",
                            "[Tickets Resolved]", "[Assigned - Closed]", "[Close Rate]"]},
                title="Current backlog & throughput", sort=("[Open Now]", "Descending")),
-        visual(p, "trend", "clusteredColumnChart", (780, 460, 490, 250),
+        visual(p, "trend", "clusteredColumnChart", (780, BODY_Y + 340, 490, 720 - BODY_Y - 348),
                {"Category": [PERIOD], "Y": ["[Tickets Assigned]", "[Tickets Closed]"]},
                title="Assigned vs. closed over time"),
     ]
@@ -178,26 +201,22 @@ def tickets_by_tech(p):
 
 def sla(p):
     return [
-        slicer(p, "date", (10, 8, 300, 72), "Calendar[Date]", "Between", "Date range"),
-        slicer(p, "period", (320, 8, 150, 72), PERIOD, "Dropdown", "Group by", single=True),
-        slicer(p, "board", (480, 8, 230, 72), "Board[Board]", "Dropdown", "Board"),
-        card(p, "c_resp", (10, 90, 245, 90), "[Response SLA %]"),
-        card(p, "c_res", (265, 90, 245, 90), "[Resolution SLA %]"),
-        card(p, "c_mresp", (520, 90, 245, 90), "[Median Response Hours]"),
-        card(p, "c_mres", (775, 90, 245, 90), "[Median Resolution Hours]"),
-        card(p, "c_out", (1030, 90, 240, 90), "[Out of SLA Now]"),
-        visual(p, "trend", "lineChart", (10, 190, 620, 250),
+        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        board_slicer(p, (220, TOP_Y, 280, TOP_H)),
+        *kpi_row(p, 510, ["[Response SLA %]", "[Resolution SLA %]", "[Median Response Hours]",
+                          "[Median Resolution Hours]", "[Out of SLA Now]"]),
+        visual(p, "trend", "lineChart", (10, BODY_Y, 620, 240),
                {"Category": [PERIOD], "Y": ["[Response SLA %]", "[Resolution SLA %]"]},
                title="SLA attainment over time"),
-        visual(p, "byboard", "clusteredBarChart", (640, 190, 630, 250),
+        visual(p, "byboard", "clusteredBarChart", (640, BODY_Y, 630, 240),
                {"Category": ["Board[Board]"], "Y": ["[Response SLA %]", "[Resolution SLA %]"]},
                title="SLA by board", sort=("[Response SLA %]", "Ascending")),
-        visual(p, "priority", "pivotTable", (10, 450, 620, 260),
+        visual(p, "priority", "pivotTable", (10, BODY_Y + 250, 620, 720 - BODY_Y - 258),
                {"Rows": ["Tickets[Priority]"],
                 "Values": ["[Responses With SLA Target]", "[Response SLA %]", "[Avg Response Hours]",
                            "[Resolutions With SLA Target]", "[Resolution SLA %]", "[Avg Resolution Hours]"]},
                title="SLA by priority"),
-        visual(p, "tech", "tableEx", (640, 450, 630, 260),
+        visual(p, "tech", "tableEx", (640, BODY_Y + 250, 630, 720 - BODY_Y - 258),
                {"Values": ["Tech[Tech]", "[Responses With SLA Target]", "[Response SLA %]", "[Avg Response Hours]",
                            "[Resolution SLA %]", "[Avg Resolution Hours]"]},
                title="SLA by ticket owner", sort=("[Responses With SLA Target]", "Descending")),
@@ -206,24 +225,21 @@ def sla(p):
 
 def utilization(p):
     return [
-        slicer(p, "date", (10, 8, 300, 72), "Calendar[Date]", "Between", "Date range"),
-        slicer(p, "period", (320, 8, 150, 72), PERIOD, "Dropdown", "Group by", single=True),
-        slicer(p, "cwutil", (480, 8, 230, 72), "Tech[In CW Utilization]", "Dropdown", "In CW utilization"),
-        card(p, "c_util", (720, 8, 180, 72), "[Utilization %]"),
-        card(p, "c_bill", (905, 8, 180, 72), "[Billable %]"),
-        card(p, "c_hours", (1090, 8, 180, 72), "[Hours Logged]"),
-        visual(p, "matrix", "pivotTable", (10, 90, 760, 380),
+        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        slicer(p, "cwutil", (220, TOP_Y, 230, TOP_H), "Tech[In CW Utilization]", "Dropdown", "In CW utilization"),
+        *kpi_row(p, 460, ["[Utilization %]", "[Billable %]", "[Hours Logged]"]),
+        visual(p, "matrix", "pivotTable", (10, BODY_Y, 760, 360),
                {"Rows": ["Tech[Tech]"],
                 "Values": ["[Available Hours]", "[Hours Logged]", "[Utilized Hours]", "[Billable Hours]",
                            "[PTO Hours]", "[Utilization %]", "[Billable %]"]},
                title="Utilization by tech", sort=("[Utilization %]", "Descending")),
-        visual(p, "trend", "clusteredColumnChart", (780, 90, 490, 380),
+        visual(p, "trend", "clusteredColumnChart", (780, BODY_Y, 490, 360),
                {"Category": [PERIOD], "Y": ["[Utilization %]", "[Billable %]"]},
                title="Utilization over time"),
-        visual(p, "worktype", "clusteredBarChart", (10, 480, 760, 230),
+        visual(p, "worktype", "clusteredBarChart", (10, BODY_Y + 370, 760, 720 - BODY_Y - 378),
                {"Category": ["TimeEntries[Work Type]"], "Y": ["[Hours Logged]"]},
                title="Hours by work type", sort=("[Hours Logged]", "Descending")),
-        visual(p, "charge", "donutChart", (780, 480, 490, 230),
+        visual(p, "charge", "donutChart", (780, BODY_Y + 370, 490, 720 - BODY_Y - 378),
                {"Category": ["TimeEntries[Charge Type]"], "Y": ["[Hours Logged]"]},
                title="Ticket vs. project vs. admin time"),
     ]
@@ -231,23 +247,20 @@ def utilization(p):
 
 def client_profitability(p):
     return [
-        slicer(p, "year", (10, 8, 160, 72), "Calendar[Year]", "Dropdown", "Year"),
-        slicer(p, "month", (180, 8, 200, 72), "Calendar[Month]", "Dropdown", "Month"),
-        slicer(p, "ctype", (390, 8, 250, 72), "Company[Company Types]", "Dropdown", "Company type"),
-        card(p, "c_rev", (650, 8, 150, 72), "[Normalized Revenue]"),
-        card(p, "c_cost", (805, 8, 150, 72), "[Client Total Cost]"),
-        card(p, "c_margin", (960, 8, 150, 72), "[Client Margin]"),
-        card(p, "c_pct", (1115, 8, 155, 72), "[Client Margin %]"),
-        visual(p, "table", "tableEx", (10, 90, 1260, 340),
+        slicer(p, "year", (10, TOP_Y, 150, TOP_H), "Calendar[Year]", "Dropdown", "Year"),
+        slicer(p, "month", (170, TOP_Y, 190, TOP_H), "Calendar[Month]", "Dropdown", "Month"),
+        slicer(p, "ctype", (370, TOP_Y, 250, TOP_H), "Company[Company Types]", "Dropdown", "Company type"),
+        *kpi_row(p, 630, ["[Normalized Revenue]", "[Client Total Cost]", "[Client Margin]", "[Client Margin %]"]),
+        visual(p, "table", "tableEx", (10, BODY_Y, 1260, 320),
                {"Values": ["Company[Company]", "[Normalized Revenue]", "[Invoiced Revenue]", "[Client Labor Cost]",
                            "[Client Addition Cost]", "[Client Product Cost]", "[Client Margin]", "[Client Margin %]",
                            "[Client Hours]", "[Client Effective Hourly Rate]", "[Client Uncosted Hours]"]},
                title="Profitability by client", sort=("[Normalized Revenue]", "Descending")),
-        visual(p, "scatter", "scatterChart", (10, 440, 620, 270),
+        visual(p, "scatter", "scatterChart", (10, BODY_Y + 330, 620, 720 - BODY_Y - 338),
                {"Category": ["Company[Company]"], "X": ["[Normalized Revenue]"], "Y": ["[Client Margin %]"],
                 "Size": ["[Client Hours]"]},
                title="Revenue vs. margin % (bubble = hours)"),
-        visual(p, "trend", "lineChart", (640, 440, 630, 270),
+        visual(p, "trend", "lineChart", (640, BODY_Y + 330, 630, 720 - BODY_Y - 338),
                {"Category": ["Calendar[Month]"], "Y": ["[Normalized Revenue]", "[Invoiced Revenue]", "[Client Margin]"]},
                title="Revenue and margin by month"),
     ]
@@ -255,23 +268,21 @@ def client_profitability(p):
 
 def contract_profitability(p):
     return [
-        slicer(p, "year", (10, 8, 160, 72), "Calendar[Year]", "Dropdown", "Year"),
-        slicer(p, "month", (180, 8, 200, 72), "Calendar[Month]", "Dropdown", "Month"),
-        slicer(p, "atype", (390, 8, 250, 72), "Agreement[Agreement Type]", "Dropdown", "Agreement type"),
-        slicer(p, "astatus", (650, 8, 180, 72), "Agreement[Agreement Status]", "Dropdown", "Status"),
-        card(p, "c_rev", (840, 8, 140, 72), "[Agreement Revenue]"),
-        card(p, "c_margin", (985, 8, 140, 72), "[Agreement Margin]"),
-        card(p, "c_pct", (1130, 8, 140, 72), "[Agreement Margin %]"),
-        visual(p, "table", "tableEx", (10, 90, 1260, 400),
+        slicer(p, "year", (10, TOP_Y, 140, TOP_H), "Calendar[Year]", "Dropdown", "Year"),
+        slicer(p, "month", (160, TOP_Y, 170, TOP_H), "Calendar[Month]", "Dropdown", "Month"),
+        slicer(p, "atype", (340, TOP_Y, 220, TOP_H), "Agreement[Agreement Type]", "Dropdown", "Agreement type"),
+        slicer(p, "astatus", (570, TOP_Y, 170, TOP_H), "Agreement[Agreement Status]", "Dropdown", "Status"),
+        *kpi_row(p, 750, ["[Agreement Revenue]", "[Agreement Margin]", "[Agreement Margin %]"]),
+        visual(p, "table", "tableEx", (10, BODY_Y, 1260, 370),
                {"Values": ["Agreement[Agreement]", "Agreement[Agreement Type]", "Company[Company]",
                            "[Agreement Revenue]", "[Agreement Labor Cost]", "[Agreement Addition Cost]",
                            "[Agreement Margin]", "[Agreement Margin %]", "[Agreement Hours]",
                            "[Agreement Effective Hourly Rate]"]},
                title="Profitability by agreement", sort=("[Agreement Revenue]", "Descending")),
-        visual(p, "bytype", "clusteredBarChart", (10, 500, 620, 210),
+        visual(p, "bytype", "clusteredBarChart", (10, BODY_Y + 380, 620, 720 - BODY_Y - 388),
                {"Category": ["Agreement[Agreement Type]"], "Y": ["[Agreement Margin %]"]},
                title="Margin % by agreement type", sort=("[Agreement Margin %]", "Ascending")),
-        visual(p, "trend", "lineChart", (640, 500, 630, 210),
+        visual(p, "trend", "lineChart", (640, BODY_Y + 380, 630, 720 - BODY_Y - 388),
                {"Category": ["Calendar[Month]"], "Y": ["[Agreement Revenue]", "[Agreement Margin]"]},
                title="Agreement revenue and margin by month"),
     ]
