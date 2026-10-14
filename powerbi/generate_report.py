@@ -446,11 +446,17 @@ def check_model_references(docs):
 # --------------------------------------------------------------- main
 
 def main():
-    """py generate_report.py                    -> (re)build every page in PAGES
-       py generate_report.py ReportSection5     -> build only the named pages;
-       all other pages are left exactly as Desktop last saved them."""
+    """py generate_report.py ReportSection5     -> build only the named pages;
+       all other pages are left exactly as Desktop last saved them.
+       py generate_report.py --all              -> rebuild EVERY page in PAGES
+       (discards any edits made to those pages in Desktop)."""
     load_measure_tables()
-    only = set(sys.argv[1:])
+    args = sys.argv[1:]
+    if not args:
+        raise SystemExit("Name the page folder(s) to build, e.g. `py generate_report.py ReportSection5`, "
+                         "or pass --all to rebuild every page (discards Desktop edits to them). "
+                         f"Pages: {[(p[0], p[1]) for p in PAGES]}")
+    only = set() if args == ["--all"] else set(args)
     unknown = only - {p[0] for p in PAGES}
     if unknown:
         raise SystemExit(f"Unknown page folder(s): {sorted(unknown)} — choose from {[p[0] for p in PAGES]}")

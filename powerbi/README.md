@@ -14,7 +14,8 @@ model before writing.
   saves to `HelpdeskMetrics.Report/`.
 
 ```
-py powerbi/generate_report.py
+py powerbi/generate_report.py ReportSection5   # build/rebuild just that page
+py powerbi/generate_report.py --all            # rebuild all generated pages (discards Desktop edits to them)
 ```
 
 Regenerate the model (not the report) after changing `sql/006_powerbi_views.sql`:
