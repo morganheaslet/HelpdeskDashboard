@@ -147,6 +147,54 @@ PROJECT_BOARDS = [
 EXCLUDED_BOARDS = ["z(inactive)Quartus - Managed Services"]
 
 
+def period_value_slicer(page, pos):
+    """The "Period" picker: lists the VALUES of whichever grain Group by
+    selected (months, weeks or days) and filters the page to the ones
+    picked; nothing picked = everything. This is the dynamic-slicer pattern
+    — the slicer's field is switched by the Period field parameter — in the
+    exact form Desktop saves it (all three Calendar fields + fieldParameters
+    length 3). Multi-select, no default selection."""
+    fields = [("Calendar[Month]", "Month", True), ("Calendar[Week]", "Week", False), ("Calendar[Date]", "Day", False)]
+    projections = []
+    for ref, display, active in fields:
+        proj = projection(ref)
+        proj.update(active=active, displayName=display)
+        projections.append(proj)
+    param, _, _ = field(PERIOD)
+    v = visual(page, "period_value", "slicer", pos, {"Values": ["Calendar[Month]"]}, title="Period",
+               objects={"data": [{"properties": {"mode": lit(s("Dropdown"))}}]})
+    v["visual"]["query"]["queryState"] = {"Values": {
+        "projections": projections,
+        "fieldParameters": [{"parameterExpr": param, "index": 0, "length": 3}],
+    }}
+    v["filterConfig"] = {"filters": [
+        {"name": vname(page, f"period_value_{c}"), "field": col("Calendar", c), "type": "Categorical"}
+        for c in ("Month", "Week", "Date")
+    ]}
+    return v
+
+
+def period_slicers(page, x, w):
+    """Group by (grain) above Period (which month/week/day), sharing the top band."""
+    half = TOP_H // 2 - 2
+    return [
+        slicer(page, "period", (x, TOP_Y, w, half), PERIOD, "Dropdown", "Group by", single=True),
+        period_value_slicer(page, (x, TOP_Y + half + 4, w, half)),
+    ]
+
+
+def trend_interactions(page, visuals):
+    """Trend charts (Group-by axis) ignore the Period picker, so they always
+    show the whole timeline while everything else filters to the pick."""
+    source = vname(page, "period_value")
+    if not any(v["name"] == source for v in visuals):
+        return []
+    return [{"source": source, "target": v["name"], "type": "NoFilter"}
+            for v in visuals
+            if v["visual"]["visualType"] != "slicer"
+            and "fieldParameters" in v["visual"]["query"]["queryState"].get("Category", {})]
+
+
 def board_slicer(page, pos):
     """Board dropdown listing only active, non-project boards. Inactive
     boards — the "z(Inactive)…", "z(DO NOT USE)…" and "zzzz… (DO NOT USE)"
@@ -204,7 +252,7 @@ def kpi_row(p, x0, measures, width=1270):
 
 def tickets_by_tech(p):
     return [
-        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        *period_slicers(p, 10, 200),
         board_slicer(p, (220, TOP_Y, 280, TOP_H)),
         *kpi_row(p, 510, ["[Tickets Assigned]", "[Tickets Closed]", "[Open Now]", "[Waiting Now]"]),
         visual(p, "matrix", "pivotTable", (10, BODY_Y, 760, 720 - BODY_Y - 8),
@@ -227,7 +275,7 @@ def tickets_by_tech(p):
 
 def sla(p):
     return [
-        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        *period_slicers(p, 10, 200),
         board_slicer(p, (220, TOP_Y, 280, TOP_H)),
         *kpi_row(p, 510, ["[Response SLA %]", "[Resolution SLA %]", "[Median Response Hours]",
                           "[Median Resolution Hours]", "[Out of SLA Now]"]),
@@ -251,7 +299,7 @@ def sla(p):
 
 def utilization(p):
     return [
-        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        *period_slicers(p, 10, 200),
         slicer(p, "cwutil", (220, TOP_Y, 230, TOP_H), "Tech[In CW Utilization]", "Dropdown", "In CW utilization"),
         *kpi_row(p, 460, ["[Utilization %]", "[Billable %]", "[Hours Logged]"]),
         visual(p, "matrix", "pivotTable", (10, BODY_Y, 760, 360),
@@ -321,7 +369,7 @@ def tickets_by_client(p):
         return categorical(f"recentClients_{p}_{tag}", "Company", "Has Recent Tickets", ["true"])
     open_only = categorical(f"openOnly_{p}", "Tickets", "Is Open", ["true"])
     return [
-        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        *period_slicers(p, 10, 200),
         slicer(p, "client", (220, TOP_Y, 300, TOP_H), "Company[Company]", "Dropdown", "Client",
                filters=[recent("slicer")]),
         board_slicer(p, (530, TOP_Y, 230, TOP_H)),
@@ -365,7 +413,7 @@ def phones(p):
     tech_filters = [categorical(f"activeTechs_{p}", "Tech", "Is Active", ["true"]),
                     categorical(f"noAutomationTechs_{p}", "Tech", "Is Automation", ["false"])]
     return [
-        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        *period_slicers(p, 10, 200),
         slicer(p, "tech", (220, TOP_Y, 260, TOP_H), "Tech[Tech]", "Dropdown", "Tech", filters=tech_filters),
         *kpi_row(p, 490, ["[Calls Answered]", "[Calls Missed]", "[Answer Rate]", "[Talk Hours]",
                           "[Avg Talk Time (min)]", "[Outbound Calls]"]),
@@ -549,7 +597,12 @@ def main():
         else:
             page.pop("filterConfig", None)
         docs.append((page_dir / "page.json", page))
-        for v in build(folder):
+        built = build(folder)
+        ours = {i["source"] for i in trend_interactions(folder, built)}
+        keep = [i for i in page.get("visualInteractions", []) if i.get("source") not in ours]
+        if trend_interactions(folder, built) or keep:
+            page["visualInteractions"] = keep + trend_interactions(folder, built)
+        for v in built:
             docs.append((page_dir / "visuals" / v["name"] / "visual.json", v))
 
     pages_path = DEF / "pages" / "pages.json"

@@ -120,5 +120,12 @@
         "howCreated": "User"
       }
     ]
-  }
+  },
+  "visualInteractions": [
+    {
+      "source": "b19c5218595461ce2e97",
+      "target": "14d9fc512d4920bf5ee8",
+      "type": "NoFilter"
+    }
+  ]
 }
