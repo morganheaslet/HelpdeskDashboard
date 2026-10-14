@@ -88,12 +88,38 @@ def _cw_ts(dt):
     return f"[{dt.strftime('%Y-%m-%dT%H:%M:%SZ')}]"
 
 
+def _local(utc_naive):
+    """Naive-UTC datetime -> naive local (REPORT_TIMEZONE) datetime.
+    Computed here, once per row at sync time, because doing it in SQL
+    (AT TIME ZONE) per row per query was ~85% of the reporting views' cost."""
+    if utc_naive is None:
+        return None
+    return to_local(utc_naive.replace(tzinfo=timezone.utc)).replace(tzinfo=None)
+
+
+def _local_date(utc_naive):
+    local = _local(utc_naive)
+    return local.date() if local else None
+
+
 def _chunks(seq, n):
     for i in range(0, len(seq), n):
         yield seq[i:i + n]
 
 
 def ticket_row(t, now):
+    row = _ticket_row(t, now)
+    row.update({
+        "entered_local": _local(row["date_entered"]),
+        "entered_local_date": _local_date(row["date_entered"]),
+        "closed_local_date": _local_date(row["closed_date"]),
+        "resolved_local_date": _local_date(row["date_resolved"]),
+        "responded_local_date": _local_date(row["date_responded"]),
+    })
+    return row
+
+
+def _ticket_row(t, now):
     return {
         "ticket_id": t["id"],
         "record_type": _s(t.get("recordType"), 30),
@@ -148,6 +174,7 @@ def time_entry_row(e, now):
         "work_role_id": _id(e.get("workRole")), "work_role_name": _name(e.get("workRole")),
         "billable_option": _s(e.get("billableOption"), 20),
         "time_start": db.parse_ts(e.get("timeStart")), "time_end": db.parse_ts(e.get("timeEnd")),
+        "local_date": _local_date(db.parse_ts(e.get("timeStart"))),
         "actual_hours": e.get("actualHours"), "hours_deduct": e.get("hoursDeduct"),
         "hours_billed": e.get("hoursBilled"), "invoice_hours": e.get("invoiceHours"),
         "agreement_hours": e.get("agreementHours"), "agreement_amount": e.get("agreementAmount"),
