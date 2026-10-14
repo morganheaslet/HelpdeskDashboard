@@ -256,7 +256,8 @@ def _record_ticket_events(conn, rows, backfill_complete):
                 if (old_val or None) != (new_val or None):
                     events.append((ticket_id, at, field, old_val, new_val))
     if events:
-        cur.fast_executemany = True
+        # Plain executemany: a handful of rows per run, and fast_executemany
+        # mis-binds a leading NULL old_value (see db.upsert's docstring).
         cur.executemany(
             "INSERT INTO cw.ticket_events (ticket_id, event_at, field, old_value, new_value) VALUES (?, ?, ?, ?, ?)",
             events,
