@@ -15,6 +15,7 @@ Docs: https://developer.connectwise.com/Products/Manage/REST
 """
 import os
 import base64
+import logging
 import time
 import requests
 
@@ -40,23 +41,58 @@ class ConnectWiseClient:
             "Content-Type": "application/json",
         })
 
-    def _get_paged(self, path, params=None, page_size=1000, max_pages=20):
+    def _get(self, path, params=None, max_retries=5):
+        """GET with backoff on 429/5xx. ConnectWise throttles per API member
+        (roughly 60 req/min is commonly cited — not officially published) and
+        sends no Retry-After header, so back off exponentially. Matters most
+        during the SQL backfill, which shares this API member with the
+        dashboard's own 15-minute pull."""
+        delay = 2
+        for attempt in range(max_retries + 1):
+            resp = self.session.get(f"{self.base_url}{path}", params=params, timeout=60)
+            if resp.status_code == 429 or resp.status_code >= 500:
+                if attempt == max_retries:
+                    resp.raise_for_status()
+                logging.warning("ConnectWise %s on %s — retrying in %ss", resp.status_code, path, delay)
+                time.sleep(delay)
+                delay = min(delay * 2, 60)
+                continue
+            resp.raise_for_status()
+            return resp.json()
+
+    def get_one(self, path, params=None):
+        return self._get(path, params)
+
+    def get_all(self, path, conditions=None, fields=None, max_pages=50, **extra):
+        """Every record of a list endpoint matching `conditions`."""
+        params = dict(extra)
+        if conditions:
+            params["conditions"] = conditions
+        if fields:
+            params["fields"] = ",".join(fields)
+        return self._get_paged(path, params, max_pages=max_pages)
+
+    def _get_paged(self, path, params=None, page_size=1000, max_pages=50):
         """Fetch all pages of a list endpoint. ConnectWise caps pageSize at 1000."""
         params = dict(params or {})
         params["pageSize"] = page_size
         results = []
         page = 1
-        while page <= max_pages:
+        while True:
             params["page"] = page
-            resp = self.session.get(f"{self.base_url}{path}", params=params, timeout=30)
-            resp.raise_for_status()
-            batch = resp.json()
+            batch = self._get(path, params)
             results.extend(batch)
             if len(batch) < page_size:
-                break
+                return results
+            if page >= max_pages:
+                # Used to stop here silently, quietly undercounting any query
+                # that matched more than max_pages * page_size records.
+                raise RuntimeError(
+                    f"{path} returned more than {max_pages * page_size} records "
+                    f"(conditions: {params.get('conditions')}) — refusing to return a truncated result"
+                )
             page += 1
             time.sleep(0.2)  # be polite to the rate limiter
-        return results
 
     def list_tickets(self, board_id, conditions=None, fields=None, closed_flag=None):
         """
@@ -79,9 +115,7 @@ class ConnectWiseClient:
         return self._get_paged("/service/tickets", params)
 
     def list_statuses(self, board_id):
-        resp = self.session.get(f"{self.base_url}/service/boards/{board_id}/statuses", timeout=30)
-        resp.raise_for_status()
-        return resp.json()
+        return self._get_paged(f"/service/boards/{board_id}/statuses")
 
     def list_members(self):
         return self._get_paged("/system/members", {"fields": "identifier,firstName,lastName"})

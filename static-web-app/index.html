@@ -475,7 +475,14 @@ window.__REPORT_DATA__ = {"meta": {"generatedAt": "2026-09-12", "org": "TH2 Tech
 <script>
 function renderReport(){
   let D = window.__REPORT_DATA__;
-  document.getElementById('genDate').textContent = D.meta.generatedAt;
+  // meta.generatedAt is the seed data's original build date and never
+  // changes; meta.lastUpdated is stamped by every refresh — prefer it.
+  function generatedLabel(){
+    const ts = D.meta.lastUpdated;
+    if (!ts) return D.meta.generatedAt;
+    return new Date(ts).toLocaleString('en-US', {month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit'});
+  }
+  document.getElementById('genDate').textContent = generatedLabel();
 
   /* ---------------- Refresh Now ----------------
      Calls the hosted backend's RefreshNow endpoint, which re-pulls
@@ -510,9 +517,9 @@ function renderReport(){
         }
         return;
       }
-      D = await res.json();
+      D = escapeReportData(await res.json());
       window.__REPORT_DATA__ = D;
-      document.getElementById('genDate').textContent = D.meta.generatedAt;
+      document.getElementById('genDate').textContent = generatedLabel();
       rerenderAll();
       setRefreshMsg('Refreshed at ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + '.', false);
     } catch(err){
@@ -990,10 +997,10 @@ function renderReport(){
         <div class="table-wrap"><table><tr><th>Agent</th><th class="num">Answered</th><th class="num">Missed</th></tr>` +
         byAgentRows.map(([name,v])=>`<tr><td>${name}</td><td class="num">${fmt(v.answered||0)}</td><td class="num">${fmt(v.missed||0)}</td></tr>`).join('') +
         `</table></div>
-        <div class="hint">Pulled live from Dialpad's Stats API. See the Phones &amp; Historical tab for the manually-reported weekly trend (not yet replaced by this feed).</div>
+        <div class="hint">Pulled live from Dialpad's Stats API. See the Phones tab for the 8-week trend.</div>
       </div>`;
     } else {
-      phoneSection.innerHTML = `<div class="callout warn"><span>☎</span><span>Phone metrics (calls answered, talk time) aren't live yet — see the Phones &amp; Historical tab for the most recent manually-reported week. Ask for a Dialpad connector to bring that onto this tab.</span></div>`;
+      phoneSection.innerHTML = `<div class="callout warn"><span>☎</span><span>Today's phone stats aren't available — Dialpad isn't configured on the backend, or this run's Dialpad pull failed. See the Phones tab for the weekly trend.</span></div>`;
     }
   }
   renderToday();
@@ -1250,6 +1257,23 @@ function renderReport(){
 }
 </script>
 <script>
+/* Every render function builds HTML with template strings + innerHTML, and
+   fields like ticket summaries come straight from client email subject lines
+   — so all strings (object keys too, since tech/company/status names are used
+   as keys) are HTML-escaped once, here, before anything renders them. The
+   report never intentionally carries markup in its data. */
+function escapeReportData(v){
+  if (typeof v === 'string') {
+    return v.replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  if (Array.isArray(v)) return v.map(escapeReportData);
+  if (v && typeof v === 'object') {
+    const out = {};
+    Object.keys(v).forEach(k => { out[escapeReportData(k)] = escapeReportData(v[k]); });
+    return out;
+  }
+  return v;
+}
 async function loadReportData(){
   try {
     const res = await fetch('/api/GetReportData', {cache: 'no-store'});
@@ -1262,7 +1286,7 @@ async function loadReportData(){
   }
 }
 loadReportData().then(function(D){
-  window.__REPORT_DATA__ = D;
+  window.__REPORT_DATA__ = escapeReportData(D);
   renderReport();
 });
 </script>

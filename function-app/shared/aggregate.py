@@ -20,8 +20,41 @@ Two data-quality rules carried over from the manual build of this report:
    Responded}, per the definition the helpdesk manager gave for what counts
    as untouched-since-last-client-contact.
 """
+import os
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+# Every "today" / "this week" boundary in the report is a LOCAL calendar
+# boundary, not a UTC one — before this existed, everything was bucketed in
+# UTC, so anything opened or closed after ~4-5pm Pacific counted toward the
+# NEXT day (and Sunday-evening tickets toward the next week). ConnectWise and
+# Dialpad timestamps are still UTC on the wire; they're converted to this zone
+# before being compared against a local date. Override with the REPORT_TIMEZONE
+# app setting (any IANA tz name).
+DEFAULT_TIMEZONE = "America/Los_Angeles"
+
+
+def report_tz():
+    return ZoneInfo(os.environ.get("REPORT_TIMEZONE") or DEFAULT_TIMEZONE)
+
+
+def to_local(dt):
+    """Converts an aware datetime to the report's local timezone."""
+    return dt.astimezone(report_tz())
+
+
+def local_midnight_utc(local_date):
+    """Local midnight at the start of `local_date`, as a UTC 'Z' timestamp
+    string ready to drop into a ConnectWise `conditions` date filter."""
+    start = datetime.combine(local_date, time.min, tzinfo=report_tz())
+    return start.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _local_date_of(iso_ts):
+    """Local calendar date (date object) of a UTC ISO timestamp, or None."""
+    dt = _parse_date(iso_ts)
+    return to_local(dt).date() if dt else None
 
 CLOSED_STATUSES = {
     "closed", "resolved*", "resolved", "canceled", "cancelled",
@@ -73,7 +106,7 @@ def _build_board_snapshot(tickets, board_label, member_display_names, now):
     across whichever boards are currently active (the Alerts/Security
     Services toggles, plus Dispatch, which is always included).
     """
-    today_str = now.date().isoformat()
+    today = to_local(now).date()
 
     opened_total = closed_total = 0
     opened_by_tech, closed_by_tech = {}, {}
@@ -88,17 +121,17 @@ def _build_board_snapshot(tickets, board_label, member_display_names, now):
     for t in tickets:
         owner_id = (t.get("owner") or {}).get("identifier")
         owner_display = member_display_names.get(owner_id, owner_id) if owner_id else None
-        entered_date = (t.get("_info", {}).get("dateEntered") or t.get("dateEntered") or "")[:10]
-        closed_date = (t.get("closedDate") or "")[:10]
+        entered_date = _local_date_of(t.get("_info", {}).get("dateEntered") or t.get("dateEntered"))
+        closed_date = _local_date_of(t.get("closedDate"))
 
-        if entered_date == today_str:
+        if entered_date == today:
             opened_total += 1
             if owner_display:
                 opened_by_tech[owner_display] = opened_by_tech.get(owner_display, 0) + 1
             else:
                 opened_unassigned += 1
 
-        if t.get("closedFlag") and closed_date == today_str:
+        if t.get("closedFlag") and closed_date == today:
             closed_total += 1
             if owner_display:
                 closed_by_tech[owner_display] = closed_by_tech.get(owner_display, 0) + 1
@@ -190,7 +223,7 @@ def build_today_snapshot(tickets_by_board, member_display_names, now=None):
     }
 
 
-def build_dispatch_queue(tickets, now=None):
+def build_dispatch_queue(tickets, member_display_names=None, now=None):
     """
     Builds the Dispatch (Live) tab's data from the raw list of currently-open
     tickets on the Dispatch board (board id 1 on this instance).
@@ -206,12 +239,15 @@ def build_dispatch_queue(tickets, now=None):
     long since anyone touched it (hoursSinceTouch, since lastUpdated).
     """
     now = now or datetime.now(timezone.utc)
+    member_display_names = member_display_names or {}
     rows = []
     unassigned_total = 0
 
     for t in tickets:
         owner_id = (t.get("owner") or {}).get("identifier")
-        owner_name = (t.get("owner") or {}).get("name") or owner_id
+        # Same "First Last" display name every other tab uses, so a tech
+        # doesn't show up under two different spellings across tabs.
+        owner_name = member_display_names.get(owner_id) or (t.get("owner") or {}).get("name") or owner_id
         if not owner_name:
             owner_name = "(Unassigned)"
             unassigned_total += 1
@@ -268,17 +304,21 @@ LEADERBOARD_CLOSED_FIELD = {
 
 
 def _week_start(dt):
-    """Monday (as a date) of the week containing dt (a date or datetime)."""
-    d = dt.date() if hasattr(dt, "date") else dt
+    """Monday (as a date) of the LOCAL week containing dt (a date, or an
+    aware datetime — which is converted to the report timezone first)."""
+    if isinstance(dt, datetime):
+        d = to_local(dt).date()
+    else:
+        d = dt
     return d - timedelta(days=d.weekday())
 
 
 def week_starts(now, count=11):
     """
     Returns `count` ISO week-start (Monday) date strings, oldest first,
-    ending with the Monday of the CURRENT (possibly in-progress) week — this
-    matches the shape of the original manually-built weeklyTrend.weeks (see
-    report/data.json), where the last entry is the week containing the
+    ending with the Monday of the CURRENT (possibly in-progress) local week —
+    this matches the shape of the original manually-built weeklyTrend.weeks
+    (see report/data.json), where the last entry is the week containing the
     report's own generation date, not necessarily a completed week.
     """
     now = now or datetime.now(timezone.utc)

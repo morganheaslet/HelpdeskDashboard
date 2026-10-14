@@ -1,0 +1,10 @@
+# Local Function App settings — holds real API keys once filled in
+function-app/local.settings.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Azure Functions Core Tools
+.python_packages/

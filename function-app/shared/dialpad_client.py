@@ -48,7 +48,13 @@ from datetime import date, datetime, timedelta, timezone
 
 import requests
 
+from shared.aggregate import report_tz, to_local
+
 BASE_URL = "https://dialpad.com/api/v2"
+
+
+class DialpadNoDateColumn(Exception):
+    """A multi-day stats export came back without a per-day date column."""
 
 
 class DialpadClient:
@@ -198,8 +204,11 @@ class DialpadClient:
                 "Dialpad API key not configured — set DIALPAD_API_KEY in Function App settings "
                 "once you've generated one (Admin Settings > Integrations > API)."
             )
+        # Dialpad's `timezone` (an IANA name) decides where "today" starts —
+        # with "UTC" here, Pacific's "today" used to roll over at 4-5pm.
         rows = self._run_export(
-            stat_type="calls", export_type="stats", group_by="user", is_today=True, timezone="UTC",
+            stat_type="calls", export_type="stats", group_by="user", is_today=True,
+            timezone=report_tz().key,
         )
         if not rows:
             return {"date": date, "answered": 0, "missed": 0, "avgTalkTimeSeconds": 0, "byAgent": {}}
@@ -259,6 +268,65 @@ class DialpadClient:
             "byAgent": by_agent,
         }
 
+    def get_agent_daily_stats(self, start_date, end_date, now=None):
+        """
+        Per-agent, per-local-day call stats for start_date..end_date
+        (inclusive `date` objects), for th2-metrics-db's dp.agent_daily.
+
+        Dialpad documents group_by=user stats exports as "per user per day",
+        so a multi-day range should come back with a date column — but the
+        exact header isn't published. If no date-like column is found, a
+        single-day request is still usable (every row is that day); a
+        multi-day one isn't, and raises DialpadNoDateColumn so the caller can
+        fall back to one day per request.
+
+        Returns {(date_iso, agent_name): {inbound, answered, missed,
+        abandoned, talk_seconds, ring_seconds}}.
+
+        days_ago_start/days_ago_end follow the same convention as
+        get_call_stats_for_week() (start = the older edge), which is what
+        the live weekly pull already uses.
+        """
+        if not self._configured():
+            raise NotImplementedError("Dialpad API key not configured")
+        now = now or datetime.now(timezone.utc)
+        today = to_local(now).date()
+        rows = self._run_export(
+            stat_type="calls", export_type="stats", group_by="user",
+            days_ago_start=(today - start_date).days, days_ago_end=(today - end_date).days,
+            timezone=report_tz().key,
+        )
+        if not rows:
+            return {}
+        fieldnames = list(rows[0].keys())
+        cols = self._match_columns(fieldnames)
+        date_col = next((f for f in fieldnames if f.strip().lower() in ("date", "day", "stat_date")), None) \
+            or self._find_col(fieldnames, "date")
+        logging.info(
+            "Dialpad daily pull %s..%s: date column %r, matched %s | %d row(s)",
+            start_date, end_date, date_col, cols, len(rows),
+        )
+        if not date_col and start_date != end_date:
+            raise DialpadNoDateColumn(f"no date column in {fieldnames}")
+
+        out = {}
+        for row in rows:
+            day = (row.get(date_col) or "")[:10] if date_col else start_date.isoformat()
+            if not day:
+                continue
+            agent = (row.get(cols["name"]) or "Unknown").strip() if cols["name"] else "Unknown"
+            e = out.setdefault((day, agent), {
+                "inbound": 0, "answered": 0, "missed": 0, "abandoned": 0,
+                "talk_seconds": 0.0, "ring_seconds": 0.0,
+            })
+            e["inbound"] += self._to_int(row.get(cols["inbound"])) if cols["inbound"] else 0
+            e["answered"] += self._to_int(row.get(cols["answered"])) if cols["answered"] else 0
+            e["missed"] += self._to_int(row.get(cols["missed"])) if cols["missed"] else 0
+            e["abandoned"] += self._to_int(row.get(cols["abandoned"])) if cols["abandoned"] else 0
+            e["talk_seconds"] += self._to_seconds(row.get(cols["talk_duration"])) if cols["talk_duration"] else 0.0
+            e["ring_seconds"] += self._to_seconds(row.get(cols["ring_duration"])) if cols["ring_duration"] else 0.0
+        return out
+
     def get_call_stats_for_week(self, week_start_iso, now=None):
         """
         Pulls ONE week's aggregated call stats — Monday `week_start_iso`
@@ -284,7 +352,7 @@ class DialpadClient:
                 "once you've generated one (Admin Settings > Integrations > API)."
             )
         now = now or datetime.now(timezone.utc)
-        today = now.date()
+        today = to_local(now).date()
         week_start = date.fromisoformat(week_start_iso)
         if week_start > today:
             return None
@@ -294,7 +362,7 @@ class DialpadClient:
 
         rows = self._run_export(
             stat_type="calls", export_type="stats", group_by="user",
-            days_ago_start=days_ago_start, days_ago_end=days_ago_end, timezone="UTC",
+            days_ago_start=days_ago_start, days_ago_end=days_ago_end, timezone=report_tz().key,
         )
         if not rows:
             return None

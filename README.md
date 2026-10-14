@@ -153,6 +153,7 @@ az functionapp config appsettings set -g rg-helpdesk-report -n th2-helpdesk-func
   CW_BOARD_ALERTS="20" \
   CW_BOARD_SECURITY_SERVICES="54" \
   CW_BOARD_DISPATCH="1" \
+  REPORT_TIMEZONE="America/Los_Angeles" \
   STORAGE_CONNECTION_STRING="<from the storage account's access keys>" \
   DIALPAD_API_KEY="<generate at Dialpad Admin Settings > Integrations > API>" \
   DIALPAD_OFFICE_ID="<optional — from GET /api/v2/offices if calls need a target scope>"
@@ -396,6 +397,46 @@ for numbers that mostly don't change run-to-run. Instead:
   Dialpad-related — a failure fetching one week (or all of them) logs and
   leaves `phoneHistory` as whatever was there before, it doesn't take down
   the rest of the run.
+
+## Metrics database (th2-metrics-db) and Power BI (added 2026-10-13)
+
+Management analytics (SLA, utilization, client/contract profitability, CSAT,
+long-range trends) come from Azure SQL and Power BI, not from this web app.
+The web app keeps the live operational tabs.
+
+- **Database:** `th2-metrics-db` on `th2-metrics-sql` (Standard S0). The
+  schema is in `sql/`. Run the numbered scripts in order as the server's
+  Entra admin. They are idempotent.
+  - `001`: ConnectWise ticket/time/reference tables + sync bookkeeping.
+  - `002`: reporting views for tickets/SLA, utilization, timesheets and sync health.
+  - `003`: agreements/invoices/products, Dialpad daily, SmileBack reviews.
+  - `004`: MRR plus client and contract profitability (monthly and annual), phones, CSAT.
+  - `005`: Function App identity access + the read-only `reporting_reader` role for Power BI.
+- **Sync:** the `SyncMetrics` timer runs every 15 minutes (offset 7 minutes
+  from `PullSnapshot`). It runs `shared/sync_all.py`. It is incremental by
+  `lastUpdated` from 2025-01-01, so the first runs ARE the backfill: each
+  run advances as far as its time budget allows. Progress and errors are in
+  `rpt.v_sync_health` / `meta.sync_log`.
+  - **Once a day:** reference tables, every open ticket, timesheets, agreements,
+    the start-of-day backlog snapshot, and deletion reconciliation.
+  - **Agreement additions** refresh on a rotation.
+  - **SmileBack and Dialpad** are skipped until their settings exist.
+- **Settings:**
+  - `SQL_CONNECTION_STRING` holds the server and database only. The Function App
+    authenticates with its managed identity via `azure-identity`.
+  - `REPORT_TIMEZONE` (default `America/Los_Angeles`).
+  - `SMILEBACK_CLIENT_ID` / `_CLIENT_SECRET` / `_USERNAME` / `_PASSWORD`
+    (optional `SMILEBACK_BASE_URL`).
+- **Power BI:** connect to the `rpt.*` views with an Entra account in the
+  `reporting_reader` role. Use Import mode refreshed a few times a day; it
+  doesn't need the database scaled up the way DirectQuery would.
+- **Verify on the first real runs** (APIs not fully documented publicly):
+  - `sync_cw.UPDATED_FIELD` (the ConnectWise "last updated" condition name).
+  - That newer ticket fields like `respondedBy` come back.
+  - Whether time entry/member `hourlyCost` is visible to the API member
+    (`uncosted_hours` in the profitability views shows what isn't).
+  - Dialpad's per-day column, `days_ago` range direction and duration units.
+  - SmileBack's ticket id mapping (the first sync logs a sample review).
 
 ## Schedule
 

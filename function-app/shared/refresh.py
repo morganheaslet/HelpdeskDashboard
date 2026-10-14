@@ -17,7 +17,7 @@ and doesn't assume this returns instantly.
 import json
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from azure.storage.blob import BlobServiceClient
@@ -26,7 +26,7 @@ from shared.cw_client import ConnectWiseClient
 from shared.aggregate import (
     build_today_snapshot, build_dispatch_queue, is_truly_open, BOARD_LABELS,
     build_weekly_trend, build_backlog_snapshot, build_tech_leaderboard, week_starts,
-    build_phone_history,
+    build_phone_history, to_local, local_midnight_utc, report_tz,
 )
 from shared.dialpad_client import DialpadClient
 
@@ -87,9 +87,9 @@ LEADERBOARD_FIELDS = ["id", "owner", "priority", "source"]
 # actually change between runs. Instead, `phoneHistoryByWeek` in the blob is
 # the real source of truth (week-start ISO date -> that week's raw stats);
 # each run only fetches weeks missing from it, plus the current
-# (in-progress) week every time. A brand-new deployment backfills all
-# PHONE_HISTORY_WEEKS on its first run; after that, steady-state runs make
-# exactly one Dialpad call here.
+# (in-progress) week at most once per local calendar day. A brand-new
+# deployment backfills all PHONE_HISTORY_WEEKS on its first run; after that,
+# steady-state runs make at most one Dialpad call here per day.
 #
 # Confirmed live 2026-09-13: a single Dialpad export can itself take longer
 # than expected (one daily pull timed out at the poller's old 120s cap,
@@ -130,7 +130,10 @@ def run_refresh(now=None):
         for m in cw.list_members()
     }
 
-    today_iso = now.strftime("%Y-%m-%dT00:00:00Z")
+    # Local midnight (REPORT_TIMEZONE, Pacific by default) expressed in UTC —
+    # NOT UTC midnight, which is 4-5pm the previous afternoon Pacific.
+    local_now = to_local(now)
+    today_iso = local_midnight_utc(local_now.date())
     tickets_by_board = {}
     for key in BOARD_KEYS:
         board_id = os.environ[BOARD_ENV_VARS[key]]
@@ -173,7 +176,7 @@ def run_refresh(now=None):
     # tickets — reuse the pull above instead of a second API call.
     if dispatch_board_id:
         open_dispatch = [t for t in tickets_by_board[DISPATCH_KEY] if is_truly_open(t)]
-        dispatch_queue = build_dispatch_queue(open_dispatch, now=now)
+        dispatch_queue = build_dispatch_queue(open_dispatch, member_names, now=now)
         logging.info(
             "Dispatch (Live): %d open tickets (%d unassigned)",
             dispatch_queue["total"], dispatch_queue["unassignedTotal"],
@@ -189,7 +192,7 @@ def run_refresh(now=None):
     today_phone = None
     try:
         dialpad = DialpadClient()
-        today_phone = dialpad.get_daily_call_stats(date=now.strftime("%Y-%m-%d"))
+        today_phone = dialpad.get_daily_call_stats(date=local_now.date().isoformat())
         logging.info(
             "Dialpad: %d answered, %d missed today across %d agents",
             today_phone["answered"], today_phone["missed"], len(today_phone["byAgent"]),
@@ -208,8 +211,8 @@ def run_refresh(now=None):
     weekly_trend = backlog_snapshot = tech_leaderboard = None
     try:
         weeks = week_starts(now, WEEKLY_TREND_WEEKS)
-        window_start = weeks[0] + "T00:00:00Z"
-        leaderboard_window_start = (now - timedelta(days=LEADERBOARD_DAYS)).strftime("%Y-%m-%dT00:00:00Z")
+        window_start = local_midnight_utc(date.fromisoformat(weeks[0]))
+        leaderboard_window_start = local_midnight_utc(local_now.date() - timedelta(days=LEADERBOARD_DAYS))
 
         opened_by_board, closed_by_board, leaderboard_closed_by_board = {}, {}, {}
         for key in BOARD_KEYS:
@@ -263,9 +266,16 @@ def run_refresh(now=None):
             raise NotImplementedError("Dialpad API key not configured")
 
         phone_weeks = week_starts(now, PHONE_HISTORY_WEEKS)
-        by_week = dict(existing.get("phoneHistoryByWeek") or {})
+        tz_name = report_tz().key
+        # Weeks stored before the timezone fix were pulled with UTC day
+        # boundaries (no "_tz" marker) — drop them so they're re-fetched once
+        # with local boundaries, instead of mixing the two in one chart.
+        by_week = {
+            wk: v for wk, v in (existing.get("phoneHistoryByWeek") or {}).items()
+            if v.get("_tz") == tz_name
+        }
         current_week = phone_weeks[-1]
-        today_str = now.date().isoformat()
+        today_str = local_now.date().isoformat()
 
         # Completed (non-current) weeks are backfilled once and never
         # change again, so they're only fetched if missing entirely. The
@@ -294,7 +304,10 @@ def run_refresh(now=None):
             try:
                 week_data = dialpad_weekly.get_call_stats_for_week(wk, now=now)
                 if week_data is not None:
-                    week_data["_fetchedAt"] = now.isoformat()
+                    # Local timestamp, so _fetchedAt[:10] compares against
+                    # the local today_str above.
+                    week_data["_fetchedAt"] = local_now.isoformat()
+                    week_data["_tz"] = tz_name
                     by_week[wk] = week_data
                 fetched.append(wk)
             except Exception:

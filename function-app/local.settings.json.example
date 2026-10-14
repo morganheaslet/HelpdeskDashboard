@@ -16,8 +16,18 @@
     "CW_BOARD_SECURITY_SERVICES": "54",
     "CW_BOARD_DISPATCH": "1",
 
+    "REPORT_TIMEZONE": "America/Los_Angeles",
+
     "STORAGE_CONNECTION_STRING": "UseDevelopmentStorage=true",
     "DATA_CONTAINER": "helpdesk-report-data",
+
+    "SQL_CONNECTION_STRING": "Driver={ODBC Driver 18 for SQL Server};Server=tcp:th2-metrics-sql.database.windows.net,1433;Database=th2-metrics-db;Encrypt=yes;",
+
+    "SMILEBACK_BASE_URL": "https://app.smileback.io/api",
+    "SMILEBACK_CLIENT_ID": "",
+    "SMILEBACK_CLIENT_SECRET": "",
+    "SMILEBACK_USERNAME": "",
+    "SMILEBACK_PASSWORD": "",
 
     "DIALPAD_API_KEY": "not-yet-configured",
     "NINJAONE_CLIENT_ID": "not-yet-configured",
