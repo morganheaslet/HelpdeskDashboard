@@ -1,0 +1,96 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "494f99d889bba595536a",
+  "position": {
+    "x": 640,
+    "y": 922,
+    "z": 0,
+    "width": 630,
+    "height": 300,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tech"
+                    }
+                  },
+                  "Property": "Tech"
+                }
+              },
+              "queryRef": "Tech.Tech",
+              "nativeQueryRef": "Tech"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Answer Rate"
+                }
+              },
+              "queryRef": "PhoneDaily.Answer Rate",
+              "nativeQueryRef": "Answer Rate"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "PhoneDaily"
+                  }
+                },
+                "Property": "Answer Rate"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Answer rate by tech'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

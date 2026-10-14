@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "69ae280db71ce6407409",
+  "position": {
+    "x": 753,
+    "y": 8,
+    "z": 0,
+    "width": 123,
+    "height": 104,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Answer Rate"
+                }
+              },
+              "queryRef": "PhoneDaily.Answer Rate",
+              "nativeQueryRef": "Answer Rate"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

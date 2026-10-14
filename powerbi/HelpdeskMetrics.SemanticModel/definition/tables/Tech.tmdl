@@ -1,9 +1,9 @@
 table Tech
-	lineageTag: a2ba3394-7f71-4345-be05-1356dfa66870
+	lineageTag: f32bab53-f919-4db2-b8cf-532a222fa96a
 
 	column TechKey
 		dataType: string
-		lineageTag: 6b45c3cb-6db3-41ed-9f22-dfcf0c31d95d
+		lineageTag: ef0a79b0-108e-4203-ab73-94924c89ab9c
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -11,7 +11,7 @@ table Tech
 
 	column Tech
 		dataType: string
-		lineageTag: e6087c53-838e-4b21-8ea9-6b9dd9491d44
+		lineageTag: bf533631-d5a6-476a-a4f2-2f72c5c9ae64
 		summarizeBy: none
 		sourceColumn: Tech
 
@@ -19,7 +19,7 @@ table Tech
 
 	column Identifier
 		dataType: string
-		lineageTag: 776a9757-a596-41ef-80a6-ea8e2a062803
+		lineageTag: 947d39cc-0467-458b-ac14-7e6ee022d73b
 		summarizeBy: none
 		sourceColumn: Identifier
 
@@ -27,7 +27,7 @@ table Tech
 
 	column Title
 		dataType: string
-		lineageTag: 78ccf297-c527-4671-85d3-b7cd140b1a92
+		lineageTag: be4a11a2-7ded-4907-b045-dc89f3d9e983
 		summarizeBy: none
 		sourceColumn: Title
 
@@ -35,7 +35,7 @@ table Tech
 
 	column Department
 		dataType: string
-		lineageTag: 62d363a8-b0c4-459f-b6df-a1be0a1c9c96
+		lineageTag: 61c5ab8d-b07f-493b-9d0f-e69fa3dac417
 		summarizeBy: none
 		sourceColumn: Department
 
@@ -43,7 +43,7 @@ table Tech
 
 	column 'Is Active'
 		dataType: boolean
-		lineageTag: 43158d90-51d9-4e91-a7a2-b6b3913c3f18
+		lineageTag: 75dec555-035f-4411-961e-0178a6118ab1
 		summarizeBy: none
 		sourceColumn: Is Active
 
@@ -51,7 +51,7 @@ table Tech
 
 	column 'In CW Utilization'
 		dataType: boolean
-		lineageTag: 204174a8-8d16-4eb4-ad66-3800d6f4909e
+		lineageTag: 1edd33d9-c22d-41d6-ac99-bb3b4097dc40
 		summarizeBy: none
 		sourceColumn: In CW Utilization
 
@@ -59,7 +59,7 @@ table Tech
 
 	column 'Is Automation'
 		dataType: boolean
-		lineageTag: 90d9f1a9-b6c1-48a4-9138-47f56cec72aa
+		lineageTag: b03410e3-dd63-4c2d-a9ba-c291ae685fd9
 		summarizeBy: none
 		sourceColumn: Is Automation
 
@@ -68,7 +68,7 @@ table Tech
 	column 'Daily Capacity Hours'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 803f2919-2407-46a3-9a51-cdcd545aa30f
+		lineageTag: a6e0ea1b-c931-4d42-879e-83710dcb5828
 		summarizeBy: none
 		sourceColumn: Daily Capacity Hours
 
@@ -77,7 +77,7 @@ table Tech
 	column 'Hourly Cost'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 99194f13-44e8-4997-a0b3-baaa168330bc
+		lineageTag: f39f33e8-1dce-4f64-9682-537cbe208641
 		summarizeBy: none
 		sourceColumn: Hourly Cost
 
@@ -93,4 +93,3 @@ table Tech
 				    Data
 
 	annotation PBI_ResultType = Table
-

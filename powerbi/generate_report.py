@@ -347,6 +347,38 @@ def tickets_by_client(p):
     ]
 
 
+def phones(p):
+    """Manager's review of techs on the phones (Dialpad), by Group-by period."""
+    tech_filters = [categorical(f"activeTechs_{p}", "Tech", "Is Active", ["true"]),
+                    categorical(f"noAutomationTechs_{p}", "Tech", "Is Automation", ["false"])]
+    return [
+        slicer(p, "period", (10, TOP_Y, 200, TOP_H), PERIOD, "Dropdown", "Group by", single=True),
+        slicer(p, "tech", (220, TOP_Y, 260, TOP_H), "Tech[Tech]", "Dropdown", "Tech", filters=tech_filters),
+        *kpi_row(p, 490, ["[Calls Answered]", "[Calls Missed]", "[Answer Rate]", "[Talk Hours]",
+                          "[Avg Talk Time (min)]", "[Outbound Calls]"]),
+        visual(p, "scorecard", "tableEx", (10, BODY_Y, 1260, 420),
+               {"Values": ["Tech[Tech]", "[Inbound Calls]", "[Calls Answered]", "[Calls Missed]", "[Answer Rate]",
+                           "[Rejected Calls]", "[Ring No Answer]", "[Voicemails]", "[Outbound Calls]",
+                           "[Outbound Connected]", "[Talk Hours]", "[Avg Talk Time (min)]", "[Avg Hold Time (min)]",
+                           "[Avg Ring Time (sec)]", "[Transfers Out]", "[Calls per Day]",
+                           "[Talk % of Available Hours]", "[Tickets Closed]"]},
+               title="Phone scorecard by tech", sort=("[Calls Answered]", "Descending")),
+        visual(p, "matrix", "pivotTable", (10, BODY_Y + 430, 760, 360),
+               {"Rows": ["Tech[Tech]"], "Columns": [PERIOD],
+                "Values": ["[Calls Answered]", "[Calls Missed]", "[Talk Hours]"]},
+               title="Answered, missed and talk hours per tech", sort=("[Calls Answered]", "Descending")),
+        visual(p, "trend", "clusteredColumnChart", (780, BODY_Y + 430, 490, 360),
+               {"Category": [PERIOD], "Y": ["[Calls Answered]", "[Calls Missed]"]},
+               title="Calls over time"),
+        visual(p, "talk", "clusteredBarChart", (10, BODY_Y + 800, 620, 300),
+               {"Category": ["Tech[Tech]"], "Y": ["[Talk Hours]"]},
+               title="Talk hours by tech", sort=("[Talk Hours]", "Descending")),
+        visual(p, "answerrate", "clusteredBarChart", (640, BODY_Y + 800, 630, 300),
+               {"Category": ["Tech[Tech]"], "Y": ["[Answer Rate]"]},
+               title="Answer rate by tech", sort=("[Answer Rate]", "Ascending")),
+    ]
+
+
 # (folder name Desktop created, display name, builder, page filters)
 PAGES = [
     ("ReportSection0", "Tickets by Tech", tickets_by_tech, [NO_AUTOMATION, NO_ALERTS, NO_EXCLUDED_BOARDS]),
@@ -358,12 +390,14 @@ PAGES = [
     # by automation (per Morgan, 2026-10-14) — only inactive boards (the
     # "(DO NOT USE)" / "(Inactive)" ones, Quartus included) are excluded.
     ("ReportSection5", "Tickets by Client", tickets_by_client, [ACTIVE_BOARDS_ONLY]),
+    ("ReportSection6", "Phones", phones, [NO_AUTOMATION]),
 ]
 
 # Pages that don't fit 1280x720 (scroll vertically, fit to width).
-PAGE_SIZES = {"ReportSection5": (1280, BODY_Y + 1070 + 420 + 10)}
+PAGE_SIZES = {"ReportSection5": (1280, BODY_Y + 1070 + 420 + 10),
+              "ReportSection6": (1280, BODY_Y + 800 + 300 + 10)}
 # Display order of pages in the report (by folder name).
-PAGE_ORDER = ["ReportSection0", "ReportSection5", "ReportSection1", "ReportSection2",
+PAGE_ORDER = ["ReportSection0", "ReportSection5", "ReportSection6", "ReportSection1", "ReportSection2",
               "ReportSection3", "ReportSection4"]
 PAGES_SCHEMA = "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.1.0/schema.json"
 

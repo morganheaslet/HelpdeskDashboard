@@ -281,11 +281,24 @@ GO
 
 /* ---------------------------------------------------------------- phones */
 
+/*
+  Per tech per local day, from Dialpad's stats export (durations stored in
+  seconds — see sql/008). Agents match techs by name (all current agents
+  do); deleted Dialpad users have no TechKey.
+  "Missed" is per agent: a hunt-group call answered by a teammate still
+  counts as missed for everyone else it rang. Rejected / Ring No Answer are
+  the agent-specific signals.
+*/
 CREATE OR ALTER VIEW pbi.PhoneDaily AS
 SELECT stat_date AS [Date], agent_name AS [Agent],
        UPPER(member_identifier) AS [TechKey],   -- NULL until mapped in dp.agent_member_map
+       agent_type AS [Agent Type],
        inbound_calls AS [Inbound Calls], answered AS [Answered], missed AS [Missed],
-       abandoned AS [Abandoned], talk_seconds / 3600.0 AS [Talk Hours]
+       rejected AS [Rejected], ring_no_answer AS [Ring No Answer], abandoned AS [Abandoned],
+       voicemails AS [Voicemails], outbound_calls AS [Outbound Calls], outbound_connected AS [Outbound Connected],
+       handled AS [Handled], transferred_in AS [Transfers In], transferred_out AS [Transfers Out],
+       talk_seconds AS [Talk Seconds], hold_seconds AS [Hold Seconds], ring_seconds AS [Ring Seconds],
+       talk_seconds / 3600.0 AS [Talk Hours]
 FROM rpt.v_phone_agent_daily;
 GO
 

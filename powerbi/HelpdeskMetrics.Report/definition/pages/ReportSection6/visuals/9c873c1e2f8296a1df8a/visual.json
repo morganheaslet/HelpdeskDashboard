@@ -1,0 +1,316 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "9c873c1e2f8296a1df8a",
+  "position": {
+    "x": 10,
+    "y": 122,
+    "z": 0,
+    "width": 1260,
+    "height": 420,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tech"
+                    }
+                  },
+                  "Property": "Tech"
+                }
+              },
+              "queryRef": "Tech.Tech",
+              "nativeQueryRef": "Tech"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Inbound Calls"
+                }
+              },
+              "queryRef": "PhoneDaily.Inbound Calls",
+              "nativeQueryRef": "Inbound Calls"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls Answered"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls Answered",
+              "nativeQueryRef": "Calls Answered"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls Missed"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls Missed",
+              "nativeQueryRef": "Calls Missed"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Answer Rate"
+                }
+              },
+              "queryRef": "PhoneDaily.Answer Rate",
+              "nativeQueryRef": "Answer Rate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Rejected Calls"
+                }
+              },
+              "queryRef": "PhoneDaily.Rejected Calls",
+              "nativeQueryRef": "Rejected Calls"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Ring No Answer"
+                }
+              },
+              "queryRef": "PhoneDaily.Ring No Answer",
+              "nativeQueryRef": "Ring No Answer"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Voicemails"
+                }
+              },
+              "queryRef": "PhoneDaily.Voicemails",
+              "nativeQueryRef": "Voicemails"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Outbound Calls"
+                }
+              },
+              "queryRef": "PhoneDaily.Outbound Calls",
+              "nativeQueryRef": "Outbound Calls"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Outbound Connected"
+                }
+              },
+              "queryRef": "PhoneDaily.Outbound Connected",
+              "nativeQueryRef": "Outbound Connected"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Talk Hours"
+                }
+              },
+              "queryRef": "PhoneDaily.Talk Hours",
+              "nativeQueryRef": "Talk Hours"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Avg Talk Time (min)"
+                }
+              },
+              "queryRef": "PhoneDaily.Avg Talk Time (min)",
+              "nativeQueryRef": "Avg Talk Time (min)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Avg Hold Time (min)"
+                }
+              },
+              "queryRef": "PhoneDaily.Avg Hold Time (min)",
+              "nativeQueryRef": "Avg Hold Time (min)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Avg Ring Time (sec)"
+                }
+              },
+              "queryRef": "PhoneDaily.Avg Ring Time (sec)",
+              "nativeQueryRef": "Avg Ring Time (sec)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Transfers Out"
+                }
+              },
+              "queryRef": "PhoneDaily.Transfers Out",
+              "nativeQueryRef": "Transfers Out"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls per Day"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls per Day",
+              "nativeQueryRef": "Calls per Day"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Talk % of Available Hours"
+                }
+              },
+              "queryRef": "PhoneDaily.Talk % of Available Hours",
+              "nativeQueryRef": "Talk % of Available Hours"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Tickets Closed"
+                }
+              },
+              "queryRef": "Tickets.Tickets Closed",
+              "nativeQueryRef": "Tickets Closed"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "PhoneDaily"
+                  }
+                },
+                "Property": "Calls Answered"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Phone scorecard by tech'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

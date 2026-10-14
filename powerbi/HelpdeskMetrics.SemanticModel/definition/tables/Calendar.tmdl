@@ -1,23 +1,21 @@
 table Calendar
-	lineageTag: fcda6770-5d82-481a-bda8-e7a4ca39ce36
+	lineageTag: 136a05de-7f9a-4e8a-93d7-6fd34e41eeeb
 	dataCategory: Time
 
 	column Date
 		dataType: dateTime
 		isKey
 		formatString: yyyy-mm-dd
-		lineageTag: e74acf6c-b180-4232-97c7-7f705f679480
+		lineageTag: 92c2a34f-fe38-480b-be90-b51161c4be94
 		summarizeBy: none
 		sourceColumn: Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column Year
 		dataType: int64
 		formatString: 0
-		lineageTag: ba90e713-5e64-404d-8a0e-572ebaf90627
+		lineageTag: d3beeaf8-254f-453d-b714-487438166c2e
 		summarizeBy: none
 		sourceColumn: Year
 
@@ -26,17 +24,15 @@ table Calendar
 	column 'Month Start'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 812f93b8-9241-4986-8d84-7ce0b1e431df
+		lineageTag: 40003151-5ea8-4bc4-907c-b620d5bceac8
 		summarizeBy: none
 		sourceColumn: Month Start
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column Month
 		dataType: string
-		lineageTag: a0a1a7ca-8471-4daa-b1bc-9282a9ecf1d2
+		lineageTag: 7eb0eab1-8d88-4402-b5a3-08fe174b4150
 		summarizeBy: none
 		sourceColumn: Month
 		sortByColumn: 'Month Sort'
@@ -45,9 +41,9 @@ table Calendar
 
 	column 'Month Sort'
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 1e845c8f-ef29-450a-b1c9-6c23a13a4add
+		isHidden
+		lineageTag: 3df0af42-49f1-4649-b8cf-c02aa24950c2
 		summarizeBy: none
 		sourceColumn: Month Sort
 
@@ -56,17 +52,15 @@ table Calendar
 	column 'Week Start'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: cbf222b8-66b7-4cec-8646-436626fbd274
+		lineageTag: 73fb3101-e491-4d85-9a62-122562a5a7b6
 		summarizeBy: none
 		sourceColumn: Week Start
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column Week
 		dataType: string
-		lineageTag: a7827b39-0fd4-422a-85bc-6d02c31556cf
+		lineageTag: 868700a0-0194-4ade-b674-066fbb6b37d4
 		summarizeBy: none
 		sourceColumn: Week
 		sortByColumn: 'Week Start'
@@ -75,7 +69,7 @@ table Calendar
 
 	column Weekday
 		dataType: string
-		lineageTag: d9e06abb-4fec-4e4b-b96a-0e2c508e43f5
+		lineageTag: 9bb6b48c-58e9-4aa0-86bf-3921c5ef0335
 		summarizeBy: none
 		sourceColumn: Weekday
 		sortByColumn: 'Weekday Sort'
@@ -84,9 +78,9 @@ table Calendar
 
 	column 'Weekday Sort'
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: c6558a4b-caa2-4c93-afb1-2ce9ba949fb7
+		isHidden
+		lineageTag: 58591733-0c0f-4d13-8723-0fa489f73aee
 		summarizeBy: none
 		sourceColumn: Weekday Sort
 
@@ -94,7 +88,7 @@ table Calendar
 
 	column 'Is Weekday'
 		dataType: boolean
-		lineageTag: 36d3fb92-18a0-4832-98bb-bac2aab517e8
+		lineageTag: b1b6d0c7-78a3-4423-8428-e1199d904d57
 		summarizeBy: none
 		sourceColumn: Is Weekday
 
@@ -102,7 +96,7 @@ table Calendar
 
 	column 'Is Holiday'
 		dataType: boolean
-		lineageTag: ccb081a8-f079-4e9a-8bca-4f2c51324e6f
+		lineageTag: afc51e5a-7b1f-489a-a28b-37babc471492
 		summarizeBy: none
 		sourceColumn: Is Holiday
 
@@ -110,7 +104,7 @@ table Calendar
 
 	column 'Is Working Day'
 		dataType: boolean
-		lineageTag: 1cd63881-f934-45aa-9eaa-6c15732deb2d
+		lineageTag: cde0fb73-c0a9-4da5-b2d8-e08e3ad6596a
 		summarizeBy: none
 		sourceColumn: Is Working Day
 
@@ -118,7 +112,7 @@ table Calendar
 
 	column 'Is Full History'
 		dataType: boolean
-		lineageTag: 9533ea4b-897f-4ebd-9f3d-89d2ce47b669
+		lineageTag: 7a1e6e10-0afb-4b80-bb2e-335384c1d662
 		summarizeBy: none
 		sourceColumn: Is Full History
 
@@ -134,4 +128,3 @@ table Calendar
 				    Data
 
 	annotation PBI_ResultType = Table
-

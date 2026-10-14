@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "04cd7982b7e46709ed9b",
+  "position": {
+    "x": 490,
+    "y": 8,
+    "z": 0,
+    "width": 123,
+    "height": 104,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls Answered"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls Answered",
+              "nativeQueryRef": "Calls Answered"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "738abcfa44be7e2475d0",
+  "position": {
+    "x": 621,
+    "y": 8,
+    "z": 0,
+    "width": 123,
+    "height": 104,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls Missed"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls Missed",
+              "nativeQueryRef": "Calls Missed"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

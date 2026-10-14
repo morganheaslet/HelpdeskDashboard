@@ -1,30 +1,30 @@
 table Capacity
-	lineageTag: 6b37b4d7-0d31-4eb4-8f04-b0b748757a68
+	lineageTag: fdf7422b-a10d-42f9-8476-71f347d27794
 
 	measure 'Capacity Hours' = SUM ( Capacity[Capacity Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Utilization
-		lineageTag: 189f7638-d175-44fe-8642-5c0ad77ba2bd
+		lineageTag: 3af62459-07c3-4b2f-9b3f-89cf4b400bc3
 
 	measure 'Available Hours' = [Capacity Hours] - [PTO Hours]
 		formatString: #,0.0
 		displayFolder: Utilization
-		lineageTag: 2735ddec-10d4-4c73-b66f-fbae8e2fdcdc
+		lineageTag: abbd2bb8-e3f3-458e-bc05-0776453f6bcd
 
 	measure 'Utilization %' = DIVIDE ( [Utilized Hours], [Available Hours] )
 		formatString: 0.0%
 		displayFolder: Utilization
-		lineageTag: 5819e8a4-9f7b-419f-8d67-7409207e8352
+		lineageTag: e2c9132b-8267-4960-bf6a-244abf86d75a
 
 	measure 'Billable %' = DIVIDE ( [Billable Hours], [Available Hours] )
 		formatString: 0.0%
 		displayFolder: Utilization
-		lineageTag: 90e632c8-059a-46b9-b53d-d7c5f4add063
+		lineageTag: beb5a12d-5aed-4391-af8b-b0bc3f525257
 
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: dd6fa5b5-bf4b-4659-b5a8-b2981210b663
+		lineageTag: 2a37bff9-6139-45c4-8667-2446952d2841
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -33,19 +33,17 @@ table Capacity
 	column Date
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: b324682f-02ae-4bbd-a598-7df7a34807c0
+		lineageTag: 7a2fc9b9-357a-440e-a140-d652ad7a7ce8
 		summarizeBy: none
 		sourceColumn: Date
 
 		annotation SummarizationSetBy = Automatic
 
-		annotation UnderlyingDateTimeDataType = Date
-
 	column 'Capacity Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: c482e45f-dae9-4f38-a55f-6f116e5e46ac
+		isHidden
+		lineageTag: 2c494b05-eb8c-48b3-bb38-feae8a71da3b
 		summarizeBy: none
 		sourceColumn: Capacity Hours
 
@@ -61,4 +59,3 @@ table Capacity
 				    Data
 
 	annotation PBI_ResultType = Table
-

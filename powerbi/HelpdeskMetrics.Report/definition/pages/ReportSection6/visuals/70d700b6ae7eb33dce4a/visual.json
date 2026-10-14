@@ -1,0 +1,158 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "70d700b6ae7eb33dce4a",
+  "position": {
+    "x": 10,
+    "y": 552,
+    "z": 0,
+    "width": 760,
+    "height": 360,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tech"
+                    }
+                  },
+                  "Property": "Tech"
+                }
+              },
+              "queryRef": "Tech.Tech",
+              "nativeQueryRef": "Tech"
+            }
+          ]
+        },
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Period"
+                    }
+                  },
+                  "Property": "Period"
+                }
+              },
+              "queryRef": "Period.Period",
+              "nativeQueryRef": "Period"
+            }
+          ],
+          "fieldParameters": [
+            {
+              "parameterExpr": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Period"
+                    }
+                  },
+                  "Property": "Period"
+                }
+              },
+              "index": 0,
+              "length": 1
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls Answered"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls Answered",
+              "nativeQueryRef": "Calls Answered"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Calls Missed"
+                }
+              },
+              "queryRef": "PhoneDaily.Calls Missed",
+              "nativeQueryRef": "Calls Missed"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Talk Hours"
+                }
+              },
+              "queryRef": "PhoneDaily.Talk Hours",
+              "nativeQueryRef": "Talk Hours"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "PhoneDaily"
+                  }
+                },
+                "Property": "Calls Answered"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Answered, missed and talk hours per tech'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

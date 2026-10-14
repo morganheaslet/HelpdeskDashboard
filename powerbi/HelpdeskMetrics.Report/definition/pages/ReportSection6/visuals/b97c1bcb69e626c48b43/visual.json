@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "b97c1bcb69e626c48b43",
+  "position": {
+    "x": 884,
+    "y": 8,
+    "z": 0,
+    "width": 123,
+    "height": 104,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "PhoneDaily"
+                    }
+                  },
+                  "Property": "Talk Hours"
+                }
+              },
+              "queryRef": "PhoneDaily.Talk Hours",
+              "nativeQueryRef": "Talk Hours"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}
