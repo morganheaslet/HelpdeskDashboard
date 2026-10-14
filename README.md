@@ -412,6 +412,11 @@ The web app keeps the live operational tabs.
   - `003`: agreements/invoices/products, Dialpad daily, SmileBack reviews.
   - `004`: MRR plus client and contract profitability (monthly and annual), phones, CSAT.
   - `005`: Function App identity access + the read-only `reporting_reader` role for Power BI.
+  - `007`: stored local (Pacific) dates on tickets and time entries. The sync
+    computes them at write time, so the views avoid per-row `AT TIME ZONE`.
+    That conversion took the full Power BI read from about 290s to 41s on S0.
+    After applying it, run `EXEC meta.usp_backfill_local_dates`, and re-run
+    the backfill if the report timezone ever changes.
   - `006`: the `pbi.*` star schema the Power BI model imports. The project and
     page recipes are in [`powerbi/`](powerbi/README.md).
 - **Sync:** the `SyncMetrics` timer runs every 15 minutes (offset 7 minutes

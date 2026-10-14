@@ -123,8 +123,8 @@ SELECT
     UPPER(t.responded_by)                               AS [ResponderKey],
     t.entered_local_date                                AS [Entered Date],
     CASE WHEN t.closed_flag = 1 THEN t.closed_local_date END AS [Closed Date],
-    CAST((t.date_resolved  AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS [Resolved Date],
-    CAST((t.date_responded AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS [Responded Date],
+    t.resolved_local_date                               AS [Resolved Date],     -- local dates stored by the sync (sql/007)
+    t.responded_local_date                              AS [Responded Date],
     t.summary                                           AS [Summary],
     t.status_name                                       AS [Status],
     t.priority_name                                     AS [Priority],
@@ -135,9 +135,9 @@ SELECT
     t.contact_name                                      AS [Contact],
     -- Entered outside business hours (local): before 7am, from 6pm, or on a
     -- weekend. Weekday from a known Monday (1900-01-01) so DATEFIRST doesn't matter.
-    CAST(CASE WHEN DATEDIFF(DAY, '19000101', CAST(lt.entered_local AS DATE)) % 7 >= 5
-               OR DATEPART(HOUR, lt.entered_local) < 7
-               OR DATEPART(HOUR, lt.entered_local) >= 18 THEN 1 ELSE 0 END AS BIT) AS [Entered After Hours],
+    CAST(CASE WHEN DATEDIFF(DAY, '19000101', t.entered_local_date) % 7 >= 5
+               OR DATEPART(HOUR, t.entered_local) < 7
+               OR DATEPART(HOUR, t.entered_local) >= 18 THEN 1 ELSE 0 END AS BIT) AS [Entered After Hours],
     t.sla_name                                          AS [SLA],
     CAST(t.is_open AS BIT)                              AS [Is Open],
     CAST(t.is_waiting AS BIT)                           AS [Is Waiting],
@@ -155,9 +155,7 @@ SELECT
     t.met_resolve_sla                                   AS [Met Resolution SLA],
     CASE WHEN t.is_open = 1 THEN DATEDIFF(MINUTE, t.date_entered, SYSUTCDATETIME()) / 1440.0 END AS [Open Age Days],
     t.actual_hours                                      AS [Ticket Hours]
-FROM rpt.v_tickets t
-CROSS JOIN meta.settings s
-CROSS APPLY (SELECT CAST((t.date_entered AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATETIME2(0)) AS entered_local) lt;
+FROM rpt.v_tickets t;
 GO
 
 /*
@@ -182,7 +180,7 @@ WITH first_owner_event AS (
 SELECT
     t.ticket_id AS [TicketId],
     UPPER(CASE WHEN f.ticket_id IS NOT NULL THEN f.old_value ELSE t.owner_identifier END) AS [TechKey],
-    CAST((t.date_entered AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS [Assigned Date],
+    t.entered_local_date AS [Assigned Date],
     'Initial' AS [Assignment Kind],
     ISNULL(t.board_id, -1) AS [BoardId], ISNULL(t.company_id, -1) AS [CompanyId], t.priority_name AS [Priority]
 FROM cw.tickets t

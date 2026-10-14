@@ -79,9 +79,9 @@ GO
 /* --------------------------------------------------------------- tickets */
 CREATE OR ALTER VIEW rpt.v_tickets AS
 SELECT
+    -- t.* includes entered_local_date / closed_local_date / etc., stored by
+    -- the sync (see sql/007) — no per-row AT TIME ZONE here.
     t.*,
-    CAST((t.date_entered AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS entered_local_date,
-    CAST((t.closed_date  AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS closed_local_date,
     CASE WHEN t.closed_flag = 0
               AND ISNULL(bs.closed_status, 0) = 0
               AND cs.name IS NULL THEN 1 ELSE 0 END                         AS is_open,
@@ -102,7 +102,6 @@ SELECT
     CASE WHEN t.resolve_minutes IS NULL OR tgt.resolution_hours IS NULL THEN NULL
          WHEN t.resolve_minutes <= tgt.resolution_hours * 60 THEN 1 ELSE 0 END AS met_resolve_sla
 FROM cw.tickets t
-CROSS JOIN meta.settings s
 LEFT JOIN cw.board_statuses bs ON bs.status_id = t.status_id
 LEFT JOIN meta.closed_status_names cs ON cs.name = LOWER(t.status_name)
 LEFT JOIN meta.waiting_status_names ws ON ws.name = LOWER(t.status_name)
@@ -114,8 +113,7 @@ GO
 /* ------------------------------------------------------- time / labor */
 CREATE OR ALTER VIEW rpt.v_time_entries AS
 SELECT
-    e.*,
-    CAST((e.time_start AT TIME ZONE 'UTC') AT TIME ZONE s.report_timezone AS DATE) AS local_date,
+    e.*,   -- includes local_date, stored by the sync (see sql/007)
     COALESCE(NULLIF(m.display_name, ''), e.member_identifier)   AS member_name,
     ISNULL(wt.utilization_flag, 0)                               AS counts_toward_utilization,
     wt.accrual_type,
@@ -130,7 +128,6 @@ SELECT
     -- NULL when neither is visible to the API member's security role.
     e.actual_hours * COALESCE(e.hourly_cost, m.hourly_cost)      AS labor_cost
 FROM cw.time_entries e
-CROSS JOIN meta.settings s
 LEFT JOIN cw.members m ON m.identifier = e.member_identifier
 LEFT JOIN cw.work_types wt ON wt.work_type_id = e.work_type_id
 WHERE e.deleted = 0;
