@@ -1,10 +1,10 @@
 table Board
-	lineageTag: 27440a5e-388a-4c14-a4f6-3fdb81a65b1d
+	lineageTag: f26d5db9-72cf-4c05-ac74-4af7906343ec
 
 	column BoardId
 		dataType: int64
 		formatString: 0
-		lineageTag: 3944c965-e226-4380-a7c1-99507a08e3a3
+		lineageTag: 350a3edf-57e7-41c3-bb1d-0cdf947b85dc
 		summarizeBy: none
 		sourceColumn: BoardId
 
@@ -12,7 +12,7 @@ table Board
 
 	column Board
 		dataType: string
-		lineageTag: d9acf826-2070-41d4-8325-81885eac53a1
+		lineageTag: 27c5cd38-2abf-48a3-a05c-8dca17904d12
 		summarizeBy: none
 		sourceColumn: Board
 
@@ -20,7 +20,7 @@ table Board
 
 	column 'Is Throughput Board'
 		dataType: boolean
-		lineageTag: e68f53bc-60ee-4b62-baa7-04770fee9072
+		lineageTag: 829167fe-f42b-491d-ab28-3531304b0f28
 		summarizeBy: none
 		sourceColumn: Is Throughput Board
 
@@ -28,7 +28,7 @@ table Board
 
 	column 'Is Alerts'
 		dataType: boolean
-		lineageTag: 8417876f-7057-462d-a5db-e8c18936b4f8
+		lineageTag: 456e24a2-6375-444e-bae5-e3db0c899bab
 		summarizeBy: none
 		sourceColumn: Is Alerts
 
@@ -36,7 +36,7 @@ table Board
 
 	column 'Is Active'
 		dataType: boolean
-		lineageTag: 5ece3625-124f-46df-b546-c3d54e5b2fa2
+		lineageTag: 92667aef-1f2d-424c-82a3-aa12b84055f5
 		summarizeBy: none
 		sourceColumn: Is Active
 

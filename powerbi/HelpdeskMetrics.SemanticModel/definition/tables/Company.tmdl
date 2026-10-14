@@ -1,10 +1,10 @@
 table Company
-	lineageTag: 2501123d-95d2-4c3a-99b9-e4bc5455b31f
+	lineageTag: 2427826d-ef23-45e2-9fa4-64fd80e6702c
 
 	column CompanyId
 		dataType: int64
 		formatString: 0
-		lineageTag: fcf990a4-db1a-48ff-bb09-1a6765d606fa
+		lineageTag: 1a5cc5df-80ce-48dc-a072-a5a803215d2d
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -12,7 +12,7 @@ table Company
 
 	column Company
 		dataType: string
-		lineageTag: cb544dab-c8a9-44c7-ba6f-a5571d515642
+		lineageTag: 99a96977-9e90-4bec-bbd6-cf9da8b8f8e7
 		summarizeBy: none
 		sourceColumn: Company
 
@@ -20,7 +20,7 @@ table Company
 
 	column 'Company Types'
 		dataType: string
-		lineageTag: 96c211f5-c548-4102-aa72-06503dec3259
+		lineageTag: e86ffc2e-42dc-4974-b559-341c8d0e39ec
 		summarizeBy: none
 		sourceColumn: Company Types
 
@@ -28,7 +28,7 @@ table Company
 
 	column Territory
 		dataType: string
-		lineageTag: f2a9a8a9-567e-45d6-b5dc-32549c93ff46
+		lineageTag: 81786f3f-57b7-41b5-b235-2d65e6061f95
 		summarizeBy: none
 		sourceColumn: Territory
 
@@ -36,7 +36,7 @@ table Company
 
 	column 'Company Status'
 		dataType: string
-		lineageTag: baa66a6f-1de8-443b-b30e-d97f877e0800
+		lineageTag: 9eb45300-e355-4bc0-82a5-ae5248ee2c21
 		summarizeBy: none
 		sourceColumn: Company Status
 

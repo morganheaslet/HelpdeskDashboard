@@ -1,50 +1,50 @@
 table TimeEntries
-	lineageTag: 3a6f9d21-367e-4bbf-bddd-0bcb534fa9da
+	lineageTag: 1e5e1df8-f49d-4b09-9373-e7ce3624f698
 
 	measure 'Hours Logged' = SUM ( TimeEntries[Hours] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 4591ec67-9858-4699-93f4-9fe76829ede5
+		lineageTag: f095140e-2e4b-4bff-95e6-7e59850d1130
 
-	measure 'Utilized Hours' = SUM ( TimeEntries[Utilized Hours] )
+	measure 'Utilized Hours' = SUM ( TimeEntries[Utilized Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 17f65146-2dc3-4c58-b83d-8c305f739ee0
+		lineageTag: ffaf67c1-711d-4cfc-a464-5073f8c976b6
 
-	measure 'Billable Hours' = SUM ( TimeEntries[Billable Hours] )
+	measure 'Billable Hours' = SUM ( TimeEntries[Billable Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: a4cd5403-2187-4c78-b755-4b65765ae9ac
+		lineageTag: 43b6bb0d-c3a4-42ec-a94b-663a7a48fcef
 
-	measure 'PTO Hours' = SUM ( TimeEntries[PTO Hours] )
+	measure 'PTO Hours' = SUM ( TimeEntries[PTO Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 630e86d7-1da1-43e8-88c5-444556185134
+		lineageTag: ab61e05f-fe3e-4700-826a-5b662589cf83
 
 	measure 'Ticket Hours' = CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = "ServiceTicket" )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 4dd3871c-c1b5-48b4-9f61-b8248860d97f
+		lineageTag: 2dcf863f-7896-4b48-bbba-8ec95ae29b43
 
 	measure 'Project Hours' = CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = "ProjectTicket" )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 3738d12e-0763-4950-962e-f31222331dbb
+		lineageTag: 98bd7ecc-c441-4480-a777-947ec1ed9d65
 
-	measure 'Labor Cost' = SUM ( TimeEntries[Labor Cost] )
+	measure 'Labor Cost' = SUM ( TimeEntries[Labor Cost (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Time
-		lineageTag: 7a642319-7924-4aa2-b843-ec2133c853e1
+		lineageTag: c4e356d7-cf75-4e77-a89f-6f5c3b7e35d5
 
-	measure 'Uncosted Hours' = SUM ( TimeEntries[Uncosted Hours] )
+	measure 'Uncosted Hours' = SUM ( TimeEntries[Uncosted Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 8585564e-c103-43f7-9c83-9f72c4262985
+		lineageTag: 65e1255d-3555-4ec0-9f6e-570ce16e7cbf
 
 	column TimeEntryId
 		dataType: int64
 		formatString: 0
-		lineageTag: e70b058c-8c73-4c50-af1b-1440dffacc37
+		lineageTag: 145fc2df-b8ea-4d96-8082-d65b1d977869
 		summarizeBy: none
 		sourceColumn: TimeEntryId
 
@@ -53,7 +53,7 @@ table TimeEntries
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: f7aa6308-0302-4160-b5e4-3902ebebeca3
+		lineageTag: 0577e2f8-167e-4046-b3cd-397443c660c6
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -62,7 +62,7 @@ table TimeEntries
 	column Date
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: fa67e5b1-3f18-4e11-846a-a6e8755ace9d
+		lineageTag: f22652b3-da46-4d78-9409-613836207e5f
 		summarizeBy: none
 		sourceColumn: Date
 
@@ -72,7 +72,7 @@ table TimeEntries
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: 970b3b9f-6840-4195-ac28-eec60eeeeecb
+		lineageTag: 8536a726-1fc7-4c90-9a6f-59b4ca8c0fcb
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -82,7 +82,7 @@ table TimeEntries
 		dataType: int64
 		formatString: 0
 		isHidden
-		lineageTag: 8e5176e4-2014-47d4-9a6f-2fe0ea1c908c
+		lineageTag: f3e5f5f3-05d9-49b0-8a37-228da088c9d3
 		summarizeBy: none
 		sourceColumn: AgreementId
 
@@ -91,7 +91,7 @@ table TimeEntries
 	column TicketId
 		dataType: int64
 		formatString: 0
-		lineageTag: 64e07eed-e7d4-4427-8653-2c54202a2aa8
+		lineageTag: 78560e28-ac28-418d-bf43-eed55c984f03
 		summarizeBy: none
 		sourceColumn: TicketId
 
@@ -99,7 +99,7 @@ table TimeEntries
 
 	column 'Charge Type'
 		dataType: string
-		lineageTag: 8154f19f-e1f3-4d0f-bea8-3bda8562ff40
+		lineageTag: 29ca4c2e-eabc-4e2c-b8f6-7ae07ad02d1e
 		summarizeBy: none
 		sourceColumn: Charge Type
 
@@ -107,7 +107,7 @@ table TimeEntries
 
 	column 'Work Type'
 		dataType: string
-		lineageTag: 79f6550e-08a7-4e14-b398-0735b6a04804
+		lineageTag: 030646ad-6efc-42b6-951e-a7210ab441ac
 		summarizeBy: none
 		sourceColumn: Work Type
 
@@ -115,7 +115,7 @@ table TimeEntries
 
 	column 'Work Role'
 		dataType: string
-		lineageTag: 5c1e2230-ac52-4a5b-9282-6b6061dea7c2
+		lineageTag: e73ac62b-28c1-4b23-87ee-fef0fb6a5e56
 		summarizeBy: none
 		sourceColumn: Work Role
 
@@ -123,7 +123,7 @@ table TimeEntries
 
 	column 'Billable Option'
 		dataType: string
-		lineageTag: e5696b1f-60f8-400d-a2be-f99fc67e87c6
+		lineageTag: c0b95262-80a5-4604-a0e7-583b2093520b
 		summarizeBy: none
 		sourceColumn: Billable Option
 
@@ -132,52 +132,57 @@ table TimeEntries
 	column Hours
 		dataType: double
 		formatString: #,0.0
-		lineageTag: baa6c4f9-ce1b-4acc-b750-262f35c851b6
+		lineageTag: bb14207c-5459-439a-bc36-7cb54b3fb2df
 		summarizeBy: none
 		sourceColumn: Hours
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Utilized Hours'
+	column 'Utilized Hours (raw)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: c7acb951-6271-44ec-97be-e743c7c48583
+		isHidden
+		lineageTag: a5e184c9-6bc7-490a-9dcf-1a56831d4536
 		summarizeBy: none
 		sourceColumn: Utilized Hours
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Billable Hours'
+	column 'Billable Hours (raw)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: d74dde83-e578-4436-a0a3-ab97dd3b104f
+		isHidden
+		lineageTag: b2d2dd8b-f4ac-468c-b803-9567bdba18be
 		summarizeBy: none
 		sourceColumn: Billable Hours
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'PTO Hours'
+	column 'PTO Hours (raw)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 2448f336-6700-4ead-9b35-c013b85c4209
+		isHidden
+		lineageTag: eefc99b1-7a56-4845-8dd7-6f218fb1e946
 		summarizeBy: none
 		sourceColumn: PTO Hours
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Labor Cost'
+	column 'Labor Cost (raw)'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 593c50e6-d0fe-4587-ad00-bd4182bde00a
+		isHidden
+		lineageTag: 50f7bb26-ccf1-42bf-a5d4-9475913927eb
 		summarizeBy: none
 		sourceColumn: Labor Cost
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Uncosted Hours'
+	column 'Uncosted Hours (raw)'
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 41687317-be8a-456c-8e68-c83921846a52
+		isHidden
+		lineageTag: 97ca295d-423e-4d2c-a781-4824599153d2
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
 

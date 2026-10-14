@@ -229,7 +229,70 @@ def read_columns():
     return cols
 
 
-def table_tmdl(table, columns):
+RAW_SUFFIX = " (raw)"
+
+
+def resolve_name_collisions(cols):
+    """
+    A measure can't share its name with a column (Power BI refuses to load
+    the model: "measure cannot be created because a column with the same name
+    already exists"). Several fact columns are exactly what a same-named
+    measure sums (TimeEntries[Utilized Hours] -> [Utilized Hours]), so the
+    COLUMN gets renamed in the model to "<name> (raw)" and hidden — its
+    sourceColumn still points at the SQL column — and every
+    Table[<name>] reference in measure DAX is rewritten to match. Measure
+    names, which are what report authors use, stay readable.
+    Returns {(table, column): model column name}.
+    """
+    measure_names = [m[0] for ms in MEASURES.values() for m in ms]
+    dupes = {n for n in measure_names if measure_names.count(n) > 1}
+    if dupes:
+        raise SystemExit(f"Duplicate measure names: {sorted(dupes)}")
+    measure_set = {n.lower() for n in measure_names}
+    renames = {}
+    for table, columns in cols.items():
+        for col, _ in columns:
+            if col.lower() in measure_set:
+                renames[(table, col)] = col + RAW_SUFFIX
+    for table, ms in MEASURES.items():
+        rewritten = []
+        for name, dax, fmt, folder in ms:
+            for (t, col), new in renames.items():
+                dax = dax.replace(f"{t}[{col}]", f"{t}[{new}]")
+            rewritten.append((name, dax, fmt, folder))
+        MEASURES[table] = rewritten
+    # Final guard: nothing may still collide, case-insensitively.
+    all_cols = {renames.get((t, c), c).lower() for t, cs in cols.items() for c, _ in cs}
+    clash = sorted(n for n in measure_names if n.lower() in all_cols)
+    if clash:
+        raise SystemExit(f"Measure/column name collisions remain: {clash}")
+    for (t, c), new in sorted(renames.items()):
+        print(f"  renamed column {t}[{c}] -> [{new}] (hidden; a measure uses the name)")
+    return renames
+
+
+def check_references(cols, renames):
+    """Fails before writing anything if measure DAX references a column or
+    measure that won't exist in the model — Desktop otherwise reports these
+    one at a time, on open."""
+    import re
+    model_cols = {t: {renames.get((t, c), c) for c, _ in cs} for t, cs in cols.items()}
+    model_cols["Period"] = {"Period", "Period Fields", "Period Order"}
+    measure_names = {m[0] for ms in MEASURES.values() for m in ms}
+    problems = []
+    for table, ms in MEASURES.items():
+        for name, dax, *_ in ms:
+            for t, c in re.findall(r"'?([A-Za-z][A-Za-z0-9 ]*?)'?\[([^\]]+)\]", dax):
+                if c not in model_cols.get(t, set()):
+                    problems.append(f"{name}: {t}[{c}]")
+            for ref in re.findall(r"(?<![\w'\]])\[([^\]]+)\]", dax):
+                if ref not in measure_names:
+                    problems.append(f"{name}: [{ref}] is not a measure")
+    if problems:
+        raise SystemExit("Unresolved references in measures:\n  " + "\n  ".join(problems))
+
+
+def table_tmdl(table, columns, renames):
     is_dim = table in ("Calendar", "Tech", "Board", "Company", "Agreement")
     out = [f"table {q(table)}", f"\tlineageTag: {lineage()}"]
     if table == "Calendar":
@@ -242,14 +305,15 @@ def table_tmdl(table, columns):
                 f"\t\tlineageTag: {lineage()}", ""]
     for col, sql_type in columns:
         dtype = tmdl_type(sql_type)
-        out.append(f"\tcolumn {q(col)}")
+        model_name = renames.get((table, col), col)
+        out.append(f"\tcolumn {q(model_name)}")
         out.append(f"\t\tdataType: {dtype}")
         if table == "Calendar" and col == "Date":
             out.append("\t\tisKey")
         fmt = column_format(table, col, dtype)
         if fmt:
             out.append(f"\t\tformatString: {fmt}")
-        hidden = (col in HIDDEN and not is_dim) or col in HIDDEN_ON_DIMS_TOO
+        hidden = (col in HIDDEN and not is_dim) or col in HIDDEN_ON_DIMS_TOO or (table, col) in renames
         if hidden:
             out.append("\t\tisHidden")
         out.append(f"\t\tlineageTag: {lineage()}")
@@ -335,6 +399,13 @@ def write(path, text):
 
 def main():
     cols = read_columns()
+    renames = resolve_name_collisions(cols)
+    # Relationships and sort-by columns must not point at a renamed column.
+    used = {(t, c) for t, c, *_ in RELATIONSHIPS} | {(t2, c2) for _, _, t2, c2, _ in RELATIONSHIPS} \
+        | set(SORT_BY) | {(t, c) for (t, _), c in SORT_BY.items()}
+    if used & set(renames):
+        raise SystemExit(f"A relationship/sort column collides with a measure name: {sorted(used & set(renames))}")
+    check_references(cols, renames)
     model_dir = ROOT / f"{NAME}.SemanticModel"
     defn = model_dir / "definition"
     if (defn / "tables").exists():
@@ -384,7 +455,7 @@ def main():
         rel.append("")
     write(defn / "relationships.tmdl", "\n".join(rel))
     for t in TABLES:
-        write(defn / "tables" / f"{t}.tmdl", table_tmdl(t, cols[t]))
+        write(defn / "tables" / f"{t}.tmdl", table_tmdl(t, cols[t], renames))
     write(defn / "tables" / "Period.tmdl", PERIOD_TABLE.format(
         l1=lineage(), l2=lineage(), l3=lineage(), l4=lineage(), pid=uuid.uuid4().hex))
 

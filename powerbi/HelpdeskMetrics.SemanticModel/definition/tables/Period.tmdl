@@ -1,9 +1,9 @@
 table Period
-	lineageTag: 6a72851a-9dfc-4e9d-a778-cac608d975dc
+	lineageTag: 3b6d9753-05d6-4b5d-ab4a-18711d0ce08b
 
 	column Period
 		dataType: string
-		lineageTag: 47dec6ae-4296-443f-b84b-f75f09de50a2
+		lineageTag: bf8b93b4-1951-43f6-8832-7a8698c87e11
 		summarizeBy: none
 		sourceColumn: [Value1]
 		sortByColumn: 'Period Order'
@@ -16,7 +16,7 @@ table Period
 	column 'Period Fields'
 		dataType: string
 		isHidden
-		lineageTag: 3e51062a-58fd-44bf-8fdd-cb565412f3c8
+		lineageTag: 6d8ead5f-5b7f-4ded-a7a4-6ed5fef4e313
 		summarizeBy: none
 		sourceColumn: [Value2]
 		sortByColumn: 'Period Order'
@@ -33,7 +33,7 @@ table Period
 		dataType: int64
 		isHidden
 		formatString: 0
-		lineageTag: dad18cc5-41bf-429f-9cee-5b7b9e212224
+		lineageTag: 54ba14d2-0b0b-4710-99c9-6eaf8bb1f3ea
 		summarizeBy: sum
 		sourceColumn: [Value3]
 
@@ -48,4 +48,4 @@ table Period
 				    ("Month", NAMEOF('Calendar'[Month]), 2)
 				}
 
-	annotation PBI_Id = 35c6327658a14309bffa760edc815929
+	annotation PBI_Id = 49be130c12f149aca5798ca54b913f51
