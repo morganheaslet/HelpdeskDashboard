@@ -177,20 +177,6 @@
                       "Entity": "Tickets"
                     }
                   },
-                  "Property": "After-Hours %"
-                }
-              },
-              "queryRef": "Tickets.After-Hours %",
-              "nativeQueryRef": "After-Hours %"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Tickets"
-                    }
-                  },
                   "Property": "Phone %"
                 }
               },
@@ -476,20 +462,6 @@
               }
             },
             "Property": "Avg Hours per Closed Ticket"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "d01f3a9fe6c44daf0955",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Tickets"
-              }
-            },
-            "Property": "After-Hours %"
           }
         },
         "type": "Advanced"

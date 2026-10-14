@@ -121,7 +121,7 @@ def visual(page, key, vtype, pos, roles, title=None, sort=None, objects=None, fi
     return container
 
 
-def slicer(page, key, pos, ref, mode, title=None, single=False, filters=None):
+def slicer(page, key, pos, ref, mode, title=None, single=False, filters=None, sync_group=None):
     objects = {"data": [{"properties": {"mode": lit(s(mode))}}]}
     if single:
         objects["selection"] = [{"properties": {"singleSelect": lit("true"), "strictSingleSelect": lit("true")}}]
@@ -135,6 +135,9 @@ def slicer(page, key, pos, ref, mode, title=None, single=False, filters=None):
     # display the parameter (matrix columns, chart axes) get fieldParameters.
     for state in v["visual"]["query"]["queryState"].values():
         state.pop("fieldParameters", None)
+    if sync_group:
+        # Same group name on every page = a pick on one page applies to all pages.
+        v["visual"]["syncGroup"] = {"groupName": sync_group, "fieldChanges": True, "filterChanges": True}
     return v
 
 
@@ -155,10 +158,12 @@ EXCLUDED_BOARDS = ["z(inactive)Quartus - Managed Services"]
 # - chart axes / matrix columns: the same three fields as a drill hierarchy
 #   (starts at Month; Power BI's drill buttons go down to Week and Day).
 CAL_HIER = ["Calendar[Month]", "Calendar[Week]", "Calendar[Date]"]
+MONTH_SYNC_GROUP, BOARD_SYNC_GROUP = "Month", "Board"
 
 
 def date_slicer(page, x, w):
-    return slicer(page, "date_hierarchy", (x, TOP_Y, w, TOP_H), CAL_HIER, "Dropdown", "Month")
+    return slicer(page, "date_hierarchy", (x, TOP_Y, w, TOP_H), CAL_HIER, "Dropdown", "Month",
+                  sync_group=MONTH_SYNC_GROUP)
 
 
 def trend_interactions(page, visuals):
@@ -181,7 +186,8 @@ def board_slicer(page, pos):
     active = categorical(f"activeBoards_{page}", "Board", "Is Active", ["true"])
     no_projects = categorical(f"noProjectBoards_{page}", "Board", "Board",
                               [s(b) for b in PROJECT_BOARDS], exclude=True)
-    return slicer(page, "board", pos, "Board[Board]", "Dropdown", "Board", filters=[active, no_projects])
+    return slicer(page, "board", pos, "Board[Board]", "Dropdown", "Board", filters=[active, no_projects],
+                  sync_group=BOARD_SYNC_GROUP)
 
 
 def card(page, key, pos, measure):
@@ -301,7 +307,7 @@ def utilization(p):
 def client_profitability(p):
     return [
         slicer(p, "year", (10, TOP_Y, 150, TOP_H), "Calendar[Year]", "Dropdown", "Year"),
-        slicer(p, "month", (170, TOP_Y, 190, TOP_H), "Calendar[Month]", "Dropdown", "Month"),
+        date_slicer(p, 170, 190),
         slicer(p, "ctype", (370, TOP_Y, 250, TOP_H), "Company[Company Types]", "Dropdown", "Company type"),
         *kpi_row(p, 630, ["[Normalized Revenue]", "[Client Total Cost]", "[Client Margin]", "[Client Margin %]"]),
         visual(p, "table", "tableEx", (10, BODY_Y, 1260, 320),
@@ -322,7 +328,7 @@ def client_profitability(p):
 def contract_profitability(p):
     return [
         slicer(p, "year", (10, TOP_Y, 140, TOP_H), "Calendar[Year]", "Dropdown", "Year"),
-        slicer(p, "month", (160, TOP_Y, 170, TOP_H), "Calendar[Month]", "Dropdown", "Month"),
+        date_slicer(p, 160, 170),
         slicer(p, "atype", (340, TOP_Y, 220, TOP_H), "Agreement[Agreement Type]", "Dropdown", "Agreement type"),
         slicer(p, "astatus", (570, TOP_Y, 170, TOP_H), "Agreement[Agreement Status]", "Dropdown", "Status"),
         *kpi_row(p, 750, ["[Agreement Revenue]", "[Agreement Margin]", "[Agreement Margin %]"]),
@@ -352,11 +358,11 @@ def tickets_by_client(p):
         slicer(p, "client", (220, TOP_Y, 300, TOP_H), "Company[Company]", "Dropdown", "Client",
                filters=[recent("slicer")]),
         board_slicer(p, (530, TOP_Y, 230, TOP_H)),
-        *kpi_row(p, 770, ["[Tickets Opened]", "[Tickets Closed]", "[Open Now]", "[After-Hours %]"]),
+        *kpi_row(p, 770, ["[Tickets Opened]", "[Tickets Closed]", "[Open Now]"]),
         visual(p, "overview", "tableEx", (10, BODY_Y, 1260, 400),
                {"Values": ["Company[Company]", "[Tickets Opened]", "[Tickets Closed]", "[Open Now]", "[Waiting Now]",
                            "[Avg Open Age (Days)]", "[Max Open Age (Days)]", "[Response SLA %]", "[Resolution SLA %]",
-                           "[Hours Logged]", "[Avg Hours per Closed Ticket]", "[After-Hours %]", "[Phone %]",
+                           "[Hours Logged]", "[Avg Hours per Closed Ticket]", "[Phone %]",
                            "[Requesting Contacts]", "[Revenue per Ticket]"]},
                title="Client overview (click a client to focus the page)",
                sort=("[Tickets Opened]", "Descending"), filters=[recent("overview")]),

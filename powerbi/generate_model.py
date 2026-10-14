@@ -101,9 +101,14 @@ MEASURES = {
         ("Open at End of Period",
          "VAR d = MIN ( MAX ( 'Calendar'[Date] ), TODAY () ) "
          "RETURN IF ( MIN ( 'Calendar'[Date] ) > TODAY (), BLANK (), "
+         # "still open today OR done after d" — identical to "Done Date blank
+         # or > d" when the data is right (Done Date is blank exactly when
+         # open), but a stale/unrefreshed Done Date can no longer turn this
+         # into "every ticket ever entered" (it showed ~190,000 that way).
          "CALCULATE ( COUNTROWS ( Tickets ), REMOVEFILTERS ( 'Calendar' ), "
          "Tickets[Entered Date] <= d, "
-         "FILTER ( ALL ( Tickets[Done Date] ), ISBLANK ( Tickets[Done Date] ) || Tickets[Done Date] > d ) ) )",
+         "FILTER ( ALL ( Tickets[Is Open], Tickets[Done Date] ), "
+         "Tickets[Is Open] = TRUE () || Tickets[Done Date] > d ) ) )",
          COUNT, "Backlog"),
         ("Waiting Now",
          "CALCULATE ( COUNTROWS ( Tickets ), Tickets[Is Open] = TRUE (), Tickets[Is Waiting] = TRUE (), "
@@ -133,9 +138,6 @@ MEASURES = {
         ("Max Open Age (Days)",
          "CALCULATE ( MAX ( Tickets[Open Age Days] ), Tickets[Is Open] = TRUE (), REMOVEFILTERS ( 'Calendar' ) )",
          "#,0", "Backlog"),
-        ("After-Hours Tickets",
-         "CALCULATE ( COUNTROWS ( Tickets ), Tickets[Entered After Hours] = TRUE () )", COUNT, "Client"),
-        ("After-Hours %", "DIVIDE ( [After-Hours Tickets], [Tickets Opened] )", PCT, "Client"),
         ("Phone %",
          "DIVIDE ( CALCULATE ( COUNTROWS ( Tickets ), Tickets[Source] = \"Phone\" ), [Tickets Opened] )", PCT, "Client"),
         ("Requesting Contacts", "DISTINCTCOUNT ( Tickets[Contact] )", COUNT, "Client"),

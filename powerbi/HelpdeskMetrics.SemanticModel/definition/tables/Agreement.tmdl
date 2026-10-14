@@ -1,10 +1,10 @@
 table Agreement
-	lineageTag: fb9d672b-0ab7-4c50-b374-181ba4a4f80d
+	lineageTag: e0e1f199-6213-4861-904a-531075a33c81
 
 	column AgreementId
 		dataType: int64
 		formatString: 0
-		lineageTag: bd9e9c43-0a8e-4ef1-b010-085654faebe7
+		lineageTag: 9f3525a9-5fb0-4fde-b864-2c2e591325b4
 		summarizeBy: none
 		sourceColumn: AgreementId
 
@@ -12,7 +12,7 @@ table Agreement
 
 	column Agreement
 		dataType: string
-		lineageTag: 303488fb-3430-4643-8286-b46b3529e0b7
+		lineageTag: 42f8034c-e0a9-4f50-a85a-52b52215ffe7
 		summarizeBy: none
 		sourceColumn: Agreement
 
@@ -20,7 +20,7 @@ table Agreement
 
 	column 'Agreement Type'
 		dataType: string
-		lineageTag: 74416223-76fe-47d8-a370-b1a5ae59cbaa
+		lineageTag: 2db5d71b-b8e8-423d-8ae1-bad46903b458
 		summarizeBy: none
 		sourceColumn: Agreement Type
 
@@ -29,7 +29,7 @@ table Agreement
 	column CompanyId
 		dataType: int64
 		formatString: 0
-		lineageTag: 0262eeaf-6d24-47d0-8e8c-1ecace8a5025
+		lineageTag: f972d1ba-2245-4520-a9f5-699d42939a20
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -37,7 +37,7 @@ table Agreement
 
 	column 'Agreement Status'
 		dataType: string
-		lineageTag: 564494d8-ead3-4b8c-aa94-990dda2408e0
+		lineageTag: 6564a462-c917-4a9d-a0f1-0f9bb47635ca
 		summarizeBy: none
 		sourceColumn: Agreement Status
 
@@ -45,7 +45,7 @@ table Agreement
 
 	column 'Billing Cycle'
 		dataType: string
-		lineageTag: 933c884a-86e7-49d0-b553-00cd6e460a0c
+		lineageTag: f6cb394e-3820-45a0-804c-f1b903dc4a4f
 		summarizeBy: none
 		sourceColumn: Billing Cycle
 
@@ -54,7 +54,7 @@ table Agreement
 	column 'Bill Amount'
 		dataType: double
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 59c9baa7-19e2-4f24-80e9-b407628cd3ad
+		lineageTag: ed535281-5851-424b-982a-5cd8e0a134e7
 		summarizeBy: none
 		sourceColumn: Bill Amount
 
@@ -63,7 +63,7 @@ table Agreement
 	column 'Start Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 8bfa96e1-3738-44f7-b2de-51173bf7b347
+		lineageTag: 50b1f6ba-678b-4ea0-9387-a47d7acafabb
 		summarizeBy: none
 		sourceColumn: Start Date
 
@@ -72,7 +72,7 @@ table Agreement
 	column 'End Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 03cbef9b-5e0f-4f31-8f37-e6dc10691c75
+		lineageTag: 62a5de13-0ca8-4d0b-b1f2-5e824cbec547
 		summarizeBy: none
 		sourceColumn: End Date
 
@@ -88,4 +88,3 @@ table Agreement
 				    Data
 
 	annotation PBI_ResultType = Table
-

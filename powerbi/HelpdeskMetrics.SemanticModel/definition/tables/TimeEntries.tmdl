@@ -1,55 +1,55 @@
 table TimeEntries
-	lineageTag: ac41aa1f-dad8-425e-9f40-e980c8ddc804
+	lineageTag: c5f5f3da-a10b-432a-b6e8-60d4ba86f3cc
 
 	measure 'Hours Logged' = SUM ( TimeEntries[Hours] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: c3fc5b28-3d47-4c86-8267-03fa249b6868
+		lineageTag: 9669c133-f6dd-4151-8811-6f2519cfea00
 
 	measure 'Utilized Hours' = SUM ( TimeEntries[Utilized Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: dc2ef5ae-6c94-4de4-86a4-4c1c403c4a03
+		lineageTag: 0b3a5b69-3035-418f-a4c4-8d9d618be053
 
 	measure 'Billable Hours' = SUM ( TimeEntries[Billable Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: e205158b-5936-44f9-ab91-3edbe24171bd
+		lineageTag: 2d0afa07-0bb4-44e0-a7eb-ef2f6f3f9cc0
 
 	measure 'PTO Hours' = SUM ( TimeEntries[PTO Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 1ab186a1-ba97-4c92-b99c-86d195bc4652
+		lineageTag: 7a756407-a225-4d72-a58d-5230ff47b987
 
 	measure 'Ticket Hours' = CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = "ServiceTicket" )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 24513989-0e05-4a8a-9b2b-fbf20378d0bd
+		lineageTag: 23828dc7-290c-4412-948a-0fb267a7cc9b
 
 	measure 'Project Hours' = CALCULATE ( [Hours Logged], TimeEntries[Charge Type] = "ProjectTicket" )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: d3430e81-3690-46db-9b1b-50be2a235e19
+		lineageTag: d4f27e5a-cb0e-46d6-ad00-1069b97b47d0
 
 	measure 'Labor Cost' = SUM ( TimeEntries[Labor Cost (raw)] )
 		formatString: \$#,0;(\$#,0);\$#,0
 		displayFolder: Time
-		lineageTag: 9fd607e1-5bcb-4df7-9f00-cde9e8dfd16e
+		lineageTag: 9a76a60a-1f2f-46f5-9506-f9b37a6b676f
 
 	measure 'Uncosted Hours' = SUM ( TimeEntries[Uncosted Hours (raw)] )
 		formatString: #,0.0
 		displayFolder: Time
-		lineageTag: 9a113b75-b1a5-4fce-a41d-171305e81610
+		lineageTag: e3318ea2-35d6-45ae-b134-b32bcb114f79
 
 	measure 'Avg Hours per Closed Ticket' = DIVIDE ( [Ticket Hours], [Tickets Closed] )
 		formatString: #,0.0
 		displayFolder: Client
-		lineageTag: 4f35cd31-3306-403d-9a27-c540370047ed
+		lineageTag: c70804e9-e29b-4057-9ea3-65cef1b30d50
 
 	column TimeEntryId
 		dataType: int64
 		formatString: 0
-		lineageTag: e82fa907-e115-4c53-9df0-60b2dbfb665e
+		lineageTag: 4256f100-3a66-4382-a37f-6b3da05b00c7
 		summarizeBy: none
 		sourceColumn: TimeEntryId
 
@@ -58,7 +58,7 @@ table TimeEntries
 	column TechKey
 		dataType: string
 		isHidden
-		lineageTag: e35e9842-7698-4798-9ff4-825077d4ec5f
+		lineageTag: a4d76abf-0e09-4568-a783-16521d6732d2
 		summarizeBy: none
 		sourceColumn: TechKey
 
@@ -67,7 +67,7 @@ table TimeEntries
 	column Date
 		dataType: dateTime
 		formatString: yyyy-mm-dd
-		lineageTag: 43400850-e926-49f0-908c-04495df09eec
+		lineageTag: a9b62121-4ed1-4c81-8a46-a7647d90f90a
 		summarizeBy: none
 		sourceColumn: Date
 
@@ -75,9 +75,9 @@ table TimeEntries
 
 	column CompanyId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 1287390e-4666-40a0-afaa-8f730f66ea97
+		isHidden
+		lineageTag: b53f546e-6ba8-4624-953b-7834ead6ae6d
 		summarizeBy: none
 		sourceColumn: CompanyId
 
@@ -85,9 +85,9 @@ table TimeEntries
 
 	column AgreementId
 		dataType: int64
-		isHidden
 		formatString: 0
-		lineageTag: 671af7f2-865f-44ec-b414-e3299b857197
+		isHidden
+		lineageTag: 6198db86-d4a1-4936-88da-af7ceb57b066
 		summarizeBy: none
 		sourceColumn: AgreementId
 
@@ -96,7 +96,7 @@ table TimeEntries
 	column TicketId
 		dataType: int64
 		formatString: 0
-		lineageTag: f2b3fa7f-8a52-400a-a7e2-54f070d1a01f
+		lineageTag: 61bff517-7e86-4da1-bcd4-aa48e40ec6ff
 		summarizeBy: none
 		sourceColumn: TicketId
 
@@ -104,7 +104,7 @@ table TimeEntries
 
 	column 'Charge Type'
 		dataType: string
-		lineageTag: 15f56e0e-c0e9-43b5-a8c2-326e27f7b382
+		lineageTag: 20d7b7ff-f208-45a8-b06a-010766aface7
 		summarizeBy: none
 		sourceColumn: Charge Type
 
@@ -112,7 +112,7 @@ table TimeEntries
 
 	column 'Work Type'
 		dataType: string
-		lineageTag: 626ac238-e3a0-4339-b672-95448882ebf0
+		lineageTag: 27af1faa-e932-4041-8ec8-0896976812df
 		summarizeBy: none
 		sourceColumn: Work Type
 
@@ -120,7 +120,7 @@ table TimeEntries
 
 	column 'Work Role'
 		dataType: string
-		lineageTag: d91d1b2e-2c6a-4c6a-812a-56eef1c8377d
+		lineageTag: b80c1d1c-933c-4e2e-bbda-1a5f80b23b06
 		summarizeBy: none
 		sourceColumn: Work Role
 
@@ -128,7 +128,7 @@ table TimeEntries
 
 	column 'Billable Option'
 		dataType: string
-		lineageTag: 72a915ea-3bb0-4134-a4ea-fe4d37886658
+		lineageTag: fea506ca-a602-45f8-abd1-eadd76de332c
 		summarizeBy: none
 		sourceColumn: Billable Option
 
@@ -137,7 +137,7 @@ table TimeEntries
 	column Hours
 		dataType: double
 		formatString: #,0.0
-		lineageTag: 651dd40c-49b0-4dbc-bd60-d61671a62a11
+		lineageTag: 82d539f4-63b3-4cdb-bb6d-c89c26ab9429
 		summarizeBy: none
 		sourceColumn: Hours
 
@@ -145,9 +145,9 @@ table TimeEntries
 
 	column 'Utilized Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: 0e5fad3e-3f39-4a44-8fc1-f5d9a3f8847f
+		isHidden
+		lineageTag: ff54bc65-b263-4a81-bb19-89880bba2c36
 		summarizeBy: none
 		sourceColumn: Utilized Hours
 
@@ -155,9 +155,9 @@ table TimeEntries
 
 	column 'Billable Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: 4764df6a-bbad-4f29-9a1a-7a06072afe79
+		isHidden
+		lineageTag: e99e3842-ab78-4d8d-b845-bffe1db9eac4
 		summarizeBy: none
 		sourceColumn: Billable Hours
 
@@ -165,9 +165,9 @@ table TimeEntries
 
 	column 'PTO Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: 565141d1-2188-4fc1-857c-0826d293c6cd
+		isHidden
+		lineageTag: ed303f4f-3fe7-4141-9263-f1a59c2144e7
 		summarizeBy: none
 		sourceColumn: PTO Hours
 
@@ -175,9 +175,9 @@ table TimeEntries
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		isHidden
 		formatString: \$#,0;(\$#,0);\$#,0
-		lineageTag: 6135ed8c-4093-493b-b5d9-75ee05d74e9b
+		isHidden
+		lineageTag: f24c9404-130b-4668-b72d-1cd8cfe0023b
 		summarizeBy: none
 		sourceColumn: Labor Cost
 
@@ -185,9 +185,9 @@ table TimeEntries
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		isHidden
 		formatString: #,0.0
-		lineageTag: 79c46d5b-4a65-4a50-9f87-08c4141e11a7
+		isHidden
+		lineageTag: 27174387-ae0c-4bca-98eb-bace67023064
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
 
@@ -203,4 +203,3 @@ table TimeEntries
 				    Data
 
 	annotation PBI_ResultType = Table
-
