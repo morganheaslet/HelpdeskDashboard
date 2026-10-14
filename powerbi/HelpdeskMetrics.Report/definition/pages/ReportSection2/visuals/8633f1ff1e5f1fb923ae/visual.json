@@ -1,0 +1,96 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "8633f1ff1e5f1fb923ae",
+  "position": {
+    "x": 10,
+    "y": 480,
+    "z": 0,
+    "width": 760,
+    "height": 230,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TimeEntries"
+                    }
+                  },
+                  "Property": "Work Type"
+                }
+              },
+              "queryRef": "TimeEntries.Work Type",
+              "nativeQueryRef": "Work Type"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TimeEntries"
+                    }
+                  },
+                  "Property": "Hours Logged"
+                }
+              },
+              "queryRef": "TimeEntries.Hours Logged",
+              "nativeQueryRef": "Hours Logged"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "TimeEntries"
+                  }
+                },
+                "Property": "Hours Logged"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Hours by work type'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

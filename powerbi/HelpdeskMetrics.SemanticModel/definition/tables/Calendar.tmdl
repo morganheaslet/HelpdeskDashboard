@@ -12,6 +12,8 @@ table Calendar
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Year
 		dataType: int64
 		formatString: 0
@@ -30,6 +32,8 @@ table Calendar
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Month
 		dataType: string
 		lineageTag: f9130cce-1998-4665-a678-998d51c26875
@@ -41,8 +45,8 @@ table Calendar
 
 	column 'Month Sort'
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 18b41444-3d00-4074-8b19-1b7149e72188
 		summarizeBy: none
 		sourceColumn: Month Sort
@@ -57,6 +61,8 @@ table Calendar
 		sourceColumn: Week Start
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column Week
 		dataType: string
@@ -78,8 +84,8 @@ table Calendar
 
 	column 'Weekday Sort'
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 2bd755d5-45ea-40aa-bd69-f70ae45381a5
 		summarizeBy: none
 		sourceColumn: Weekday Sort
@@ -128,3 +134,4 @@ table Calendar
 				    Data
 
 	annotation PBI_ResultType = Table
+

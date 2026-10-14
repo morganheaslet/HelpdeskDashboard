@@ -87,8 +87,8 @@ table Tickets
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: be94be63-ce76-4c41-a331-886babf41897
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -97,8 +97,8 @@ table Tickets
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 861beeb9-306b-4158-8249-36b4e3b30c0f
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -150,6 +150,8 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Closed Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
@@ -158,6 +160,8 @@ table Tickets
 		sourceColumn: Closed Date
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column 'Resolved Date'
 		dataType: dateTime
@@ -168,6 +172,8 @@ table Tickets
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Responded Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
@@ -176,6 +182,8 @@ table Tickets
 		sourceColumn: Responded Date
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column Summary
 		dataType: string
@@ -346,8 +354,8 @@ table Tickets
 
 	column 'Ticket Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: b9de0987-e362-4433-b638-2797928c02f9
 		summarizeBy: none
 		sourceColumn: Ticket Hours
@@ -364,3 +372,4 @@ table Tickets
 				    Data
 
 	annotation PBI_ResultType = Table
+

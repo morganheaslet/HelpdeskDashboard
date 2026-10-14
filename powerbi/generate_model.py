@@ -383,9 +383,9 @@ PERIOD_TABLE = """table Period
 \t\tmode: import
 \t\tsource =
 \t\t\t\t{{
-\t\t\t\t    ("Day", NAMEOF('Calendar'[Date]), 0),
+\t\t\t\t    ("Day", NAMEOF('Calendar'[Date]), 2),
 \t\t\t\t    ("Week", NAMEOF('Calendar'[Week]), 1),
-\t\t\t\t    ("Month", NAMEOF('Calendar'[Month]), 2)
+\t\t\t\t    ("Month", NAMEOF('Calendar'[Month]), 0)
 \t\t\t\t}}
 
 \tannotation PBI_Id = {pid}

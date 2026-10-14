@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "HelpdeskMetrics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "5bee4cf1-580e-472e-92f7-b6b149d5ed47"
+  }
+}

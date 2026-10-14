@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "54fe20392a90622d7a1a",
+  "position": {
+    "x": 1115,
+    "y": 8,
+    "z": 0,
+    "width": 155,
+    "height": 72,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Margin %"
+                }
+              },
+              "queryRef": "ClientMonth.Client Margin %",
+              "nativeQueryRef": "Client Margin %"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -43,6 +43,8 @@ table TicketAssignments
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Assignment Kind'
 		dataType: string
 		lineageTag: d340e88b-ab2f-4df0-bd1b-a40c2e01ffca
@@ -53,8 +55,8 @@ table TicketAssignments
 
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: bf81a9f4-fb38-4a1a-b6f3-97888469b8c1
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -63,8 +65,8 @@ table TicketAssignments
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: f97343ad-edd2-4ce2-aa1c-8faf00c0a56e
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -89,3 +91,4 @@ table TicketAssignments
 				    Data
 
 	annotation PBI_ResultType = Table
+

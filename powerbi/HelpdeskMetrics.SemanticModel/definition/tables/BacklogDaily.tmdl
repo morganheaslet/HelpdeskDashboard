@@ -15,10 +15,12 @@ table BacklogDaily
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column BoardId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 760af21c-6680-4065-a19b-b14f203b7e21
 		summarizeBy: none
 		sourceColumn: BoardId
@@ -68,3 +70,4 @@ table BacklogDaily
 				    Data
 
 	annotation PBI_ResultType = Table
+

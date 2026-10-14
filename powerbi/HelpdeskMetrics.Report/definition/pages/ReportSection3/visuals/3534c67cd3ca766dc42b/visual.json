@@ -1,0 +1,218 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "3534c67cd3ca766dc42b",
+  "position": {
+    "x": 10,
+    "y": 90,
+    "z": 0,
+    "width": 1260,
+    "height": 340,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Company"
+                    }
+                  },
+                  "Property": "Company"
+                }
+              },
+              "queryRef": "Company.Company",
+              "nativeQueryRef": "Company"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Normalized Revenue"
+                }
+              },
+              "queryRef": "ClientMonth.Normalized Revenue",
+              "nativeQueryRef": "Normalized Revenue"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Invoiced Revenue"
+                }
+              },
+              "queryRef": "ClientMonth.Invoiced Revenue",
+              "nativeQueryRef": "Invoiced Revenue"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Labor Cost"
+                }
+              },
+              "queryRef": "ClientMonth.Client Labor Cost",
+              "nativeQueryRef": "Client Labor Cost"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Addition Cost"
+                }
+              },
+              "queryRef": "ClientMonth.Client Addition Cost",
+              "nativeQueryRef": "Client Addition Cost"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Product Cost"
+                }
+              },
+              "queryRef": "ClientMonth.Client Product Cost",
+              "nativeQueryRef": "Client Product Cost"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Margin"
+                }
+              },
+              "queryRef": "ClientMonth.Client Margin",
+              "nativeQueryRef": "Client Margin"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Margin %"
+                }
+              },
+              "queryRef": "ClientMonth.Client Margin %",
+              "nativeQueryRef": "Client Margin %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Hours"
+                }
+              },
+              "queryRef": "ClientMonth.Client Hours",
+              "nativeQueryRef": "Client Hours"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Effective Hourly Rate"
+                }
+              },
+              "queryRef": "ClientMonth.Client Effective Hourly Rate",
+              "nativeQueryRef": "Client Effective Hourly Rate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "ClientMonth"
+                    }
+                  },
+                  "Property": "Client Uncosted Hours"
+                }
+              },
+              "queryRef": "ClientMonth.Client Uncosted Hours",
+              "nativeQueryRef": "Client Uncosted Hours"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "ClientMonth"
+                  }
+                },
+                "Property": "Normalized Revenue"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Profitability by client'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

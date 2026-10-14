@@ -1,0 +1,78 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "334eb9683e19e2a110ab",
+  "position": {
+    "x": 780,
+    "y": 480,
+    "z": 0,
+    "width": 490,
+    "height": 230,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "donutChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TimeEntries"
+                    }
+                  },
+                  "Property": "Charge Type"
+                }
+              },
+              "queryRef": "TimeEntries.Charge Type",
+              "nativeQueryRef": "Charge Type"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TimeEntries"
+                    }
+                  },
+                  "Property": "Hours Logged"
+                }
+              },
+              "queryRef": "TimeEntries.Hours Logged",
+              "nativeQueryRef": "Hours Logged"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Ticket vs. project vs. admin time'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

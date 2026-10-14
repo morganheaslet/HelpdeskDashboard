@@ -1,0 +1,204 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "fd1e7b0093456c34c872",
+  "position": {
+    "x": 10,
+    "y": 90,
+    "z": 0,
+    "width": 1260,
+    "height": 400,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Agreement"
+                    }
+                  },
+                  "Property": "Agreement"
+                }
+              },
+              "queryRef": "Agreement.Agreement",
+              "nativeQueryRef": "Agreement"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Agreement"
+                    }
+                  },
+                  "Property": "Agreement Type"
+                }
+              },
+              "queryRef": "Agreement.Agreement Type",
+              "nativeQueryRef": "Agreement Type"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Company"
+                    }
+                  },
+                  "Property": "Company"
+                }
+              },
+              "queryRef": "Company.Company",
+              "nativeQueryRef": "Company"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Revenue"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Revenue",
+              "nativeQueryRef": "Agreement Revenue"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Labor Cost"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Labor Cost",
+              "nativeQueryRef": "Agreement Labor Cost"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Addition Cost"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Addition Cost",
+              "nativeQueryRef": "Agreement Addition Cost"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Margin"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Margin",
+              "nativeQueryRef": "Agreement Margin"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Margin %"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Margin %",
+              "nativeQueryRef": "Agreement Margin %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Hours"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Hours",
+              "nativeQueryRef": "Agreement Hours"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Effective Hourly Rate"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Effective Hourly Rate",
+              "nativeQueryRef": "Agreement Effective Hourly Rate"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "AgreementMonth"
+                  }
+                },
+                "Property": "Agreement Revenue"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Profitability by agreement'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

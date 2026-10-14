@@ -1,0 +1,92 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "6424a9dff3ebaaa463fc",
+  "position": {
+    "x": 640,
+    "y": 500,
+    "z": 0,
+    "width": 630,
+    "height": 210,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendar"
+                    }
+                  },
+                  "Property": "Month"
+                }
+              },
+              "queryRef": "Calendar.Month",
+              "nativeQueryRef": "Month"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Revenue"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Revenue",
+              "nativeQueryRef": "Agreement Revenue"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Margin"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Margin",
+              "nativeQueryRef": "Agreement Margin"
+            }
+          ]
+        }
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Agreement revenue and margin by month'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

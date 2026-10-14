@@ -1,0 +1,162 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "a2533e37b323e9298181",
+  "position": {
+    "x": 780,
+    "y": 90,
+    "z": 0,
+    "width": 490,
+    "height": 360,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tech"
+                    }
+                  },
+                  "Property": "Tech"
+                }
+              },
+              "queryRef": "Tech.Tech",
+              "nativeQueryRef": "Tech"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Open Now"
+                }
+              },
+              "queryRef": "Tickets.Open Now",
+              "nativeQueryRef": "Open Now"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Waiting Now"
+                }
+              },
+              "queryRef": "Tickets.Waiting Now",
+              "nativeQueryRef": "Waiting Now"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Avg Open Age (Days)"
+                }
+              },
+              "queryRef": "Tickets.Avg Open Age (Days)",
+              "nativeQueryRef": "Avg Open Age (Days)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Tickets"
+                    }
+                  },
+                  "Property": "Tickets Resolved"
+                }
+              },
+              "queryRef": "Tickets.Tickets Resolved",
+              "nativeQueryRef": "Tickets Resolved"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TicketAssignments"
+                    }
+                  },
+                  "Property": "Assigned - Closed"
+                }
+              },
+              "queryRef": "TicketAssignments.Assigned - Closed",
+              "nativeQueryRef": "Assigned - Closed"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "TicketAssignments"
+                    }
+                  },
+                  "Property": "Close Rate"
+                }
+              },
+              "queryRef": "TicketAssignments.Close Rate",
+              "nativeQueryRef": "Close Rate"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Tickets"
+                  }
+                },
+                "Property": "Open Now"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Current backlog & throughput'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

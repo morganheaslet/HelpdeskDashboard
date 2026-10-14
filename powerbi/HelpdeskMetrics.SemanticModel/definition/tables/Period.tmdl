@@ -43,9 +43,10 @@ table Period
 		mode: import
 		source =
 				{
-				    ("Day", NAMEOF('Calendar'[Date]), 0),
+				    ("Day", NAMEOF('Calendar'[Date]), 2),
 				    ("Week", NAMEOF('Calendar'[Week]), 1),
-				    ("Month", NAMEOF('Calendar'[Month]), 2)
+				    ("Month", NAMEOF('Calendar'[Month]), 0)
 				}
 
 	annotation PBI_Id = 49be130c12f149aca5798ca54b913f51
+

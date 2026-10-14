@@ -1,0 +1,96 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "d62c9fefde3a6887c7c7",
+  "position": {
+    "x": 10,
+    "y": 500,
+    "z": 0,
+    "width": 620,
+    "height": 210,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Agreement"
+                    }
+                  },
+                  "Property": "Agreement Type"
+                }
+              },
+              "queryRef": "Agreement.Agreement Type",
+              "nativeQueryRef": "Agreement Type"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "AgreementMonth"
+                    }
+                  },
+                  "Property": "Agreement Margin %"
+                }
+              },
+              "queryRef": "AgreementMonth.Agreement Margin %",
+              "nativeQueryRef": "Agreement Margin %"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "AgreementMonth"
+                  }
+                },
+                "Property": "Agreement Margin %"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": false
+      }
+    },
+    "drillFilterOtherVisuals": true,
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Margin % by agreement type'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -39,10 +39,12 @@ table Capacity
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'Capacity Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 75646e7c-eed0-4550-99d1-1bafa82404fd
 		summarizeBy: none
 		sourceColumn: Capacity Hours
@@ -59,3 +61,4 @@ table Capacity
 				    Data
 
 	annotation PBI_ResultType = Table
+

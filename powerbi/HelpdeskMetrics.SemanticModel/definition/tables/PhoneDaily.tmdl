@@ -35,6 +35,8 @@ table PhoneDaily
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column Agent
 		dataType: string
 		lineageTag: 9f7d1245-7798-43f9-bd64-4c75988fdf79
@@ -87,8 +89,8 @@ table PhoneDaily
 
 	column 'Talk Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: a007d18d-242f-4663-bb4b-73db0593acfd
 		summarizeBy: none
 		sourceColumn: Talk Hours
@@ -105,3 +107,4 @@ table PhoneDaily
 				    Data
 
 	annotation PBI_ResultType = Table
+

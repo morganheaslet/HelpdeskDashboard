@@ -38,8 +38,8 @@ table AgreementMonth
 
 	column AgreementId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: 506aecd2-1dad-4e55-811c-95574541c386
 		summarizeBy: none
 		sourceColumn: AgreementId
@@ -48,8 +48,8 @@ table AgreementMonth
 
 	column CompanyId
 		dataType: int64
-		formatString: 0
 		isHidden
+		formatString: 0
 		lineageTag: e555797a-53fd-45cf-9c5b-5fe567fc2ce6
 		summarizeBy: none
 		sourceColumn: CompanyId
@@ -64,6 +64,8 @@ table AgreementMonth
 		sourceColumn: Month Start
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	column Revenue
 		dataType: double
@@ -85,8 +87,8 @@ table AgreementMonth
 
 	column 'Labor Cost (raw)'
 		dataType: double
-		formatString: \$#,0;(\$#,0);\$#,0
 		isHidden
+		formatString: \$#,0;(\$#,0);\$#,0
 		lineageTag: 2cdee779-cd5b-45f0-be41-cb87cfc5160a
 		summarizeBy: none
 		sourceColumn: Labor Cost
@@ -95,8 +97,8 @@ table AgreementMonth
 
 	column 'Uncosted Hours (raw)'
 		dataType: double
-		formatString: #,0.0
 		isHidden
+		formatString: #,0.0
 		lineageTag: 37b28820-e681-4f5e-9074-bc748f29ca59
 		summarizeBy: none
 		sourceColumn: Uncosted Hours
@@ -131,3 +133,4 @@ table AgreementMonth
 				    Data
 
 	annotation PBI_ResultType = Table
+

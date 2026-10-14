@@ -69,6 +69,8 @@ table Agreement
 
 		annotation SummarizationSetBy = Automatic
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column 'End Date'
 		dataType: dateTime
 		formatString: yyyy-mm-dd
@@ -77,6 +79,8 @@ table Agreement
 		sourceColumn: End Date
 
 		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
 
 	partition Agreement = m
 		mode: import
@@ -88,3 +92,4 @@ table Agreement
 				    Data
 
 	annotation PBI_ResultType = Table
+
